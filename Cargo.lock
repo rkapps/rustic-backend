@@ -3,9 +3,35 @@
 version = 4
 
 [[package]]
+name = "agentic-boot"
+version = "0.1.0"
+source = "git+https://github.com/rkapps/agentic-boot#c614615cf52fd14b58f12d9176e28d3e66ed316a"
+dependencies = [
+ "agentic-core",
+ "anyhow",
+ "axum",
+ "chrono",
+ "futures",
+ "futures-util",
+ "google-cloud-storage",
+ "jsonwebtoken",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "storage-core",
+ "tempfile",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
 name = "agentic-core"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/agentic-core-rs#2171c69fedf458a7247eab6d495d9b054a0dc508"
+source = "git+https://github.com/rkapps/agentic-core-rs#4d3a0b432426bc0e1ee750d47322c12d2e285961"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -205,22 +231,6 @@ name = "base64ct"
 version = "1.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
-
-[[package]]
-name = "bin-shared"
-version = "0.1.0"
-dependencies = [
- "agentic-core",
- "anyhow",
- "google-cloud-storage",
- "rustic-ai-storage",
- "serde",
- "serde_json",
- "storage-core",
- "tempfile",
- "tracing",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "bitflags"
@@ -692,6 +702,71 @@ name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
+
+[[package]]
+name = "fin-analyse"
+version = "0.1.0"
+dependencies = [
+ "agentic-core",
+ "anyhow",
+ "async-trait",
+ "fin-domain",
+ "fin-storage",
+ "futures",
+ "serde",
+ "serde_json",
+ "storage-core",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "fin-domain"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bson 3.1.0",
+ "chrono",
+ "fin-providers",
+ "mongodb",
+ "rust_decimal",
+ "rust_decimal_macros",
+ "serde",
+ "serde_with",
+ "storage-core",
+ "tracing",
+]
+
+[[package]]
+name = "fin-providers"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "reqwest",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "fin-storage"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "fin-domain",
+ "rust_decimal",
+ "rust_decimal_macros",
+ "serde",
+ "serde_json",
+ "storage-core",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "find-msvc-tools"
@@ -2246,6 +2321,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust_decimal_macros"
+version = "1.40.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74a5a6f027e892c7a035c6fddb50435a1fbf5a734ffc0c2a9fed4d0221440519"
+dependencies = [
+ "quote",
+ "syn 2.0.111",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2268,16 +2353,15 @@ dependencies = [
 name = "rustic-ai-api"
 version = "0.1.0"
 dependencies = [
+ "agentic-boot",
  "agentic-core",
  "anyhow",
  "axum",
- "bin-shared",
+ "fin-analyse",
+ "fin-storage",
  "futures",
  "jsonwebtoken",
  "reqwest",
- "rustic-ai-domain",
- "rustic-ai-services",
- "rustic-ai-storage",
  "serde",
  "serde_json",
  "serde_with",
@@ -2287,50 +2371,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
 ]
-
-[[package]]
-name = "rustic-ai-domain"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "mongodb",
- "serde",
- "serde_with",
- "storage-core",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "rustic-ai-services"
-version = "0.1.0"
-dependencies = [
- "agentic-core",
- "anyhow",
- "rustic-ai-domain",
- "rustic-ai-storage",
- "tracing",
-]
-
-[[package]]
-name = "rustic-ai-storage"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "chrono",
- "rustic-ai-domain",
- "serde",
- "serde_json",
- "storage-core",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "rustic-chats"
-version = "0.1.0"
 
 [[package]]
 name = "rustix"
@@ -2690,7 +2730,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "storage-core"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/storage-core-rs#f342fc186c001157c916314d0fff49feb3ee0c41"
+source = "git+https://github.com/rkapps/storage-core-rs#58c87be869f6547b785b573d0c47ef7c5b7714ae"
 dependencies = [
  "anyhow",
  "async-trait",

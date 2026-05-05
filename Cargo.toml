@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "bin/*"]
+members = ["bin/api"]
 
 [workspace.dependencies]
 anyhow = "1.0.100"
@@ -29,15 +29,13 @@ tokio = { version = "1", features = ["full"] }
 tower-http = {version = "0.6.8", features = ["cors"]}
 uuid = { version = "1.0", features = ["v4"] }
 
-
 #storage-core = { path = "../libs/storage-core-rs" }
 #agentic-core = { path = "../libs/agentic-core-rs" }
+#agentic-boot = { path = "../libs/agentic-boot" }
+
+fin-analyse = { path = "../fin-tracker-backend-rs/crates/fin-analyse" }
+fin-storage = { path = "../fin-tracker-backend-rs/crates/fin-storage" }
+
 storage-core = { git = "https://github.com/rkapps/storage-core-rs" }
 agentic-core = { git = "https://github.com/rkapps/agentic-core-rs" }
-
-
-# Local app crates
-rustic-ai-chats = { path = "crates/chats" }
-rustic-ai-domain = { path = "crates/domain" }
-rustic-ai-storage = { path = "crates/storage" }
-rustic-ai-services = { path = "crates/services" }
+agentic-boot = { git = "https://github.com/rkapps/agentic-boot" }

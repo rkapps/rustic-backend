@@ -1,132 +1,104 @@
-use agentic_core::agent::service::AgentService;
-use anyhow::Result;
-use axum::{
-    Router,
-    http::{HeaderValue, Method},
-    middleware::from_fn_with_state,
-    routing::{delete, get, post},
-};
-use bin_shared::{
-    config::loader::load_app_config,
-    logger,
-    services::{get_storage_service, load_agent_config},
-    templates::loader::load_templates,
-};
-use rustic_ai_api::{
-    handlers::{
-        chats::{
-            chat_completion_handler, chat_completion_streaming_handler, create_chat_handler,
-            delete_chat_handler, get_all_chats_handler, get_chat_handler,
-        },
-        rustic::{get_llm_providers_handler, get_templates_handler},
+use std::{env, sync::Arc};
+
+use agentic_boot::{
+    logger::set_logger,
+    routes::{
+        agents::agent_routes, conversation::conversation_routes, providers::provider_routes,
+        templates::template_routes,
     },
-    middleware::firebase_auth::firebase_auth_middleware,
-    state::AppState,
+    startup::boot,
 };
-use rustic_ai_services::{chat::ChatsService, rustic::RusticService};
-use std::sync::Arc;
-use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
+
+use agentic_core::{client::tools::Tool, providers::openai::embeddings::OpenAIEmbeddingClient};
+use anyhow::Result;
+use fin_analyse::tools::{
+    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool,
+    TickerSnapshotTool, TickerTaxonomyTool,
+};
+use fin_storage::mongo::{MongoStorageManager, MongoStorageService};
+use rustic_ai_api::state::AppState;
 use tracing::debug;
 
 #[tokio::main]
 
 async fn main() -> Result<()> {
-    logger::set_logger();
+    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        "rustic_ai_api=debug,agentic_boot=info,agentic_core=info,fin_analyse=info".to_string()
+    });
 
-    // // initialize storage and the services
-    // let storage = ChatStorage::new(
-    //     "agenticdb".to_string(),
-    //     "data/agenticdb".to_string(),
-    //     "chats".to_string(),
-    // )
-    // .await?;
-    let app_config = match load_app_config().await {
-        Ok(c) => c,
-        Err(e) => return Err(anyhow::anyhow!(format!("Loading app Config error: {}", e)))
-    };
-    let agent_config = load_agent_config(&app_config).await;
-    let templates = match load_templates().await {
-        Ok(c) => c,
-        Err(e) => return Err(anyhow::anyhow!(format!("Loading templates error: {}", e)))
-    };
+    set_logger(filter);
 
-    let agent_service = AgentService::with_config(agent_config);
-    let rustic_service = RusticService::new(Arc::new(agent_service));
+    let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
+        .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
+    let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
+        .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
-    let storage_service = get_storage_service().await?;
-    let chats_service = ChatsService::new(storage_service.clone(), rustic_service.clone());
+    let openai_api_key: String =
+        env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
+    let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
 
-    let app_state = AppState::new(
-        Arc::new(chats_service),
-        Arc::new(rustic_service),
-        Some(templates),
-    )
-    .await?;
+    let mongo_db =
+        env::var("FINTRACKER_DB_NAME").expect("FINTRACKER_DB_NAME envrionment variable not set");
+    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 
-    let origins = [
-        "http://localhost:4200".parse::<HeaderValue>().unwrap(),
-        "http://localhost:4201".parse::<HeaderValue>().unwrap(),
-        "http://localhost:4202".parse::<HeaderValue>().unwrap(),
-        "https://rustic-ai-rkapps.web.app"
-            .parse::<HeaderValue>()
-            .unwrap(),
+    debug!("Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
+    let storage_manager = MongoStorageManager::new(&mongo_uri, &mongo_db).await?;
+    let storage_service = Arc::new(MongoStorageService::new(storage_manager));
+
+    // Find these again for rusticai
+    let mongo_db =
+        env::var("RUSTIC_AI_DB_NAME").expect("RUSTIC_AI_DB_NAME envrionment variable not set");
+    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
+
+    let tools: Vec<Arc<dyn Tool>> = vec![
+        Arc::new(TickerScreeningTool::new(
+            storage_service.clone(),
+            embedding_client.clone(),
+        )),
+        Arc::new(TickerTaxonomyTool::new(storage_service.clone())),
+        // Arc::new(TickerSentimentTool::new(
+        //     query_embedding.clone(),
+        //     storage_service.clone(),
+        // )),
+        Arc::new(TickerSnapshotTool::new(storage_service.clone())),
+        Arc::new(TickerPriceHistoryTool::new(storage_service.clone())),
+        Arc::new(TickerIndicatorTool::new(storage_service.clone())),
+        Arc::new(TickerPeersTool::new(storage_service.clone())),
     ];
 
-    let cors = CorsLayer::new()
-        .allow_origin(origins)
-        .allow_methods([Method::GET, Method::POST, Method::DELETE])
-        .allow_headers([
-            axum::http::header::CONTENT_TYPE,
-            axum::http::header::AUTHORIZATION,
-        ]);
-
-    let chats_routes = Router::new()
-        .route("/", get(get_all_chats_handler))
-        .route("/{id}", get(get_chat_handler))
-        .route("/{id}", delete(delete_chat_handler))
-        .route("/create", post(create_chat_handler))
-        .route("/completion", post(chat_completion_handler))
-        .route(
-            "/completion_streaming",
-            post(chat_completion_streaming_handler),
-        )
-        .route_layer(from_fn_with_state(
-            app_state.clone(),
-            firebase_auth_middleware, // 👈 all chats routes protected
-        ));
-
-    let app = Router::new()
-        .route("/llm/providers", get(get_llm_providers_handler))
-        .route("/templates", get(get_templates_handler))
-        .nest("/chats", chats_routes)      // ✅ all protected
-
-        // .route("/chats", get(get_all_chats_handler))
-        // .route("/chats/{id}", get(get_chat_handler))
-        // .route("/chats/create", post(create_chat_handler))
-        // .route("/chats/completion", post(chat_completion_handler))
-        // .route("/chats/completion_streaming", post(chat_completion_streaming_handler))
-        // .route("/chats/save_streaming_message", post(save_streaming_message_handler))
-        .layer(cors)
-        .with_state(app_state) // Shared state
-        ;
-
-    let port = std::env::var("PORT").unwrap_or_else(|_| "3002".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
-    let listener = TcpListener::bind(&addr).await.unwrap();
-    println!("🚀 Listening on {:?}", listener);
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(handle_shutdown())
-        .await
-        .unwrap();
+    let origins = [
+        "http://localhost:4200",
+        "http://localhost:4201",
+        "http://localhost:4202",
+        "https://rustic-ai-rkapps.web.app",
+    ];
+
+    boot::AgenticBootBuilder::new()
+        .config_dir(config_dir.to_string())
+        .firebase_project_id(&firebase_project_id)
+        .chat_templates("chat_templates.json".to_string())
+        .providers("providers.json".to_string())
+        .agents_config("agents.json".to_string())
+        .mongo_database(mongo_uri, mongo_db)
+        .cors_origins(origins.to_vec())
+        .tools(tools)
+        .serve(
+            &addr,
+            |boot| AppState {
+                boot_state: Arc::new(boot),
+            },
+            |router, _| {
+                router
+                    .merge(agent_routes())
+                    .merge(template_routes())
+                    .merge(provider_routes())
+            },
+            |router, state| router.merge(conversation_routes(state.clone())), // .nest("/finance", finance_routes(state)),
+        )
+        .await?;
 
     Ok(())
-}
-
-async fn handle_shutdown() {
-    tokio::signal::ctrl_c()
-        .await
-        .expect("Failed to install CTRL+C signal handler");
-    debug!("handled shutdown");
 }
