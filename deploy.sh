@@ -9,7 +9,7 @@ COMPUTE_SA_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(project
 COMPUTE_SA="$COMPUTE_SA_NUMBER-compute@developer.gserviceaccount.com"
 GCS_BUCKET="$PROJECT_ID-data"
 
-RUSTIC_AI_CONFIG_PATH="gs://$GCS_BUCKET"
+RUSTIC_AI_CONFIG_PATH="gs://$GCS_BUCKET/config"
 # FINTRACKER_DB_NAME=$FINTRACKER_DB_NAME
 # RUSTIC_AI_DB_NAME=$RUSTIC_AI_DB_NAME
 
