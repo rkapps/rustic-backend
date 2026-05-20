@@ -3,6 +3,7 @@ use std::pin::Pin;
 use async_trait::async_trait;
 use futures_util::Stream;
 use rustic_core::http::HttpResult;
+use serde::Serialize;
 
 use crate::client::{
     request::CompletionRequest,
@@ -35,4 +36,14 @@ pub trait LlmClient: Send + Sync + std::fmt::Debug {
         &self,
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse>;
+}
+
+
+
+#[derive(Debug, Serialize)]
+pub struct LlmProvider {
+    pub id: String,
+    pub llm: String,
+    pub models: Vec<String>,
+    pub default_model: String,
 }

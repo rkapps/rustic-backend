@@ -1,4 +1,4 @@
-use crate::services::config::provider::ResolvedProvider;
+use crate::{client::llm::LlmProvider, services::config::provider::ResolvedProvider};
 
 /// In-memory store of all [`ResolvedProvider`] entries loaded at startup.
 ///
@@ -34,21 +34,21 @@ impl ProviderRegistry {
         &self.providers
     }
 
-    // pub fn llm_providers(&self) -> Vec<LlmProvider> {
-    //     self.all()
-    //         .iter()
-    //         .map(|p| {
-    //             let rp = p.clone();
-    //             let models = rp.models.iter().map(|m| m.id.clone()).collect();
-    //             LlmProvider {
-    //                 default_model: rp.default_model,
-    //                 id: rp.id,
-    //                 llm: rp.llm,
-    //                 models,
-    //             }
-    //         })
-    //         .collect()
-    // }
+    pub fn llm_providers(&self) -> Vec<LlmProvider> {
+        self.all()
+            .iter()
+            .map(|p| {
+                let rp = p.clone();
+                let models = rp.models.iter().map(|m| m.id.clone()).collect();
+                LlmProvider {
+                    default_model: rp.default_model,
+                    id: rp.id,
+                    llm: rp.llm,
+                    models,
+                }
+            })
+            .collect()
+    }
 
     /// Return the resolved API key for `provider_id`, or `None` if not configured.
     pub fn get_api_key(&self, provider_id: &str) -> Option<&str> {
