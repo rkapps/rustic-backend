@@ -20,7 +20,7 @@ use crate::{
 
 /// Connection parameters for a single MCP server.
 #[derive(Debug, Clone)]
-pub struct MCPServerConfig {
+pub struct MCPServerSetting {
     /// Logical name used to namespace tool definitions (e.g. `"weather"`).
     pub name: String,
     /// HTTP endpoint URL of the MCP server.
@@ -64,10 +64,10 @@ impl MCPRegistry {
     /// or [`register_tool`](Self::register_tool) to make them available to the LLM.
     pub async fn register_server(
         &mut self,
-        config: MCPServerConfig,
+        setting: MCPServerSetting,
     ) -> Result<Vec<ToolDefinition>> {
         let adapter = Box::new(StandardAdapter {});
-        self.register_server_with_adapter(config, adapter).await
+        self.register_server_with_adapter(setting, adapter).await
     }
 
     /// Register an MCP server using a custom [`MCPServerAdapter`].
@@ -76,12 +76,12 @@ impl MCPRegistry {
     /// the session and returns the tool list (without full parameter schemas).
     pub async fn register_server_with_adapter(
         &mut self,
-        config: MCPServerConfig,
+        setting: MCPServerSetting,
         adapter: Box<dyn MCPServerAdapter>,
     ) -> Result<Vec<ToolDefinition>> {
         // add code to check if server already inserted
         let client =
-            MCPClient::new(config.clone(), adapter).context("Error connecting the MCPClient")?;
+            MCPClient::new(setting.clone(), adapter).context("Error connecting the MCPClient")?;
 
         client.initialize().await?;
 
@@ -92,7 +92,7 @@ impl MCPRegistry {
             .map(ToolDefinition::from)
             .collect();
 
-        self.registry.insert(config.name, client);
+        self.registry.insert(setting.name, client);
         Ok(definitions)
     }
 
@@ -184,12 +184,12 @@ pub struct MCPClient {
 }
 
 impl MCPClient {
-    /// Construct a new client from a [`MCPServerConfig`] and a protocol adapter.
-    pub fn new(config: MCPServerConfig, adapter: Box<dyn MCPServerAdapter>) -> Result<Self> {
+    /// Construct a new client from a [`MCPServersetting`] and a protocol adapter.
+    pub fn new(setting: MCPServerSetting, adapter: Box<dyn MCPServerAdapter>) -> Result<Self> {
         Ok(Self {
-            name: config.name,
-            url: config.url,
-            api_key: config.api_key,
+            name: setting.name,
+            url: setting.url,
+            api_key: setting.api_key,
             http_client: HttpClient::new()?,
             server_adapter: Arc::new(adapter),
             session_id: Arc::new(None.into()),
