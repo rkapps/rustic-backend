@@ -1017,15 +1017,16 @@ checksum = "9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6"
 [[package]]
 name = "fin-analyse"
 version = "0.1.0"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#e0befb7b234e43c93062cdca46bca0792d3aaf3e"
 dependencies = [
  "anyhow",
  "async-trait",
- "fin-domain 0.1.0",
- "fin-storage 0.1.0",
+ "fin-domain",
+ "fin-storage",
  "futures",
- "rustic-agent",
- "rustic-ml",
- "rustic-storage",
+ "rustic-agent 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
+ "rustic-ml 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
+ "rustic-storage 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_json",
  "tokio",
@@ -1035,56 +1036,25 @@ dependencies = [
 [[package]]
 name = "fin-domain"
 version = "0.1.0"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#e0befb7b234e43c93062cdca46bca0792d3aaf3e"
 dependencies = [
  "anyhow",
  "bson 3.1.0",
  "chrono",
- "fin-providers 0.1.0",
+ "fin-providers",
  "mongodb",
  "rust_decimal",
  "rust_decimal_macros",
- "rustic-storage",
+ "rustic-storage 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_with",
  "tracing",
 ]
 
 [[package]]
-name = "fin-domain"
-version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#14239265d247045cf9d1fe8daf0b0656e6b776fc"
-dependencies = [
- "anyhow",
- "bson 3.1.0",
- "chrono",
- "fin-providers 0.1.0 (git+https://github.com/rkapps/fin-tracker-backend-rs)",
- "mongodb",
- "rust_decimal",
- "rust_decimal_macros",
- "serde",
- "serde_with",
- "storage-core",
- "tracing",
-]
-
-[[package]]
 name = "fin-providers"
 version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "reqwest 0.12.28",
- "rust_decimal",
- "serde",
- "serde_json",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "fin-providers"
-version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#14239265d247045cf9d1fe8daf0b0656e6b776fc"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#e0befb7b234e43c93062cdca46bca0792d3aaf3e"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1099,34 +1069,17 @@ dependencies = [
 [[package]]
 name = "fin-storage"
 version = "0.1.0"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#e0befb7b234e43c93062cdca46bca0792d3aaf3e"
 dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
- "fin-domain 0.1.0",
+ "fin-domain",
  "rust_decimal",
  "rust_decimal_macros",
- "rustic-storage",
+ "rustic-storage 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "fin-storage"
-version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#14239265d247045cf9d1fe8daf0b0656e6b776fc"
-dependencies = [
- "anyhow",
- "async-trait",
- "chrono",
- "fin-domain 0.1.0 (git+https://github.com/rkapps/fin-tracker-backend-rs)",
- "rust_decimal",
- "rust_decimal_macros",
- "serde",
- "serde_json",
- "storage-core",
  "tokio",
  "tracing",
 ]
@@ -3293,7 +3246,27 @@ dependencies = [
  "futures",
  "futures-util",
  "reqwest 0.12.28",
- "rustic-core",
+ "rustic-core 0.1.0",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+]
+
+[[package]]
+name = "rustic-agent"
+version = "0.1.0"
+source = "git+https://github.com/rkapps/rustic-ai-backend-rs#3d50aa5c2e133480b49a9ed4b80c12cf533ab991"
+dependencies = [
+ "anyhow",
+ "async-stream",
+ "async-trait",
+ "eventsource-stream",
+ "futures",
+ "futures-util",
+ "reqwest 0.12.28",
+ "rustic-core 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_json",
  "tokio",
@@ -3308,14 +3281,14 @@ dependencies = [
  "anyhow",
  "axum",
  "fin-analyse",
- "fin-storage 0.1.0 (git+https://github.com/rkapps/fin-tracker-backend-rs)",
+ "fin-storage",
  "futures",
  "jsonwebtoken",
  "reqwest 0.12.28",
- "rustic-agent",
+ "rustic-agent 0.1.0",
  "rustic-boot",
- "rustic-core",
- "rustic-storage",
+ "rustic-core 0.1.0",
+ "rustic-storage 0.1.0",
  "serde",
  "serde_json",
  "serde_with",
@@ -3336,9 +3309,9 @@ dependencies = [
  "google-cloud-storage",
  "jsonwebtoken",
  "reqwest 0.12.28",
- "rustic-agent",
- "rustic-core",
- "rustic-storage",
+ "rustic-agent 0.1.0",
+ "rustic-core 0.1.0",
+ "rustic-storage 0.1.0",
  "serde",
  "serde_json",
  "tempfile",
@@ -3365,6 +3338,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustic-core"
+version = "0.1.0"
+source = "git+https://github.com/rkapps/rustic-ai-backend-rs#3d50aa5c2e133480b49a9ed4b80c12cf533ab991"
+dependencies = [
+ "anyhow",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "rustic-ml"
 version = "0.1.0"
 dependencies = [
@@ -3374,7 +3361,26 @@ dependencies = [
  "candle-transformers",
  "hf-hub",
  "reqwest 0.12.28",
- "rustic-core",
+ "rustic-core 0.1.0",
+ "serde",
+ "serde_json",
+ "tokenizers 0.19.1",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "rustic-ml"
+version = "0.1.0"
+source = "git+https://github.com/rkapps/rustic-ai-backend-rs#3d50aa5c2e133480b49a9ed4b80c12cf533ab991"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "candle-core",
+ "candle-transformers",
+ "hf-hub",
+ "reqwest 0.12.28",
+ "rustic-core 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_json",
  "tokenizers 0.19.1",
@@ -3395,8 +3401,30 @@ dependencies = [
  "mongodb",
  "once_cell",
  "rust_decimal",
- "rustic-core",
- "rustic-ml",
+ "rustic-core 0.1.0",
+ "rustic-ml 0.1.0",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "rustic-storage"
+version = "0.1.0"
+source = "git+https://github.com/rkapps/rustic-ai-backend-rs#3d50aa5c2e133480b49a9ed4b80c12cf533ab991"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "bson 3.1.0",
+ "chrono",
+ "crc32fast",
+ "futures",
+ "mongodb",
+ "rust_decimal",
+ "rustic-core 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
+ "rustic-ml 0.1.0 (git+https://github.com/rkapps/rustic-ai-backend-rs)",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -3827,28 +3855,6 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
-
-[[package]]
-name = "storage-core"
-version = "0.1.0"
-source = "git+https://github.com/rkapps/storage-core-rs#58c87be869f6547b785b573d0c47ef7c5b7714ae"
-dependencies = [
- "anyhow",
- "async-trait",
- "bson 3.1.0",
- "chrono",
- "crc32fast",
- "futures",
- "mongodb",
- "rust_decimal",
- "serde",
- "serde_json",
- "serde_with",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "stringprep"

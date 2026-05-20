@@ -2,8 +2,7 @@ use std::{env, sync::Arc};
 
 use anyhow::Result;
 use fin_analyse::tools::{
-    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool,
-    TickerSnapshotTool, TickerTaxonomyTool,
+    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool, TickerSentimentTool, TickerSnapshotTool, TickerTaxonomyTool
 };
 use fin_storage::mongo::{MongoStorageManager, MongoStorageService};
 use rustic_agent::client::tools::Tool;
@@ -16,6 +15,7 @@ use rustic_boot::{
     },
 };
 use rustic_core::logger::set_logger;
+use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 use tracing::debug;
 
 #[tokio::main]
@@ -32,9 +32,9 @@ async fn main() -> Result<()> {
     let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
         .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
-    // let openai_api_key: String =
-    //     env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
-    // let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
+    let openai_api_key: String =
+        env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
+    let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
 
     let mongo_db =
         env::var("FINTRACKER_DB_NAME").expect("FINTRACKER_DB_NAME envrionment variable not set");
@@ -52,11 +52,11 @@ async fn main() -> Result<()> {
     let tools: Vec<Arc<dyn Tool>> = vec![
         Arc::new(TickerScreeningTool::new(
             storage_service.clone(),
-            embedding_client,
+            embedding_client.clone(),
         )),
         Arc::new(TickerTaxonomyTool::new(storage_service.clone())),
         Arc::new(TickerSentimentTool::new(
-            query_embedding.clone(),
+            embedding_client.clone(),
             storage_service.clone(),
         )),
         Arc::new(TickerSnapshotTool::new(storage_service.clone())),

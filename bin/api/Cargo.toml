@@ -26,6 +26,7 @@ tracing-subscriber.workspace = true
 rustic-boot.workspace=true
 rustic-agent.workspace=true
 rustic-core.workspace=true
+rustic-ml.workspace=true
 rustic-storage.workspace = true
 fin-analyse.workspace = true
 fin-storage.workspace = true

@@ -50,7 +50,6 @@ tower-http = {version = "0.6.8", features = ["cors"]}
 uuid = { version = "1.0", features = ["v4"] }
 
 
-
 rustic-agent = { path = "crates/rustic-agent" }
 rustic-boot = { path = "crates/rustic-boot" }
 rustic-core = { path = "crates/rustic-core" }
