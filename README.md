@@ -84,7 +84,7 @@ The server reads JSON config files from `RUSTIC_AI_CONFIG_PATH` at startup:
 
 ## rustic-agent
 
-The `rustic-agent` crate is a standalone multi-provider LLM client library. It can be used independently of the API server.
+The `rustic-agent` crate is a standalone multi-provider LLM client library. It can be used independently of the API server. It includes both a low-level `Agent` struct and a higher-level `AgentService` / `AgentBuilder` layer that handles client caching, preset configuration, and shared tool registries.
 
 ### Providers
 
@@ -173,21 +173,23 @@ registry.register_tool(WeatherTool);
 ### MCP Servers
 
 ```rust
-use rustic_agent::tools::mcp::{MCPRegistry, MCPServerConfig};
+use rustic_agent::tools::mcp::{MCPRegistry, MCPServerSetting};
 
 let mut mcp = MCPRegistry::new();
 
-let definitions = mcp.register_server(MCPServerConfig {
+let setting = MCPServerSetting {
     name: "docs".to_string(),
     url: "http://localhost:8081/mcp".to_string(),
     api_key: "".to_string(),
-}).await?;
+};
 
-// Namespace: "docs___search" — register individual tools with full parameter schemas
+// Initialises the session and bulk-registers all tools.
+// Each tool is namespaced as "docs___<tool_name>" to avoid collisions.
+let definitions = mcp.register_server(setting.clone()).await?;
+mcp.add_definitions(&setting.name, definitions);
+
+// Or register individual tools selectively
 mcp.register_tool("docs", "search").await?;
-
-// Or bulk-register all tools returned from the server
-mcp.add_definitions("docs", definitions);
 ```
 
 ### Streaming
@@ -204,6 +206,21 @@ while let Some(chunk) = stream.next().await {
     }
     print!("{}", chunk.content);
 }
+```
+
+### Examples
+
+| Example | Provider | Description |
+|---|---|---|
+| `completion` | Gemini | Multi-turn chat with `response_id` threading |
+| `completion_with_tools` | Gemini | Custom local tool (`GetWeatherTool`) |
+| `completion_with_mcp` | OpenAI | Remote MCP server (Apify) via `AgentService` |
+
+```bash
+cd crates/rustic-agent
+GEMINI_API_KEY=<key> cargo run --example completion
+GEMINI_API_KEY=<key> cargo run --example completion_with_tools
+OPENAI_API_KEY=<key> APIFY_API_KEY=<key> cargo run --example completion_with_mcp
 ```
 
 ## Supported Models
