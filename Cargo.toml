@@ -49,6 +49,9 @@ tokio-stream = "0.1.18"
 tower-http = {version = "0.6.8", features = ["cors"]}
 uuid = { version = "1.0", features = ["v4"] }
 
+# test dependencies
+wiremock = "0.6"
+tokio-test = "0.4"
 
 rustic-agent = { path = "crates/rustic-agent" }
 rustic-boot = { path = "crates/rustic-boot" }
@@ -65,6 +68,12 @@ fin-storage = { git = "https://github.com/rkapps/fin-tracker-backend-rs", packag
 fin-domain = { git = "https://github.com/rkapps/fin-tracker-backend-rs", package = "fin-domain"}
 
 
-# test dependencies
-wiremock = "0.6"
-tokio-test = "0.4"
+# patch — use local rustic crates instead of what fin-tracker pulls from git
+[patch."https://github.com/rkapps/rustic-ai-backend-rs"]
+rustic-agent   = { path = "crates/rustic-agent" }
+rustic-boot    = { path = "crates/rustic-boot" }
+rustic-core    = { path = "crates/rustic-core" }
+rustic-ml      = { path = "crates/rustic-ml" }
+rustic-storage = { path = "crates/rustic-storage" }
+
+
