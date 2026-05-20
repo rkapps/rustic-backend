@@ -1,12 +1,6 @@
 use anyhow::Result;
+use rustic_storage::{core::{repository::Repository, search::{SearchCriteria, SearchOp, SearchValue}}, mongo::{database::MongoDatabase, repository::MongoRepository}};
 use std::sync::Arc;
-use storage_core::{
-    core::{
-        Repository,
-        search::{SearchCriteria, SearchOp, SearchValue},
-    },
-    mongo::{database::MongoDatabase, repository::MongoRepository},
-};
 use tokio::sync::Mutex;
 
 use crate::conversation::{CONVERSATION_COLLECTION_NAME, FIELD_CONVERSATION_ID, FIELD_CONVERSATION_TYPE, FIELD_ID, FIELD_LAST_UPDATED_AT, FIELD_LLM, FIELD_UID, TURN_COLLECTION_NAME, domain::{Conversation, Turn}, dto::ConversationsQuery};

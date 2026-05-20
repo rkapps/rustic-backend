@@ -22,4 +22,4 @@ uuid.workspace=true
 # local crates
 rustic-core.workspace=true
 rustic-agent.workspace=true
-storage-core.workspace=true
+rustic-storage.workspace=true

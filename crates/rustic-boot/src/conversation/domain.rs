@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use rustic_agent::client::response::CompletionResponseTokenUsage;
+use rustic_storage::core::repository::RepoModel;
 use serde::{Deserialize, Serialize};
-use storage_core::core::RepoModel;
 use uuid::Uuid;
 
 use crate::conversation::{CONVERSATION_COLLECTION_NAME, TURN_COLLECTION_NAME};
