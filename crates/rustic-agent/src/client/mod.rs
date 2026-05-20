@@ -12,6 +12,8 @@
 pub mod llm;
 pub mod mcp;
 pub mod message;
+pub mod preset;
+pub mod provider;
 pub mod request;
 pub mod response;
 pub mod rpc;
