@@ -30,6 +30,11 @@ rustic-agent
 │   ├── openai/    — GPT via Responses API
 │   ├── gemini/    — Gemini via Interactions API
 │   └── local/     — Anthropic-compatible local servers (Ollama)
+├── services/     — Higher-level service layer built on top of agents/
+│   ├── agent.rs  — AgentService: builds agents from registries
+│   ├── builder.rs — AgentBuilder: fluent builder with client caching
+│   ├── config/   — JSON-deserialised config types (provider, agent, MCP)
+│   └── registry/ — In-memory registries (ProviderRegistry, AgentRegistry)
 └── tools/
     ├── tool.rs    — ToolRegistry
     └── mcp.rs     — MCPRegistry, MCPClient, StandardAdapter
@@ -37,7 +42,9 @@ rustic-agent
 
 ## Usage
 
-### Creating an Agent
+### Creating an Agent — Direct Construction
+
+Construct `Agent` directly when you already have a client and don't need the service layer.
 
 ```rust
 use std::sync::Arc;
@@ -61,6 +68,50 @@ let agent = Agent {
     mcp_registry: Arc::new(MCPRegistry::new()),
 };
 ```
+
+### Creating an Agent — AgentService Builder
+
+`AgentService` manages client caching, tool registration, and MCP servers across multiple agents. Use it in applications that build agents at request time.
+
+```rust
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use rustic_agent::{
+    client::preset::Preset,
+    providers::anthropic::MODEL_CLAUDE_SONNET_4_6,
+    services::{
+        agent::AgentService,
+        registry::{agent::AgentRegistry, provider::ProviderRegistry},
+    },
+    tools::{mcp::MCPRegistry, tool::ToolRegistry},
+};
+
+let service = AgentService::from_registry(
+    Arc::new(ProviderRegistry::new()),
+    Arc::new(AgentRegistry::new()),
+    Arc::new(RwLock::new(ToolRegistry::new())),
+    Arc::new(RwLock::new(MCPRegistry::new())),
+);
+
+let agent = service
+    .builder()
+    .with_system_prompt("You are a helpful assistant.".to_string())
+    .with_preset(Preset::Balanced)
+    .with_anthropic(api_key, MODEL_CLAUDE_SONNET_4_6)
+    .await?
+    .build()
+    .await?;
+```
+
+#### Presets
+
+| Preset | Temperature | Max Tokens | Cache | Reasoning |
+|---|---|---|---|---|
+| `Fast` | 0.7 | 1 024 | No | None |
+| `Balanced` | 0.5 | 2 048 | Yes | Medium |
+| `Precise` | 0.2 | 4 096 | Yes | High |
+| `Thorough` | 0.1 | 8 192 | Yes | High |
+| `Local` | 0.7 | 4 096 | No | None |
 
 ### Completion Methods
 
@@ -118,23 +169,25 @@ registry.register_tool(WeatherTool);
 ### MCP Servers
 
 ```rust
-use rustic_agent::tools::mcp::{MCPRegistry, MCPServerConfig};
+use rustic_agent::tools::mcp::{MCPRegistry, MCPServerSetting};
 
 let mut mcp = MCPRegistry::new();
 
-// Initialises the session and fetches the tool list
-let definitions = mcp.register_server(MCPServerConfig {
+let setting = MCPServerSetting {
     name: "docs".to_string(),
     url: "http://localhost:8081/mcp".to_string(),
     api_key: "".to_string(),
-}).await?;
+};
 
-// Register individual tools with full parameter schemas
-// Stored as "docs___search" to avoid name collisions
+// Initialises the session and fetches the tool list
+let definitions = mcp.register_server(setting.clone()).await?;
+
+// Bulk-register all tools returned from the server.
+// Each tool is namespaced as "docs___<tool_name>" to avoid collisions.
+mcp.add_definitions(&setting.name, definitions);
+
+// Or register individual tools selectively
 mcp.register_tool("docs", "search").await?;
-
-// Or bulk-register all tools from the server
-mcp.add_definitions("docs", definitions);
 ```
 
 ### Streaming
@@ -168,6 +221,22 @@ GeminiClient::new(api_key)?
 
 // Local / Ollama — Anthropic-compatible
 LocalClient::anthropic_compat("http://localhost:11434".to_string())?
+```
+
+## Examples
+
+Runnable examples are in [`examples/`](examples/).
+
+| Example | Provider | API | Description |
+|---|---|---|---|
+| `completion` | Gemini | `complete` | Multi-turn chat with `response_id` threading |
+| `completion_with_tools` | Gemini | `complete_with_tools` | Custom local tool (`GetWeatherTool`) |
+| `completion_with_mcp` | OpenAI | `complete_with_tools` | Remote MCP server (Apify) via `AgentService` |
+
+```bash
+GEMINI_API_KEY=<key> cargo run --example completion
+GEMINI_API_KEY=<key> cargo run --example completion_with_tools
+OPENAI_API_KEY=<key> APIFY_API_KEY=<key> cargo run --example completion_with_mcp
 ```
 
 ## Supported Models
