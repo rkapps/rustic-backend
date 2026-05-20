@@ -9,32 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "agentic-boot"
-version = "0.1.0"
-source = "git+https://github.com/rkapps/agentic-boot#3981df841334ec58727801b053a3344a0d5c0220"
-dependencies = [
- "agentic-core",
- "anyhow",
- "axum",
- "chrono",
- "futures",
- "futures-util",
- "google-cloud-storage",
- "jsonwebtoken",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_with",
- "storage-core",
- "tempfile",
- "tokio",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "agentic-core"
 version = "0.1.0"
 source = "git+https://github.com/rkapps/agentic-core-rs#f462f23d559db3701796a8015d1c68c330f3c0ac"
@@ -3362,8 +3336,6 @@ dependencies = [
 name = "rustic-ai-api"
 version = "0.1.0"
 dependencies = [
- "agentic-boot",
- "agentic-core",
  "anyhow",
  "axum",
  "fin-analyse",
@@ -3371,10 +3343,13 @@ dependencies = [
  "futures",
  "jsonwebtoken",
  "reqwest 0.12.28",
+ "rustic-agent",
+ "rustic-boot",
+ "rustic-core",
+ "rustic-storage",
  "serde",
  "serde_json",
  "serde_with",
- "storage-core",
  "tokio",
  "tower-http",
  "tracing",
@@ -3384,6 +3359,25 @@ dependencies = [
 [[package]]
 name = "rustic-boot"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "futures",
+ "google-cloud-storage",
+ "jsonwebtoken",
+ "reqwest 0.12.28",
+ "rustic-agent",
+ "rustic-core",
+ "rustic-storage",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tower-http",
+ "tracing",
+ "uuid",
+]
 
 [[package]]
 name = "rustic-core"
@@ -3410,9 +3404,35 @@ dependencies = [
  "candle-core",
  "candle-transformers",
  "hf-hub",
+ "reqwest 0.12.28",
+ "rustic-core",
+ "serde",
  "serde_json",
  "tokenizers 0.19.1",
  "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "rustic-storage"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "bson 3.1.0",
+ "chrono",
+ "crc32fast",
+ "futures",
+ "mongodb",
+ "once_cell",
+ "rust_decimal",
+ "rustic-core",
+ "rustic-ml",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
