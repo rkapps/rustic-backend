@@ -1,3 +1,13 @@
+//! Multi-turn chat example using Gemini without tools.
+//!
+//! Demonstrates a two-turn conversation where the second [`Message::User`]
+//! carries the `response_id` from the first reply so Gemini can continue
+//! the same interaction thread.
+//!
+//! ```bash
+//! GEMINI_API_KEY=<key> cargo run --example completion
+//! ```
+
 use std::{env, sync::Arc};
 
 use anyhow::{Context, Result};
@@ -23,7 +33,7 @@ async fn main() -> Result<()> {
     let api_key = env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY envrionment variable not set");
 
     let client = GeminiClient::new(api_key.to_string())
-        .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
+        .with_context(|| anyhow::anyhow!("Error creating Gemini client"))?;
 
     let agent = Agent {
         client: Arc::new(client),
@@ -38,9 +48,9 @@ async fn main() -> Result<()> {
         tool_registry: Arc::new(ToolRegistry::new()),
     };
 
-    // Create agent
+    // Turn 1: ask Gemini to start the quiz
     let response = agent.complete(&messages).await?;
-    let response_id = response.response_id; // let aresponse = response.clone();
+    let response_id = response.response_id;
     let content = response.contents.get(0).unwrap();
     if let CompletionResponseContent::Text(val) = content {
         message = Message::Assistant {
@@ -49,7 +59,9 @@ async fn main() -> Result<()> {
         };
         messages.push(message);
     }
-    //create turn message using the response id
+
+    // Turn 2: supply grade level, threading the same response_id so Gemini
+    // continues the existing interaction rather than starting a new one.
     message = Message::User {
         content: "1st Grade".to_string(),
         response_id: Some(response_id),
