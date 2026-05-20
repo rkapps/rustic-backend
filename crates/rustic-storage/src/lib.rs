@@ -16,13 +16,26 @@
 //! - **`mongo`** – MongoDB backend that implements the same `Repository` trait using the
 //!   official `mongodb` driver.
 //!
-//! # Quick start
+//! # Re-exports
+//!
+//! Commonly used types are available directly at the crate root:
 //!
 //! ```no_run
-//! use rustic_storage::file::database::FileDatabase;
-//! use rustic_storage::core::repository::Repository;
+//! use rustic_storage::{Repository, RepoModel, RepoKey, Searchable, VectorEmbedding};
+//! use rustic_storage::SearchCriteria;
+//! use rustic_storage::{FileDatabase, MongoDatabase};
 //! ```
 
 pub mod core;
 pub mod file;
 pub mod mongo;
+
+// Core traits
+pub use core::repository::{RepoKey, RepoModel, Repository, Searchable, SortValue, VectorEmbedding};
+
+// Query DSL — only the builder is part of the public API
+pub use core::search::SearchCriteria;
+
+// Database handles
+pub use file::database::FileDatabase;
+pub use mongo::database::MongoDatabase;
