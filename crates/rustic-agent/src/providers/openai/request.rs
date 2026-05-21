@@ -29,10 +29,7 @@ pub struct OpenAICompletionRequest {
 #[serde(untagged)]
 pub enum OpenAICompletionRequestMessage {
     /// Plain text user or assistant turn.
-    Content {
-        role: String,
-        content: String,
-    },
+    Content { role: String, content: String },
     /// A tool invocation the model previously requested.
     FunctionCall {
         r#type: String,

@@ -6,12 +6,9 @@ use tracing::debug;
 
 use crate::embeddings::client::{BatchResult, Embedding, EmbeddingClient};
 
-
 /// Default model used when creating an [`OpenAIEmbeddingClient`].
 pub const MODEL_TEXT_EMBEDDING_3_SMALL: &str = "text-embedding-3-small";
 const OPENAI_BASE_URL: &str = "https://api.openai.com";
-
-
 
 #[derive(Debug, Deserialize)]
 pub(super) struct OpenAIEmbeddingsResponse {
@@ -24,7 +21,6 @@ pub(super) struct OpenAIEmbeddingsResponseData {
     pub index: usize,
     pub embedding: Vec<f32>,
 }
-
 
 #[async_trait]
 impl EmbeddingClient for OpenAIEmbeddingClient {
@@ -79,8 +75,6 @@ impl EmbeddingClient for OpenAIEmbeddingClient {
     }
 }
 
-
-
 #[derive(Serialize, Debug)]
 pub struct OpenAIEmbeddingsRequest {
     pub model: String,
@@ -95,7 +89,6 @@ impl OpenAIEmbeddingsRequest {
         }
     }
 }
-
 
 /// Embedding client backed by the OpenAI embeddings API
 /// (`text-embedding-3-small` by default).

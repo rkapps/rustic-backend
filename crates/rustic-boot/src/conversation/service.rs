@@ -1,11 +1,13 @@
 use anyhow::Result;
 use chrono::Utc;
 use rustic_agent::{
-    agents::Agent, client::{
+    agents::Agent,
+    client::{
         llm::CompletionStreamResponse,
         message::Message,
         response::{CompletionResponseContent, CompletionResponseTokenUsage},
-    }, services::agent::AgentService
+    },
+    services::agent::AgentService,
 };
 use std::sync::Arc;
 use tracing::debug;
@@ -177,9 +179,7 @@ impl ConversationService {
         };
         messages.push(nmessage);
 
-        let agent = self
-            .build_conversation_agent(&conversation)
-            .await?;
+        let agent = self.build_conversation_agent(&conversation).await?;
         let cresponse = agent.complete(&messages).await?;
 
         let mut rcontent = String::new();

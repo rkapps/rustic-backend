@@ -30,10 +30,7 @@ pub struct GeminiInteractionsRequest {
 #[serde(untagged)]
 pub enum GeminiCompletionRequestInput {
     /// Plain text user turn.
-    Content {
-        role: String,
-        content: String,
-    },
+    Content { role: String, content: String },
     /// Model turn that may contain thoughts and/or function calls interleaved.
     ModelContent {
         role: String,
@@ -58,10 +55,7 @@ pub struct GeminiCompletionRequestGenerationConfig {
 #[serde(untagged)]
 pub enum GeminiModelContent {
     /// A thought (chain-of-thought) block; `signature` must be echoed back as-is.
-    Thought {
-        r#type: String,
-        signature: String,
-    },
+    Thought { r#type: String, signature: String },
     /// A function-call block the model produced in a prior turn.
     FunctionCall {
         r#type: String,

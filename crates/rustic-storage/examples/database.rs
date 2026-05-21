@@ -1,15 +1,14 @@
 mod common;
 
+use crate::common::models::{Account, User};
 use anyhow::Result;
 use rustic_core::logger::set_logger;
 use rustic_storage::{core::repository::Repository, file::database::FileDatabase};
-use crate::common::models::{Account, User};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
-        "rustic_storage::examples,rustic-storage::file".to_string()
-    });
+    let filter = std::env::var("RUST_LOG")
+        .unwrap_or_else(|_| "rustic_storage::examples,rustic-storage::file".to_string());
     set_logger(filter);
 
     let mut fsdb = FileDatabase::new("mystore".to_string(), "data/mystoredb".to_string()).await?;

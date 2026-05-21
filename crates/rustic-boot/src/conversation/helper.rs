@@ -1,7 +1,9 @@
-use rustic_agent::{client::{message::Message, response::CompletionResponseTokenUsage}, services::registry::provider::ProviderRegistry};
+use rustic_agent::{
+    client::{message::Message, response::CompletionResponseTokenUsage},
+    services::registry::provider::ProviderRegistry,
+};
 
 use crate::conversation::domain::Turn;
-
 
 pub fn build_completions_message(turns: Vec<Turn>) -> Vec<Message> {
     let mut messages = Vec::new();

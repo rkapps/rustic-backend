@@ -9,7 +9,6 @@ use serde::{Serialize, de::DeserializeOwned};
 
 use crate::core::search::SearchCriteria;
 
-
 /// Blanket bound that every repository key type must satisfy.
 ///
 /// A blanket `impl` covers all types that meet the constraints, so callers

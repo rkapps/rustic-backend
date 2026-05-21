@@ -38,8 +38,6 @@ pub trait LlmClient: Send + Sync + std::fmt::Debug {
     ) -> HttpResult<CompletionStreamResponse>;
 }
 
-
-
 #[derive(Debug, Serialize)]
 pub struct LlmProvider {
     pub id: String,

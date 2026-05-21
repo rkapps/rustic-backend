@@ -1,8 +1,8 @@
 // rustic-providers/src/economic/traits.rs
 
+use super::types::SeriesData;
 use anyhow::Result;
 use async_trait::async_trait;
-use super::types::SeriesData;
 
 /// Common interface for economic data providers
 #[async_trait]
@@ -12,7 +12,7 @@ pub trait EconomicProvider: Send + Sync + std::fmt::Debug {
         &self,
         series_id: &str,
         frequency: Option<&str>,
-        limit:     Option<usize>,
+        limit: Option<usize>,
     ) -> Result<SeriesData>;
 
     /// Provider name for logging/debugging

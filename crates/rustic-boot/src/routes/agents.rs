@@ -10,7 +10,6 @@ use rustic_agent::services::config::agent::AgentConfig;
 
 use crate::boot::BootState;
 
-
 pub fn agent_routes<S>() -> Router<S>
 where
     S: Clone + Send + Sync + 'static,

@@ -6,7 +6,6 @@ use tracing::debug;
 
 use crate::embeddings::client::{Embedding, EmbeddingClient};
 
-
 pub const MODEL_GEMINI_EMBEDDING_001: &str = "gemini-embedding-001";
 const GEMINI_BASE_URL: &str = "https://generativelanguage.googleapis.com";
 
@@ -68,7 +67,6 @@ impl EmbeddingClient for GeminiEmbeddingClient {
     // OpenAI overrides this with a real batch API call; Gemini does not have one.
 }
 
-
 #[derive(Serialize, Debug)]
 pub(super) struct GeminiEmbeddingsRequest {
     pub model: String,
@@ -102,7 +100,6 @@ impl GeminiEmbeddingsRequest {
     }
 }
 
-
 #[derive(Debug, Deserialize, Clone)]
 pub(super) struct GeminiEmbeddingsResponse {
     pub(super) embedding: GeminiEmbeddingsResponseEmbedding,
@@ -112,8 +109,6 @@ pub(super) struct GeminiEmbeddingsResponse {
 pub(super) struct GeminiEmbeddingsResponseEmbedding {
     pub(super) values: Vec<f32>,
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -130,4 +125,3 @@ mod tests {
         run_embedding_client_test(&client).await
     }
 }
-

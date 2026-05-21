@@ -3,13 +3,31 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 use axum::{Router, extract::FromRef, http::HeaderValue};
 use reqwest::{Method, StatusCode, header};
-use rustic_agent::{client::{mcp::MCPServerAdapter, tools::Tool}, services::{agent::AgentService, config::{mcp::MCPServerConfig, provider::{ProviderConfig, ResolvedProvider}}, registry::{agent::AgentRegistry, provider::ProviderRegistry}}, tools::{mcp::MCPRegistry, tool::ToolRegistry}};
+use rustic_agent::{
+    client::{mcp::MCPServerAdapter, tools::Tool},
+    services::{
+        agent::AgentService,
+        config::{
+            mcp::MCPServerConfig,
+            provider::{ProviderConfig, ResolvedProvider},
+        },
+        registry::{agent::AgentRegistry, provider::ProviderRegistry},
+    },
+    tools::{mcp::MCPRegistry, tool::ToolRegistry},
+};
 use tokio::{net::TcpListener, sync::RwLock};
 use tower_http::cors::CorsLayer;
 use tracing::{error, info, warn};
 
-use crate::{auth::firebase::{FirebaseKeyCache, fetch_firebase_keys}, config::load::{ChatTemplate, load_agents_config, load_chat_templates, load_mcp_config, load_provider_config}, conversation::service::ConversationService, storage::manager::BootStorageManager};
-
+use crate::{
+    auth::firebase::{FirebaseKeyCache, fetch_firebase_keys},
+    config::load::{
+        ChatTemplate, load_agents_config, load_chat_templates, load_mcp_config,
+        load_provider_config,
+    },
+    conversation::service::ConversationService,
+    storage::manager::BootStorageManager,
+};
 
 // agentic-boot
 #[derive(Clone)]
@@ -18,7 +36,7 @@ pub struct BootState {
     pub conversation_service: Option<Arc<ConversationService>>,
     pub chat_templates: Vec<ChatTemplate>,
     pub firebase_keys: Arc<RwLock<FirebaseKeyCache>>,
-    pub firebase_project_id: String,                 
+    pub firebase_project_id: String,
 }
 
 impl BootState {

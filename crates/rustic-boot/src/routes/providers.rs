@@ -10,7 +10,6 @@ use rustic_agent::client::llm::LlmProvider;
 
 use crate::boot::BootState;
 
-
 pub fn provider_routes<S>() -> Router<S>
 where
     S: Clone + Send + Sync + 'static,

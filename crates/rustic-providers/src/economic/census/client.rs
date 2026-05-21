@@ -12,20 +12,20 @@ const CENSUS_BASE_URL: &str = "https://api.census.gov/data";
 #[derive(Debug, Clone)]
 pub struct CensusClient {
     http_client: Arc<HttpClient>,
-    api_key:     String,
+    api_key: String,
 }
 
 impl CensusClient {
     pub fn new(api_key: impl Into<String>) -> Result<Self> {
         Ok(Self {
             http_client: Arc::new(HttpClient::new()?),
-            api_key:     api_key.into(),
+            api_key: api_key.into(),
         })
     }
 
     /// Fetch ACS data
     /// dataset: "acs1" (1-year) or "acs5" (5-year)
-    /// variables: e.g. ["NAME", "B19013_001E"] 
+    /// variables: e.g. ["NAME", "B19013_001E"]
     /// geo: e.g. "state:*", "county:*", "us:1"
     ///
     /// Common variables:
@@ -36,20 +36,18 @@ impl CensusClient {
     /// B25077_001E → Median home value
     pub async fn get_acs(
         &self,
-        year:      &str,
-        dataset:   &str,
+        year: &str,
+        dataset: &str,
         variables: &[&str],
-        geo:       &str,
+        geo: &str,
     ) -> Result<Vec<CensusRecord>> {
         let vars = variables.join(",");
-        let url  = format!(
+        let url = format!(
             "{}/{}/acs/{}?get={}&for={}&key={}",
             CENSUS_BASE_URL, year, dataset, vars, geo, self.api_key
         );
 
-        let raw: CensusRawResponse = self.http_client
-            .get_request(url, None)
-            .await?;
+        let raw: CensusRawResponse = self.http_client.get_request(url, None).await?;
 
         Ok(self.parse_response(raw, variables))
     }
@@ -57,48 +55,36 @@ impl CensusClient {
     /// Fetch Current Population Survey data
     pub async fn get_cps(
         &self,
-        year:      &str,
+        year: &str,
         variables: &[&str],
-        geo:       &str,
+        geo: &str,
     ) -> Result<Vec<CensusRecord>> {
         let vars = variables.join(",");
-        let url  = format!(
+        let url = format!(
             "{}/timeseries/poverty/saipe?get={}&for={}&time={}&key={}",
             CENSUS_BASE_URL, vars, geo, year, self.api_key
         );
 
-        let raw: CensusRawResponse = self.http_client
-            .get_request(url, None)
-            .await?;
+        let raw: CensusRawResponse = self.http_client.get_request(url, None).await?;
 
         Ok(self.parse_response(raw, variables))
     }
 
     /// Fetch International Trade data
-    pub async fn get_trade(
-        &self,
-        year:      &str,
-        variables: &[&str],
-    ) -> Result<Vec<CensusRecord>> {
+    pub async fn get_trade(&self, year: &str, variables: &[&str]) -> Result<Vec<CensusRecord>> {
         let vars = variables.join(",");
-        let url  = format!(
+        let url = format!(
             "{}/timeseries/intltrade/imports?get={}&time={}&key={}",
             CENSUS_BASE_URL, vars, year, self.api_key
         );
 
-        let raw: CensusRawResponse = self.http_client
-            .get_request(url, None)
-            .await?;
+        let raw: CensusRawResponse = self.http_client.get_request(url, None).await?;
 
         Ok(self.parse_response(raw, variables))
     }
 
     /// Parse raw Census array response into records
-    fn parse_response(
-        &self,
-        raw:       CensusRawResponse,
-        variables: &[&str],
-    ) -> Vec<CensusRecord> {
+    fn parse_response(&self, raw: CensusRawResponse, variables: &[&str]) -> Vec<CensusRecord> {
         if raw.len() < 2 {
             return vec![];
         }
@@ -106,54 +92,49 @@ impl CensusClient {
         let headers = &raw[0];
 
         // find column indices
-        let name_idx  = headers.iter().position(|h| h == "NAME");
-        let value_idx = headers.iter().position(|h| {
-            variables.iter().any(|v| v == h && *h != "NAME")
-        });
-        let geo_type  = headers.last().cloned();
-        let geo_idx   = headers.len() - 1; // geo ID is always last column
+        let name_idx = headers.iter().position(|h| h == "NAME");
+        let value_idx = headers
+            .iter()
+            .position(|h| variables.iter().any(|v| v == h && *h != "NAME"));
+        let geo_type = headers.last().cloned();
+        let geo_idx = headers.len() - 1; // geo ID is always last column
 
         raw[1..]
             .iter()
             .map(|row| CensusRecord {
-                name:     name_idx
-                            .and_then(|i| row.get(i))
-                            .cloned()
-                            .unwrap_or_default(),
-                value:    value_idx
-                            .and_then(|i| row.get(i))
-                            .cloned()
-                            .unwrap_or_default(),
-                geo_id:   row.get(geo_idx).cloned(),
+                name: name_idx
+                    .and_then(|i| row.get(i))
+                    .cloned()
+                    .unwrap_or_default(),
+                value: value_idx
+                    .and_then(|i| row.get(i))
+                    .cloned()
+                    .unwrap_or_default(),
+                geo_id: row.get(geo_idx).cloned(),
                 geo_type: geo_type.clone(),
             })
             .collect()
     }
 
     /// Map Census records to canonical SeriesData
-    fn map_to_series(
-        &self,
-        records:   Vec<CensusRecord>,
-        series_id: &str,
-        year:      &str,
-    ) -> SeriesData {
+    fn map_to_series(&self, records: Vec<CensusRecord>, series_id: &str, year: &str) -> SeriesData {
         let observations: Vec<DataPoint> = records
             .into_iter()
             .filter_map(|r| {
                 r.value.parse::<f64>().ok().map(|v| DataPoint {
-                    date:  year.to_string(),
+                    date: year.to_string(),
                     value: v,
                 })
             })
             .collect();
 
         SeriesData {
-            series_id:    series_id.to_string(),
-            title:        None,
-            frequency:    "A".to_string(),
-            units:        None,
+            series_id: series_id.to_string(),
+            title: None,
+            frequency: "A".to_string(),
+            units: None,
             observations,
-            provider:     "census".to_string(),
+            provider: "census".to_string(),
         }
     }
 }
@@ -164,7 +145,7 @@ impl EconomicProvider for CensusClient {
         &self,
         series_id: &str,
         _frequency: Option<&str>,
-        limit:     Option<usize>,
+        limit: Option<usize>,
     ) -> Result<SeriesData> {
         // Census series_id format: "YEAR/DATASET/VARIABLE/GEO"
         // e.g. "2023/acs1/B19013_001E/state:*"
@@ -176,10 +157,10 @@ impl EconomicProvider for CensusClient {
             ));
         }
 
-        let year     = parts[0];
-        let dataset  = parts[1];
+        let year = parts[0];
+        let dataset = parts[1];
         let variable = parts[2];
-        let geo      = parts[3];
+        let geo = parts[3];
 
         let records = self
             .get_acs(year, dataset, &["NAME", variable], geo)
@@ -194,9 +175,10 @@ impl EconomicProvider for CensusClient {
         Ok(data)
     }
 
-    fn provider_name(&self) -> &str { "census" }
+    fn provider_name(&self) -> &str {
+        "census"
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -204,18 +186,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_census_median_income_by_state() {
-        let api_key = std::env::var("CENSUS_API_KEY")
-            .expect("CENSUS_API_KEY not set");
+        let api_key = std::env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY not set");
 
         let client = CensusClient::new(api_key).unwrap();
 
         let records = client
-            .get_acs(
-                "2023",
-                "acs1",
-                &["NAME", "B19013_001E"],
-                "state:*",
-            )
+            .get_acs("2023", "acs1", &["NAME", "B19013_001E"], "state:*")
             .await
             .unwrap();
 
@@ -226,18 +202,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_census_population_by_state() {
-        let api_key = std::env::var("CENSUS_API_KEY")
-            .expect("CENSUS_API_KEY not set");
+        let api_key = std::env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY not set");
 
         let client = CensusClient::new(api_key).unwrap();
 
         let records = client
-            .get_acs(
-                "2023",
-                "acs1",
-                &["NAME", "B01003_001E"],
-                "state:*",
-            )
+            .get_acs("2023", "acs1", &["NAME", "B01003_001E"], "state:*")
             .await
             .unwrap();
 
@@ -247,8 +217,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_census_get_series() {
-        let api_key = std::env::var("CENSUS_API_KEY")
-            .expect("CENSUS_API_KEY not set");
+        let api_key = std::env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY not set");
 
         let client = CensusClient::new(api_key).unwrap();
 

@@ -13,7 +13,12 @@ use tokio::sync::Mutex;
 use tracing::{debug, error, info};
 
 use crate::{
-    auth::firebase::{FirebaseClaims, firebase_auth_middleware}, boot::BootState, conversation::{domain::{Conversation, ConversationRequest, Turn}, dto::{ConversationsQuery, TurnRequest, TurnResponse}},
+    auth::firebase::{FirebaseClaims, firebase_auth_middleware},
+    boot::BootState,
+    conversation::{
+        domain::{Conversation, ConversationRequest, Turn},
+        dto::{ConversationsQuery, TurnRequest, TurnResponse},
+    },
 };
 
 pub fn conversation_routes<S>(state: S) -> Router<S>

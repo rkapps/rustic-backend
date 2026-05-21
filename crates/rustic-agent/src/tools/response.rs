@@ -29,7 +29,6 @@ impl From<MCPToolDefinition> for ToolDefinition {
     }
 }
 
-
 #[derive(Debug, Deserialize)]
 pub(super) struct MCPToolCallResponse {
     pub(super) content: Vec<MCPToolCallResponseContent>,

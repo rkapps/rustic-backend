@@ -31,7 +31,9 @@ pub mod file;
 pub mod mongo;
 
 // Core traits
-pub use core::repository::{RepoKey, RepoModel, Repository, Searchable, SortValue, VectorEmbedding};
+pub use core::repository::{
+    RepoKey, RepoModel, Repository, Searchable, SortValue, VectorEmbedding,
+};
 
 // Query DSL — only the builder is part of the public API
 pub use core::search::SearchCriteria;

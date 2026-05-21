@@ -1,4 +1,7 @@
-use rustic_storage::{core::repository::{RepoModel, Searchable}, file::database::FileDatabase};
+use rustic_storage::{
+    core::repository::{RepoModel, Searchable},
+    file::database::FileDatabase,
+};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;

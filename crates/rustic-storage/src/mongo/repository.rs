@@ -19,7 +19,6 @@ use crate::core::repository::VectorEmbedding;
 use crate::core::search::SearchCriteria;
 use crate::mongo::MongoCriteriaBuilder;
 
-
 /// MongoDB implementation of [`Repository`].
 ///
 /// Wraps a typed `mongodb::Collection<M>` and translates [`SearchCriteria`]

@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_agent::Tool;
 use rustic_providers::BeaClient;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -87,18 +87,18 @@ impl Tool for BeaTool {
     }
 
     async fn execute(&self, params: Value) -> Result<Value> {
-        let dataset    = params["dataset"].as_str()
+        let dataset = params["dataset"]
+            .as_str()
             .ok_or_else(|| anyhow::anyhow!("dataset required"))?;
-        let table_name = params["table_name"].as_str()
+        let table_name = params["table_name"]
+            .as_str()
             .ok_or_else(|| anyhow::anyhow!("table_name required"))?;
-        let frequency  = params["frequency"].as_str().unwrap_or("A");
-        let year       = params["year"].as_str().unwrap_or("LAST5");
+        let frequency = params["frequency"].as_str().unwrap_or("A");
+        let year = params["year"].as_str().unwrap_or("LAST5");
 
         match dataset {
             "nipa" => {
-                let rows = self.client
-                    .get_nipa(table_name, frequency, year)
-                    .await?;
+                let rows = self.client.get_nipa(table_name, frequency, year).await?;
                 Ok(json!({
                     "dataset":    dataset,
                     "table_name": table_name,
@@ -111,9 +111,10 @@ impl Tool for BeaTool {
             }
             "regional" => {
                 let line_code = params["line_code"].as_str().unwrap_or("1");
-                let geo_fips  = params["geo_fips"].as_str().unwrap_or("STATE");
-    
-                let rows = self.client
+                let geo_fips = params["geo_fips"].as_str().unwrap_or("STATE");
+
+                let rows = self
+                    .client
                     .get_regional(table_name, line_code, geo_fips, year)
                     .await?;
                 Ok(json!({
@@ -129,8 +130,7 @@ impl Tool for BeaTool {
                     "note":       "UNIT_MULT=3 means thousands of dollars"
                 }))
             }
-            _ => Err(anyhow::anyhow!("dataset must be 'nipa' or 'regional'"))
+            _ => Err(anyhow::anyhow!("dataset must be 'nipa' or 'regional'")),
         }
-
     }
 }

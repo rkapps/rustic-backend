@@ -11,7 +11,13 @@ use std::{
 use tokio::sync::Mutex;
 use tracing::debug;
 
-use crate::{core::repository::{RepoKey, RepoModel}, file::{collections::CollectionMetadata, errors::FileDatabaseError, repository::FileRepository, utils}};
+use crate::{
+    core::repository::{RepoKey, RepoModel},
+    file::{
+        collections::CollectionMetadata, errors::FileDatabaseError, repository::FileRepository,
+        utils,
+    },
+};
 
 /// A lightweight, file-backed "database" that manages a set of named collections.
 ///

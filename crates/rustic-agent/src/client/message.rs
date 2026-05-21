@@ -30,9 +30,7 @@ pub enum Message {
     ///
     /// Thought messages are not shown to the end user but may be included in
     /// the history for models that support extended thinking.
-    Thought {
-        content: String,
-    },
+    Thought { content: String },
 
     /// A request from the assistant to invoke a tool.
     ///

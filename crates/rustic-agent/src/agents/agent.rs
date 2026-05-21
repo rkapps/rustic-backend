@@ -57,10 +57,7 @@ impl Agent {
     /// Run a single completion pass without tool use.
     ///
     /// Useful for simple chat flows where tool calling is not required.
-    pub async fn complete(
-        &self,
-        messages: &[Message],
-    ) -> HttpResult<CompletionResponse> {
+    pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
         let request = CompletionRequest {
             model: self.model.clone(),
             system: self.system_prompt.clone(),

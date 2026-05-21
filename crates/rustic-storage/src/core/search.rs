@@ -95,25 +95,39 @@ pub struct SortField {
 // --- From impls so callers pass plain Rust values instead of SearchValue variants ---
 
 impl From<String> for SearchValue {
-    fn from(s: String) -> Self { SearchValue::String(s) }
+    fn from(s: String) -> Self {
+        SearchValue::String(s)
+    }
 }
 impl From<&str> for SearchValue {
-    fn from(s: &str) -> Self { SearchValue::String(s.to_string()) }
+    fn from(s: &str) -> Self {
+        SearchValue::String(s.to_string())
+    }
 }
 impl From<i64> for SearchValue {
-    fn from(i: i64) -> Self { SearchValue::Int(i) }
+    fn from(i: i64) -> Self {
+        SearchValue::Int(i)
+    }
 }
 impl From<bool> for SearchValue {
-    fn from(b: bool) -> Self { SearchValue::Bool(b) }
+    fn from(b: bool) -> Self {
+        SearchValue::Bool(b)
+    }
 }
 impl From<DateTime<Utc>> for SearchValue {
-    fn from(dt: DateTime<Utc>) -> Self { SearchValue::DateTime(dt) }
+    fn from(dt: DateTime<Utc>) -> Self {
+        SearchValue::DateTime(dt)
+    }
 }
 impl From<Vec<String>> for SearchValue {
-    fn from(v: Vec<String>) -> Self { SearchValue::Array(v) }
+    fn from(v: Vec<String>) -> Self {
+        SearchValue::Array(v)
+    }
 }
 impl From<rust_decimal::Decimal> for SearchValue {
-    fn from(d: rust_decimal::Decimal) -> Self { SearchValue::Decimal(d) }
+    fn from(d: rust_decimal::Decimal) -> Self {
+        SearchValue::Decimal(d)
+    }
 }
 
 impl SearchCriteria {
@@ -215,7 +229,10 @@ impl SearchCriteria {
     fn push_sort(mut self, field: &str, ascending: bool) -> Self {
         self.sort_fields
             .get_or_insert_with(Vec::new)
-            .push(SortField { field: field.to_string(), ascending });
+            .push(SortField {
+                field: field.to_string(),
+                ascending,
+            });
         self
     }
 }

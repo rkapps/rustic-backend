@@ -50,7 +50,6 @@ pub fn cosine_similarity(vec_a: &[f32], vec_b: &[f32]) -> f32 {
 mod tests {
     use crate::search::similarity::{cosine_similarity, search};
 
-
     #[test]
     fn test_vector_search_top_k() {
         let vec_a = vec![1.0, 0.0, 0.0];
@@ -92,6 +91,4 @@ mod tests {
         let similarity = cosine_similarity(&vec_a, &vec_b);
         assert_eq!(similarity, 0.0); // Should return 0.0
     }
-
-   
 }

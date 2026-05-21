@@ -43,8 +43,7 @@ impl Tool for FredTool {
             HOUST (housing starts), RSXFS (retail sales).
 
             Returns observations sorted newest first."#
-        .to_string()
-
+            .to_string()
     }
 
     fn parameters(&self) -> Value {

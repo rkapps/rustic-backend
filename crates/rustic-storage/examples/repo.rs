@@ -8,10 +8,8 @@ use crate::common::models::User;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
-        "rustic_storage::examples,rustic-storage::file".to_string()
-    });
+    let filter = std::env::var("RUST_LOG")
+        .unwrap_or_else(|_| "rustic_storage::examples,rustic-storage::file".to_string());
     set_logger(filter);
 
     let pb = PathBuf::from("data/tests/users");

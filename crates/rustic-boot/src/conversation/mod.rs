@@ -1,8 +1,7 @@
+pub mod domain;
 pub mod dto;
 pub mod helper;
 pub mod service;
-pub mod domain;
-
 
 pub const CONVERSATION_COLLECTION_NAME: &str = "conversation";
 pub const TURN_COLLECTION_NAME: &str = "turn";

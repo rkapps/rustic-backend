@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_agent::Tool;
 use rustic_providers::CensusClient;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -78,9 +78,9 @@ impl Tool for CensusTool {
     }
 
     async fn execute(&self, params: Value) -> Result<Value> {
-        let year      = params["year"].as_str().unwrap_or("2023");
-        let dataset   = params["dataset"].as_str().unwrap_or("acs1");
-        let geo       = params["geo"].as_str().unwrap_or("state:*");
+        let year = params["year"].as_str().unwrap_or("2023");
+        let dataset = params["dataset"].as_str().unwrap_or("acs1");
+        let geo = params["geo"].as_str().unwrap_or("state:*");
 
         let variables: Vec<&str> = params["variables"]
             .as_array()
@@ -98,7 +98,8 @@ impl Tool for CensusTool {
         vars_with_name.extend(variables.iter());
         vars_with_name.dedup();
 
-        let records = self.client
+        let records = self
+            .client
             .get_acs(year, dataset, &vars_with_name, geo)
             .await?;
 

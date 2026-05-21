@@ -34,8 +34,8 @@ pub use services::builder::AgentBuilder;
 
 // LLM client trait and provider
 pub use client::llm::{CompletionStreamResponse, LlmClient, LlmProvider};
-pub use client::provider::Provider;
 pub use client::preset::Preset;
+pub use client::provider::Provider;
 
 // Completion request / response types
 pub use client::request::{CompletionRequest, ReasoningEffort};

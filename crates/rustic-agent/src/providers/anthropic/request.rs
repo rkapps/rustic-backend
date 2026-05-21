@@ -39,10 +39,7 @@ pub struct AnthropicCompletionRequestCache {
 #[serde(untagged)]
 pub enum AnthropicCompletionRequestMessage {
     /// Plain text user or assistant turn.
-    Content {
-        role: String,
-        content: String,
-    },
+    Content { role: String, content: String },
     /// An assistant turn that contains one or more tool-use blocks.
     ToolUse {
         role: String,

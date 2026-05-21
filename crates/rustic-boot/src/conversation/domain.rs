@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 use crate::conversation::{CONVERSATION_COLLECTION_NAME, TURN_COLLECTION_NAME};
 
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ConversationType {
@@ -96,8 +95,6 @@ impl Conversation {
         }
     }
 }
-
-
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Turn {

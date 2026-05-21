@@ -1,6 +1,5 @@
 use crate::core::{repository::Searchable, search::SortField};
 
-
 /// Sort `items` in-place according to an ordered list of [`SortField`]s.
 ///
 /// Fields are compared left-to-right; ties in earlier fields are broken by

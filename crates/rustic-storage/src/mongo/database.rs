@@ -4,7 +4,10 @@ use anyhow::Result;
 use mongodb::Client;
 use tokio::sync::Mutex;
 
-use crate::{core::repository::{RepoKey, RepoModel}, mongo::{error::MongoDatabaseError, repository::MongoRepository}};
+use crate::{
+    core::repository::{RepoKey, RepoModel},
+    mongo::{error::MongoDatabaseError, repository::MongoRepository},
+};
 
 /// MongoDB-backed database that manages a set of typed collections.
 ///

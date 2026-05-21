@@ -1,14 +1,14 @@
 // rustic-providers/src/economic/service.rs
 
-use anyhow::Result;
-use std::sync::Arc;
 use super::traits::EconomicProvider;
 use super::types::SeriesData;
+use anyhow::Result;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct EconomicDataService {
-    fred:   Option<Arc<dyn EconomicProvider>>,
-    bea:    Option<Arc<dyn EconomicProvider>>,
+    fred: Option<Arc<dyn EconomicProvider>>,
+    bea: Option<Arc<dyn EconomicProvider>>,
     census: Option<Arc<dyn EconomicProvider>>,
 }
 
@@ -22,7 +22,7 @@ impl EconomicDataService {
         &self,
         series_id: &str,
         frequency: Option<&str>,
-        limit:     Option<usize>,
+        limit: Option<usize>,
     ) -> Result<SeriesData> {
         self.fred
             .as_ref()
@@ -36,7 +36,7 @@ impl EconomicDataService {
         &self,
         series_id: &str,
         frequency: Option<&str>,
-        limit:     Option<usize>,
+        limit: Option<usize>,
     ) -> Result<SeriesData> {
         self.bea
             .as_ref()
@@ -50,7 +50,7 @@ impl EconomicDataService {
         &self,
         series_id: &str,
         frequency: Option<&str>,
-        limit:     Option<usize>,
+        limit: Option<usize>,
     ) -> Result<SeriesData> {
         self.census
             .as_ref()
@@ -64,8 +64,8 @@ impl EconomicDataService {
 
 #[derive(Debug, Default)]
 pub struct EconomicDataServiceBuilder {
-    fred:   Option<Arc<dyn EconomicProvider>>,
-    bea:    Option<Arc<dyn EconomicProvider>>,
+    fred: Option<Arc<dyn EconomicProvider>>,
+    bea: Option<Arc<dyn EconomicProvider>>,
     census: Option<Arc<dyn EconomicProvider>>,
 }
 
@@ -87,8 +87,8 @@ impl EconomicDataServiceBuilder {
 
     pub fn build(self) -> EconomicDataService {
         EconomicDataService {
-            fred:   self.fred,
-            bea:    self.bea,
+            fred: self.fred,
+            bea: self.bea,
             census: self.census,
         }
     }

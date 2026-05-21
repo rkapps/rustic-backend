@@ -2,7 +2,8 @@ use std::{env, sync::Arc};
 
 use anyhow::Result;
 use fin_analyse::tools::{
-    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool, TickerSentimentTool, TickerSnapshotTool, TickerTaxonomyTool
+    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool,
+    TickerSentimentTool, TickerSnapshotTool, TickerTaxonomyTool,
 };
 use fin_storage::mongo::{MongoStorageManager, MongoStorageService};
 use rustic_agent::client::tools::Tool;

@@ -5,11 +5,12 @@ use google_cloud_storage::{
     client::{Client, ClientConfig},
     http::objects::{download::Range, get::GetObjectRequest},
 };
-use rustic_agent::services::config::{agent::AgentConfig, mcp::MCPServerConfig, provider::ProviderConfig};
+use rustic_agent::services::config::{
+    agent::AgentConfig, mcp::MCPServerConfig, provider::ProviderConfig,
+};
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 use tracing::trace;
-
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatTemplate {
@@ -22,7 +23,6 @@ pub struct ChatTemplate {
     pub recommended_llm: String,
     pub icon: String,
 }
-
 
 #[derive(Debug, Deserialize)]
 struct TemplatesFile {

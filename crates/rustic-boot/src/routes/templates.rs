@@ -9,7 +9,6 @@ use reqwest::StatusCode;
 
 use crate::{boot::BootState, config::load::ChatTemplate};
 
-
 pub fn template_routes<S>() -> Router<S>
 where
     S: Clone + Send + Sync + 'static,

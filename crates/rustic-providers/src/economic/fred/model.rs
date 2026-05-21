@@ -7,8 +7,8 @@ pub struct FredObservationsResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct FredObservation {
-    pub date:  String,
-    pub value: String,   // FRED returns strings, "." for missing
+    pub date: String,
+    pub value: String, // FRED returns strings, "." for missing
 }
 
 #[derive(Debug, Deserialize)]
@@ -18,11 +18,11 @@ pub struct FredSeriesResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct FredSeries {
-    pub id:                    String,
-    pub title:                 String,
-    pub frequency:             String,
-    pub units:                 String,
-    pub seasonal_adjustment:   String,
-    pub last_updated:          String,
-    pub notes:                 Option<String>,
+    pub id: String,
+    pub title: String,
+    pub frequency: String,
+    pub units: String,
+    pub seasonal_adjustment: String,
+    pub last_updated: String,
+    pub notes: Option<String>,
 }

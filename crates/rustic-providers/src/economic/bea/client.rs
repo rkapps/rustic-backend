@@ -32,30 +32,31 @@ impl BeaClient {
     pub async fn get_nipa(
         &self,
         table_name: &str,
-        frequency:  &str,
-        year:       &str,
+        frequency: &str,
+        year: &str,
     ) -> Result<Vec<BeaDataRow>> {
         let url = format!(
             "{}?UserID={}&method=GetData&datasetname=NIPA&TableName={}&Frequency={}&Year={}&ResultFormat=JSON",
             BEA_BASE_URL, self.api_key, table_name, frequency, year
         );
-    
-        let response: BeaResponse = self.http_client
-            .get_request(url, None)
-            .await?;
-    
+
+        let response: BeaResponse = self.http_client.get_request(url, None).await?;
+
         if let Some(error) = response.bea_api.error {
             return Err(anyhow::anyhow!(
-                "BEA error {}: {}", error.code, error.description
+                "BEA error {}: {}",
+                error.code,
+                error.description
             ));
         }
-    
-        let data = response.bea_api
+
+        let data = response
+            .bea_api
             .results
             .ok_or_else(|| anyhow::anyhow!("No results"))?
             .data
             .ok_or_else(|| anyhow::anyhow!("No data"))?;
-    
+
         let rows: Vec<BeaDataRow> = serde_json::from_value(data)?;
         Ok(rows)
     }
@@ -68,31 +69,32 @@ impl BeaClient {
     pub async fn get_regional(
         &self,
         table_name: &str,
-        line_code:  &str,
-        geo_fips:   &str,
-        year:       &str,
+        line_code: &str,
+        geo_fips: &str,
+        year: &str,
     ) -> Result<Vec<BeaRegionalRow>> {
         let url = format!(
             "{}?UserID={}&method=GetData&datasetname=Regional&TableName={}&LineCode={}&GeoFips={}&Year={}&ResultFormat=JSON",
             BEA_BASE_URL, self.api_key, table_name, line_code, geo_fips, year
         );
-    
-        let response: BeaResponse = self.http_client
-            .get_request(url, None)
-            .await?;
-    
+
+        let response: BeaResponse = self.http_client.get_request(url, None).await?;
+
         if let Some(error) = response.bea_api.error {
             return Err(anyhow::anyhow!(
-                "BEA error {}: {}", error.code, error.description
+                "BEA error {}: {}",
+                error.code,
+                error.description
             ));
         }
-    
-        let data = response.bea_api
+
+        let data = response
+            .bea_api
             .results
             .ok_or_else(|| anyhow::anyhow!("No results"))?
             .data
             .ok_or_else(|| anyhow::anyhow!("No data"))?;
-    
+
         let rows: Vec<BeaRegionalRow> = serde_json::from_value(data)?;
         Ok(rows)
     }
@@ -191,7 +193,6 @@ mod tests {
 
         println!("{}", serde_json::to_string_pretty(&response).unwrap());
     }
-
 
     #[tokio::test]
     async fn test_bea_personal_income() {

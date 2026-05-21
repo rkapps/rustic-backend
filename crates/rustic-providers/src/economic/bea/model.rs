@@ -14,17 +14,15 @@ pub struct BeaApi {
     pub error: Option<BeaError>,
 }
 
-
 #[derive(Debug, Deserialize)]
 pub struct BeaResults {
     #[serde(rename = "Statistic")]
-    pub statistic:    Option<String>,
+    pub statistic: Option<String>,
     #[serde(rename = "UnitOfMeasure")]
-    pub unit:         Option<String>,
+    pub unit: Option<String>,
     #[serde(rename = "Data")]
-    pub data:         Option<serde_json::Value>,  // ← flexible, handle both
+    pub data: Option<serde_json::Value>, // ← flexible, handle both
 }
-
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BeaDataRow {
@@ -51,22 +49,20 @@ pub struct BeaDataRow {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BeaRegionalRow {
     #[serde(rename = "Code")]
-    pub code:        String,
+    pub code: String,
     #[serde(rename = "GeoFips")]
-    pub geo_fips:    String,
+    pub geo_fips: String,
     #[serde(rename = "GeoName")]
-    pub geo_name:    String,
+    pub geo_name: String,
     #[serde(rename = "TimePeriod")]
     pub time_period: String,
     #[serde(rename = "DataValue")]
-    pub data_value:  String,
+    pub data_value: String,
     #[serde(rename = "CL_UNIT")]
-    pub cl_unit:     String,
+    pub cl_unit: String,
     #[serde(rename = "UNIT_MULT")]
-    pub unit_mult:   String,
+    pub unit_mult: String,
 }
-
-
 
 #[derive(Debug, Deserialize)]
 pub struct BeaError {
