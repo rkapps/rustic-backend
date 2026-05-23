@@ -2,7 +2,7 @@ use crate::{
     Agent, CompletionResponse, CompletionResponseContent, Message,
     agents::{
         ExecutionMode,
-        helper::{build_agent_messages, build_stage_decision},
+        helper::{build_agent_messages, build_clean_response_text, build_stage_decision, is_decide_prompt, is_orchestrator_decision},
     },
     services::config::agent::{AgentConfig, AgentContext},
 };
@@ -47,17 +47,24 @@ impl AgentHandle {
                     }],
                     _ => original_messages.to_vec(),
                 }
-                // let mut input = original_messages.to_vec();
-                // if let Some(last) = pipeline_messages.last() {
-                //     input.push(last.clone());
-                // }
-                // input
             }
             AgentContext::All => {
-                all_messages.to_vec()
-                // let mut input = original_messages.to_vec();
-                // input.extend_from_slice(pipeline_messages);
-                // input
+                let mut input = original_messages.to_vec();
+    
+                let data: Vec<Message> = all_messages.iter()
+                    .filter(|m| !is_orchestrator_decision(m) && !is_decide_prompt(m))
+                    .cloned()
+                    .collect();
+                
+                input.extend(data);
+                
+                // clear handoff instruction
+                input.push(Message::User {
+                    content: "Synthesise all the research above into a final response for the user.".to_string(),
+                    response_id: None,
+                });
+                
+                input     
             }
         };
 
@@ -83,13 +90,17 @@ impl AgentHandle {
     pub async fn execute(
         &self,
         original_messages: &[Message],
-        // pipeline_messages: &[Message],
     ) -> HttpResult<CompletionResponse> {
-        let input = original_messages.to_vec();
 
         match self {
-            AgentHandle::Single(agent) => agent.complete_with_tools(&input).await,
-            AgentHandle::Pipeline(runner) => Box::pin(runner.run(&input)).await,
+            AgentHandle::Single(agent) => agent.complete_with_tools(&original_messages).await,
+            AgentHandle::Pipeline(runner) => {
+                // force pipeline runner to be stateless
+                let last = original_messages.last().unwrap();
+                let mut input = Vec::new();
+                input.push(last.clone());
+                Box::pin(runner.run(&input)).await
+            }
         }
     }
 }
@@ -124,10 +135,15 @@ impl PipeLineRunner {
         let mut all_messages = Vec::new();
         all_messages.extend(messages.to_vec());
 
-        info!("");
+        const MAX_ITERATIONS: usize = 10;
+
         info!("PipelineRunner - run_dynamic");
         loop {
             iteration += 1;
+            if iteration > MAX_ITERATIONS {
+                error!("Error: {}", HttpError::MaxIterationsExceeded);
+                return Err(HttpError::MaxIterationsExceeded);
+            }
 
             let pipeline_messages = all_messages.clone();
 
@@ -139,7 +155,6 @@ impl PipeLineRunner {
                     response_id: None,
                 });
             }
-            debug!("messages: {:#?}", all_messages);
 
             let response = self.orchestrator.decide(&all_messages).await.map_err(|_| {
                 HttpError::CompletionRequestError("No stage decision returned".to_string())
@@ -155,15 +170,11 @@ impl PipeLineRunner {
             // Collect sub agent assistant messages.
             let mut sub_agent_messages = Vec::new();
 
-            if decision.stop {
-                // info!("handles: {:?}", self.agent_handles);
-            }
-
             match decision.execution {
                 ExecutionMode::Sequential => {
                     for sub_agent in decision.agents {
                         if let Some(agent_handle) = self.agent_handles.get(&sub_agent) {
-                            info!("Sub agent completion executing: {:?}", sub_agent);
+                            info!("Sub agent {:?} executing...", sub_agent);
                             let response = agent_handle
                                 .execute_sub(
                                     self.agent_config.clone(),
@@ -173,12 +184,10 @@ impl PipeLineRunner {
                                     &pipeline_messages,
                                 )
                                 .await?;
-                            info!("response: {:#?}", response);
 
-                            if decision.stop {
-                                info!("response: {:#?}", response);
-                            }
-                            let nmessages = build_agent_messages(response);
+                            let nmessages = build_agent_messages(response.clone());
+                            info!("Sub agent response: {:#?}", build_clean_response_text(response.text()));
+
                             sub_agent_messages.extend_from_slice(&nmessages);
                         };
                     }
@@ -220,7 +229,8 @@ impl PipeLineRunner {
                     for result in results {
                         match result {
                             Ok(response) => {
-                                let nmessages = build_agent_messages(response);
+                                let nmessages = build_agent_messages(response.clone());
+                                info!("Sub agent response: {:#?}", build_clean_response_text(response.text()));
                                 sub_agent_messages.extend_from_slice(&nmessages);
                             }
                             Err(e) => {
@@ -231,8 +241,7 @@ impl PipeLineRunner {
                 }
             }
 
-            debug!("sub agent messages: {:#?}", sub_agent_messages);
-
+            // debug!("sub agent messages: {:#?}", sub_agent_messages);
             let merged = sub_agent_messages
                 .iter()
                 .rev()
@@ -252,6 +261,8 @@ impl PipeLineRunner {
                 response_id: Some(cresponse.response_id),
             });
 
+            debug!("sub agent merged messages: {:#?}", merged);
+
             // if the decision is stop then return the response.
             if decision.stop {
                 let mut rcontents: Vec<CompletionResponseContent> = Vec::new();
@@ -264,11 +275,6 @@ impl PipeLineRunner {
                 };
 
                 return Ok(rresponse);
-            }
-
-            if iteration > 10 {
-                error!("Error: {}", HttpError::MaxIterationsExceeded);
-                return Err(HttpError::MaxIterationsExceeded);
             }
         }
     }
