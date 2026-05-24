@@ -58,8 +58,8 @@ impl AgentService {
     }
 
     /// Return a new [`AgentBuilder`] borrowing from this service.
-    pub fn builder(&self) -> AgentBuilder<'_> {
-        AgentBuilder::new(self)
+    pub fn builder(&self, id: &str) -> AgentBuilder<'_> {
+        AgentBuilder::new(self, id)
     }
 
     /// Build a general-purpose chat agent for the given provider and model.
@@ -82,8 +82,10 @@ impl AgentService {
         debug!("System Prompt: {}", system_prompt);
         debug!("Preset: {:?}", preset);
 
+        // chat does not have an id
+        let id = String::new();
         let agent = self
-            .builder()
+            .builder(id.as_str())
             .with_system_prompt(system_prompt)
             .with_preset(preset)
             .with_provider(provider)
@@ -111,7 +113,7 @@ impl AgentService {
         let provider = self.resolve_provider(llm, Some(model))?;
         let preset = match &provider {
             Provider::Local { .. } => Preset::Local,
-            _ => Preset::Balanced,
+            _ => Preset::Thorough,
         };
 
         let tool_registry = {
@@ -145,12 +147,13 @@ impl AgentService {
         debug!("Preset: {:?}", preset);
 
         let agent = self
-            .builder()
+            .builder(&agent_config.id)
             .with_system_prompt(agent_config.system_prompt.clone())
             .with_tools(tool_registry.get_tools())
             .with_filtered_mcp(mcp_registry)
             .with_preset(preset)
             .with_provider(provider)
+            
             .await?
             .build()
             .await?;
@@ -217,7 +220,7 @@ impl AgentService {
             ExecutionType::Pipeline => {
                 let runner =
                     Box::pin(self.build_pipeline_runner(agent_id, llm, model, visited)).await?;
-                Ok(AgentHandle::Pipeline(Box::new(runner)))
+                Ok(AgentHandle::Pipeline(Arc::new(runner)))
             }
         }
     }

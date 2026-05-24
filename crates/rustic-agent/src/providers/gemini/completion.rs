@@ -60,7 +60,7 @@ impl GeminiClient {
         let url = format!("{}/v1beta/interactions", self.base_url,);
 
         let mut headers = reqwest::header::HeaderMap::new();
-
+        let agent_id = request.id.clone();
         let api_key: HeaderValue = self
             .api_key
             .parse()
@@ -126,6 +126,7 @@ impl GeminiClient {
         };
 
         let cresponse = CompletionResponse {
+            id: agent_id.clone(),
             model: gresponse.model,
             response_id: id,
             contents: rcontents,
@@ -147,6 +148,8 @@ impl LlmClient for GeminiClient {
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
         let url = format!("{}/v1beta/interactions", self.base_url,);
+
+        let agent_id = request.id.clone();
         debug!("Gemini Request: {:#?}", request);
 
         let mut headers = reqwest::header::HeaderMap::new();
@@ -208,12 +211,13 @@ impl LlmClient for GeminiClient {
                             let dtype = delta.r#type;
                             // debug!("Type: {}", dtype);
                             if let Some(text) = delta.text {
-                                yield Ok(CompletionChunkResponse::content(text, String::new()))
+                                yield Ok(CompletionChunkResponse::content(agent_id.clone(), text, String::new()))
                             } else if let Some(signature) = delta.signature {
                                 debug!("chunk: {:#?}", signature);
-                                yield Ok(CompletionChunkResponse::thought(signature))
+                                yield Ok(CompletionChunkResponse::thought(agent_id.clone(), signature))
                             } else if dtype == "function_call" {
                                 yield Ok(CompletionChunkResponse::tool_call(
+                                    agent_id.clone(),
                                     delta.id,
                                     delta.name,
                                     delta.arguments,
@@ -245,6 +249,7 @@ impl LlmClient for GeminiClient {
                          );
 
                     yield Ok(CompletionChunkResponse::stop(
+                            agent_id.clone(),
                                 interaction.model,
                                 interaction.id,
                                 Some(usage),

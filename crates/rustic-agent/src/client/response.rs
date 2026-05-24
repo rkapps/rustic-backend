@@ -6,6 +6,8 @@ use crate::client::tools::ToolCallRequest;
 /// The complete, non-streaming response from a completion call.
 #[derive(Debug, Clone)]
 pub struct CompletionResponse {
+
+    pub id: String,
     /// Provider-specific model identifier that generated the response.
     pub model: String,
     /// Opaque identifier assigned by the provider for this response.
@@ -96,6 +98,8 @@ impl std::ops::AddAssign for CompletionResponseTokenUsage {
 /// without manually zeroing unused fields.
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CompletionChunkResponse {
+
+    pub id: String,
     /// Model that generated this chunk (only set on the final chunk).
     pub model: String,
     /// Provider-assigned response ID (only set on the final chunk).
@@ -117,13 +121,15 @@ pub struct CompletionChunkResponse {
 impl CompletionChunkResponse {
     /// Build a terminal chunk that signals the end of the stream.
     pub fn stop(
-        model: String,
         id: String,
+        model: String,
+        response_id: String,
         usage: Option<CompletionResponseTokenUsage>,
     ) -> CompletionChunkResponse {
         CompletionChunkResponse {
+            id,
             model,
-            response_id: id,
+            response_id,
             content: String::new(),
             thought: String::new(),
             thinking: String::new(),
@@ -134,8 +140,9 @@ impl CompletionChunkResponse {
     }
 
     /// Build a chunk carrying incremental visible content and optional raw thinking text.
-    pub fn content(content: String, thinking: String) -> CompletionChunkResponse {
+    pub fn content(id: String, content: String, thinking: String) -> CompletionChunkResponse {
         CompletionChunkResponse {
+            id,
             model: String::new(),
             response_id: String::new(),
             content,
@@ -148,8 +155,9 @@ impl CompletionChunkResponse {
     }
 
     /// Build a chunk carrying an incremental chain-of-thought fragment.
-    pub fn thought(thought: String) -> CompletionChunkResponse {
+    pub fn thought(id: String, thought: String) -> CompletionChunkResponse {
         CompletionChunkResponse {
+            id,
             model: String::new(),
             response_id: String::new(),
             content: String::new(),
@@ -167,11 +175,13 @@ impl CompletionChunkResponse {
     ///
     /// Panics if any of `id`, `name`, or `arguments` is `None`.
     pub fn tool_call(
-        id: Option<String>,
+        id: String,
+        tool_id: Option<String>,
         name: Option<String>,
         arguments: Option<Value>,
     ) -> CompletionChunkResponse {
         CompletionChunkResponse {
+            id,
             model: String::new(),
             response_id: String::new(),
             content: String::new(),
@@ -180,7 +190,7 @@ impl CompletionChunkResponse {
             is_final: false,
             usage: None,
             tool_call: Some(ToolCallRequest {
-                id: id.unwrap(),
+                id: tool_id.unwrap(),
                 name: name.unwrap(),
                 arguments: arguments.unwrap(),
             }),

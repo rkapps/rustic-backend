@@ -266,7 +266,7 @@ impl ConversationService {
                         conversation.system_prompt.clone(),
                     )
                     .await?;
-                let response = agent.complete_with_tools(messages).await?;
+                let response = agent.complete(messages).await?;
                 Ok(response)
             }
             ConversationType::Agent => {
@@ -310,16 +310,31 @@ impl ConversationService {
                         conversation.system_prompt.clone(),
                     )
                     .await?;
-                let stream = agent.complete_with_tools_streaming(messages).await?;
+                let stream = agent.complete_with_streaming(messages).await?;
                 Ok(Box::pin(stream))
             }
             ConversationType::Agent => {
                 if let Some(agent_id) = &conversation.agent_id {
-                    let agent = self
+
+                    // let config = self.agent_service.find_agent_config(agent_id).await?;
+                    let mut visited = HashSet::new();
+                    let handle = self
                         .agent_service
-                        .build_agent_for_id(&agent_id, &conversation.llm, &conversation.model)
+                        .build_agent_handle(
+                            &agent_id,
+                            &conversation.llm,
+                            &conversation.model,
+                            &mut visited,
+                        )
                         .await?;
-                    let stream = agent.complete_with_tools_streaming(messages).await?;
+
+                    debug!("Building conversatino agent: {}", agent_id);
+                    // let agent = self
+                    //     .agent_service
+                    //     .build_agent_for_id(&agent_id, &conversation.llm, &conversation.model)
+                    //     .await?;
+                    // let stream = agent.ex_streaming(messages).await?;
+                    let stream = handle.execute_streaming(messages).await?;
                     Ok(Box::pin(stream))
                 } else {
                     return Err(anyhow::anyhow!("Conversation agent_id is blank."));

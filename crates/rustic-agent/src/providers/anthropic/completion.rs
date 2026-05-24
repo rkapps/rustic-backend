@@ -78,6 +78,7 @@ impl LlmClient for AnthropicClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
         let url = format!("{}/v1/messages", self.base_url);
 
+        let agent_id = request.id.clone();        
         let mut headers = reqwest::header::HeaderMap::new();
         let api_key: HeaderValue = self
             .api_key
@@ -93,6 +94,7 @@ impl LlmClient for AnthropicClient {
 
         let arequest = AnthropicCompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
+
 
         debug!("AnthropicCompletionRequest {:#?}", arequest);
 
@@ -146,6 +148,7 @@ impl LlmClient for AnthropicClient {
         };
 
         let cresponse = CompletionResponse {
+            id: agent_id,
             model: aresponse.model,
             response_id: String::new(),
             contents: rcontents,
@@ -161,6 +164,7 @@ impl LlmClient for AnthropicClient {
     ) -> HttpResult<CompletionStreamResponse> {
         let url = format!("{}/v1/messages", self.base_url);
 
+        let agent_id = request.id.clone();        
         let mut headers = reqwest::header::HeaderMap::new();
         let api_key: HeaderValue = self
             .api_key
@@ -265,6 +269,7 @@ impl LlmClient for AnthropicClient {
                                     if let Some(text) = delta.text {
                                         trace!("chunk: {:#?}-{:?}-{:?}", index, dtype, text);
                                          yield Ok(CompletionChunkResponse::content(
+                                            agent_id.clone(),
                                             text.to_string(),
                                             String::new(),
                                          ))
@@ -274,6 +279,7 @@ impl LlmClient for AnthropicClient {
                                     if let Some(thinking) = delta.thinking {
                                         // info!("chunk: {:#?}-{:?}-{:?}", index, dtype, thinking);
                                          yield Ok(CompletionChunkResponse::thought(
+                                            agent_id.clone(),
                                             thinking,
                                          ))
                                     }
@@ -290,6 +296,7 @@ impl LlmClient for AnthropicClient {
 
                             if let Some(buffer) = tool_buffers.get_mut(&index) {
                                     yield Ok(CompletionChunkResponse::tool_call(
+                                         agent_id.clone(),
                                          Some(buffer.id.clone()),
                                          Some(buffer.name.clone()),
                                          Some(args_value.clone())
@@ -322,6 +329,7 @@ impl LlmClient for AnthropicClient {
                         );
 
                         yield Ok(CompletionChunkResponse::stop(
+                            agent_id.clone(),
                             arequest.model.clone(),
                             String::new(),
                             Some(usage),

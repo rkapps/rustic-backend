@@ -58,6 +58,7 @@ impl LlmClient for OpenAIClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
         let url = format!("{}/v1/responses", self.base_url,);
 
+        let agent_id = request.id.clone();
         let mut headers = reqwest::header::HeaderMap::new();
         let bearer = format!("Bearer {}", self.api_key)
             .parse()
@@ -142,6 +143,7 @@ impl LlmClient for OpenAIClient {
         };
 
         let cresponse = CompletionResponse {
+            id: agent_id,
             model: oresponse.model,
             response_id: id,
             contents: rcontents,
@@ -160,6 +162,7 @@ impl LlmClient for OpenAIClient {
 
         let mut headers = reqwest::header::HeaderMap::new();
 
+        let agent_id = request.id.clone();
         let bearer = format!("Bearer {}", self.api_key)
             .parse()
             .map_err(|_| HttpError::ApiKeyParsingFailed)?;
@@ -225,7 +228,7 @@ impl LlmClient for OpenAIClient {
                      "response.output_text.delta" => {
                         trace!("Chunk: {:?}", chunk);
                         if let Some(delta) = chunk.delta {
-                             yield Ok(CompletionChunkResponse::content(delta, String::new()))
+                             yield Ok(CompletionChunkResponse::content(agent_id.clone(), delta, String::new()))
                          }
                      }
                      "response.function_call_arguments.delta" => {
@@ -247,6 +250,7 @@ impl LlmClient for OpenAIClient {
                                 if let Some(buffer) = tool_buffers.get_mut(&item_id) {
 
                                     yield Ok(CompletionChunkResponse::tool_call(
+                                         agent_id.clone(),
                                          Some(buffer.id.clone()),
                                          Some(buffer.name.clone()),
                                          Some(args_value)
@@ -295,6 +299,7 @@ impl LlmClient for OpenAIClient {
                                 response.model, response.id, usage );
 
                              yield Ok(CompletionChunkResponse::stop(
+                                 agent_id.clone(),
                                  response.model,
                                  response.id,
                                  Some(usage),

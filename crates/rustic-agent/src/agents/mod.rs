@@ -24,3 +24,9 @@ pub enum ExecutionMode {
     Sequential,
     Parallel,
 }
+
+#[derive(Debug, Clone)]
+pub struct SubAgentResponse {
+    pub agent_id: String,
+    pub content: String,  // text only, no JSON decisions, no fences
+}

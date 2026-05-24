@@ -11,7 +11,7 @@ use tracing::{debug, error, info, trace, warn};
 
 use crate::{
     client::{
-        llm::{CompletionStreamResponse, LlmClient},
+        llm::LlmClient,
         message::Message,
         request::{CompletionRequest, ReasoningEffort},
         response::{CompletionChunkResponse, CompletionResponse, CompletionResponseContent},
@@ -34,6 +34,9 @@ use crate::{
 /// | [`complete_with_tools_streaming`](Self::complete_with_tools_streaming) | yes | yes |
 #[derive(Debug, Clone)]
 pub struct Agent {
+
+    // agent id
+    pub id: String,
     /// Provider label (e.g. `"Anthropic"`) used for logging and routing.
     pub llm: String,
     /// Model identifier forwarded to the provider (e.g. `"claude-sonnet-4-6"`).
@@ -54,44 +57,44 @@ pub struct Agent {
 }
 
 impl Agent {
-    /// Run a single completion pass without tool use.
-    ///
-    /// Useful for simple chat flows where tool calling is not required.
-    pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
-        let request = CompletionRequest {
-            model: self.model.clone(),
-            system: self.system_prompt.clone(),
-            messages: messages.to_owned(),
-            temperature: self.temperature,
-            max_tokens: self.max_tokens,
-            reasoning_effort: self.reasoning_effort.clone(),
-            enable_cache: self.enable_cache,
-            stream: false,
-            definitions: Vec::new(),
-        };
+    // /// Run a single completion pass without tool use.
+    // ///
+    // /// Useful for simple chat flows where tool calling is not required.
+    // pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
+    //     let request = CompletionRequest {
+    //         model: self.model.clone(),
+    //         system: self.system_prompt.clone(),
+    //         messages: messages.to_owned(),
+    //         temperature: self.temperature,
+    //         max_tokens: self.max_tokens,
+    //         reasoning_effort: self.reasoning_effort.clone(),
+    //         enable_cache: self.enable_cache,
+    //         stream: false,
+    //         definitions: Vec::new(),
+    //     };
 
-        self.client.complete(request).await
-    }
+    //     self.client.complete(request).await
+    // }
 
-    /// Run a single completion pass without tool use, returning a token stream.
-    pub async fn complete_with_stream(
-        &self,
-        messages: &[Message],
-    ) -> HttpResult<CompletionStreamResponse> {
-        let request = CompletionRequest {
-            model: self.model.clone(),
-            system: self.system_prompt.clone(),
-            messages: messages.to_owned(),
-            temperature: self.temperature,
-            max_tokens: self.max_tokens,
-            reasoning_effort: self.reasoning_effort.clone(),
-            enable_cache: self.enable_cache,
-            stream: true,
-            definitions: Vec::new(),
-        };
+    // /// Run a single completion pass without tool use, returning a token stream.
+    // pub async fn complete_with_stream(
+    //     &self,
+    //     messages: &[Message],
+    // ) -> HttpResult<CompletionStreamResponse> {
+    //     let request = CompletionRequest {
+    //         model: self.model.clone(),
+    //         system: self.system_prompt.clone(),
+    //         messages: messages.to_owned(),
+    //         temperature: self.temperature,
+    //         max_tokens: self.max_tokens,
+    //         reasoning_effort: self.reasoning_effort.clone(),
+    //         enable_cache: self.enable_cache,
+    //         stream: true,
+    //         definitions: Vec::new(),
+    //     };
 
-        self.client.complete_with_stream(request).await
-    }
+    //     self.client.complete_with_stream(request).await
+    // }
 
     /// Run an agentic tool-use loop, streaming output chunks to the caller.
     ///
@@ -105,7 +108,7 @@ impl Agent {
     ///    their results to the message history before the next iteration.
     /// 4. When no tool calls are requested, sends a final [`CompletionChunkResponse::stop`]
     ///    chunk with accumulated token usage and exits.
-    pub async fn complete_with_tools_streaming(
+    pub async fn complete_with_streaming(
         &self,
         messages: &[Message],
     ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
@@ -129,11 +132,14 @@ impl Agent {
         let mut current_messages = messages.to_owned();
         let system_prompt = self.system_prompt.clone();
         let new_definitions = definitions.clone();
+        let agent_id = self.id.clone();
 
         info!(
-            "Model: {} tokens: {} temperature: {} reasoning_effort: {:?}",
-            agent.model, agent.max_tokens, agent.temperature, agent.reasoning_effort
+            "Agent: {}, Model: {} tokens: {} temperature: {} reasoning_effort: {:?}",
+            agent.id, agent.model, agent.max_tokens, agent.temperature, agent.reasoning_effort
         );
+
+
         tokio::spawn(async move {
             let mut iteration = 0;
             const MAX_ITERATIONS: usize = 10;
@@ -155,13 +161,15 @@ impl Agent {
                     break;
                 }
                 info!(
-                    "Iteration: {} messsages: {} last_response_id: {:?}",
+                    "Agent: {} Iteration: {} messsages: {} last_response_id: {:?}",
+                    agent_id,
                     iteration,
                     current_messages.len(),
                     last_assistant
                 );
 
                 let request = CompletionRequest {
+                    id: agent_id.clone(),
                     model: agent.model.clone(),
                     system: system_prompt.clone(),
                     messages: current_messages.clone(),
@@ -186,6 +194,7 @@ impl Agent {
                 let mut model = String::new();
                 let mut response_id = String::new();
                 let mut thought_content = String::new();
+                // let agent_id = agent_id.clone();
 
                 // 2. "Pump" the chunks through the channel as they arrive
                 while let Some(chunk_result) = llm_stream.next().await {
@@ -199,10 +208,10 @@ impl Agent {
                         }
                     };
                     if let Some(call) = chunk.tool_call {
-                        debug!("call: {:?}", call);
+                        debug!("Agent: {} call: {:?}", agent_id, call);
                         tool_calls.push(call);
                     } else {
-                        trace!("chunk: {:?}", chunk);
+                        trace!("Agent: {} chunk: {:?}", agent_id, chunk);
 
                         if chunk.is_final {
                             usage += chunk.usage.unwrap();
@@ -221,14 +230,15 @@ impl Agent {
                     }
                 }
 
-                info!("tool_calls: {}", tool_calls.len());
+                info!("Agent: {} Tool Calls: {}", agent_id, tool_calls.len());
                 if tool_calls.is_empty() {
                     info!(
-                        "Final Response stats - model: {:#?} response_id: {} usage: {:#?}",
-                        model, response_id, usage
+                        "Agent: {} Final Response stats - model: {:#?} response_id: {} usage: {:#?}",
+                        agent_id, model, response_id, usage
                     );
                     let _ = tx
                         .send(Ok(CompletionChunkResponse::stop(
+                            agent_id.clone(),
                             model,
                             response_id,
                             Some(usage),
@@ -243,6 +253,7 @@ impl Agent {
 
                 let _ = tx
                     .send(Ok(CompletionChunkResponse::content(
+                        agent_id.clone(),
                         String::new(),
                         "Executing tools...".into(),
                     )))
@@ -261,8 +272,8 @@ impl Agent {
                 for result in results {
                     match result {
                         Ok((tool_call, tool_output)) => {
-                            debug!("Tool Call: {:?}", tool_call);
-                            debug!("     Output: {:?}", tool_output);
+                            debug!("Agent: {}  Tool Call: {:?}", agent_id, tool_call);
+                            debug!("Agent: {}     Output: {:?}", agent_id, tool_output);
                             nmessages.push(tool_call);
                             nmessages.push(tool_output);
                         }
@@ -290,7 +301,7 @@ impl Agent {
     ///
     /// Returns [`HttpError::MaxIterationsExceeded`] if the model keeps requesting
     /// tools beyond the iteration cap.
-    pub async fn complete_with_tools(
+    pub async fn complete(
         &self,
         messages: &[Message],
     ) -> HttpResult<CompletionResponse> {
@@ -311,6 +322,7 @@ impl Agent {
         trace!("Mcp_definitions: {:#?}", mcp_definitions);
 
         let request = CompletionRequest {
+            id: self.id.clone(),
             model: self.model.clone(),
             system: self.system_prompt.clone(),
             messages: messages.to_vec(),
@@ -327,16 +339,17 @@ impl Agent {
 
         let mut nrequest = request;
         let delay = Duration::from_millis(2000);
+        let agent_id = self.id.clone();
 
         loop {
             iteration += 1;
-            info!("Iteration: {}/{}", iteration, MAX_ITERATIONS);
+            info!("Agent: {} Iteration: {}/{}", agent_id, iteration, MAX_ITERATIONS);
             if iteration > 5 {
                 sleep(delay).await;
             }
 
             if iteration > MAX_ITERATIONS {
-                error!("Max tool iterations exceeded: {}", iteration);
+                error!("Agent: {}, Max tool iterations exceeded: {}", agent_id, iteration);
                 return Err(HttpError::MaxIterationsExceeded);
             }
 
@@ -359,12 +372,13 @@ impl Agent {
                 .collect();
 
             if tool_calls.is_empty() {
-                debug!("CompletionResponse: {:#?}", response.text());
+                debug!("Agent: {} CompletionResponse: {:#?}", agent_id, response.text());
                 return Ok(response); // Done - return final answer
             }
 
             info!(
-                "CompletionResponse: {:#?} tool calls: {}",
+                "Agent: {} CompletionResponse: {:#?} tool calls: {}",
+                agent_id,
                 response.response_id,
                 tool_calls.len()
             );
@@ -424,7 +438,7 @@ impl Agent {
                     }
                 };
             }
-            debug!("new messages: {:?}", nmessages.len());
+            debug!("Agent: {} New messages: {:?}", agent_id, nmessages.len());
 
             if !nmessages.is_empty() {
                 nrequest.messages.extend(nmessages);
@@ -445,8 +459,8 @@ impl Agent {
         };
 
         info!(
-            "Executing tool: {:#?} args: {:?}",
-            call.name, call.arguments
+            "Agent: {} Executing tool: {:#?} args: {:?}",
+            self.id, call.name, call.arguments
         );
 
         let output = match self.tool_registry.get_tool(&call.name) {

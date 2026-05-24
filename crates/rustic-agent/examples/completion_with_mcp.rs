@@ -65,8 +65,9 @@ async fn main() -> Result<()> {
         Arc::new(RwLock::new(mcp_registry)),
     );
 
+    
     let agent = agent_service
-        .builder()
+        .builder(&String::new())
         .with_system_prompt(furniture_analyst_prompt.to_string())
         .with_preset(Preset::Balanced)
         .with_openai(&api_key, &model)
@@ -79,7 +80,7 @@ async fn main() -> Result<()> {
         content: content.clone(),
         response_id: None,
     };
-    let response = agent.complete_with_tools(&vec![message]).await?;
+    let response = agent.complete(&vec![message]).await?;
     println!("Response: {:#?}", response);
 
     Ok(())

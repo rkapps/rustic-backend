@@ -1,19 +1,24 @@
 use crate::{
-    Agent, CompletionResponse, CompletionResponseContent, Message,
+    Agent, CompletionChunkResponse, CompletionResponse, CompletionResponseContent, Message,
     agents::{
-        ExecutionMode,
-        helper::{build_agent_messages, build_clean_response_text, build_stage_decision, is_decide_prompt, is_orchestrator_decision},
+        ExecutionMode, StageDecision,
+        helper::{
+            build_merged_sub_agent_message, build_stage_decision, build_sub_agent_messages,
+            unwrap_agent_content,
+        },
     },
     services::config::agent::{AgentConfig, AgentContext},
 };
 use rustic_core::{HttpError, HttpResult};
 use std::{collections::HashMap, sync::Arc, time::Duration};
-use tokio::sync::Semaphore;
+use tokio::sync::{Semaphore, mpsc};
+use tokio_stream::StreamExt;
+use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 
 pub enum AgentHandle {
     Single(Agent),
-    Pipeline(Box<PipeLineRunner>),
+    Pipeline(Arc<PipeLineRunner>),
 }
 
 impl AgentHandle {
@@ -22,7 +27,6 @@ impl AgentHandle {
         agent_config: AgentConfig,
         agent_id: &str,
         original_messages: &[Message],
-        all_messages: &[Message],
         pipeline_messages: &[Message],
     ) -> HttpResult<CompletionResponse> {
         let context = agent_config
@@ -33,39 +37,11 @@ impl AgentHandle {
             .unwrap_or(AgentContext::Last);
 
         let input = match context {
-            AgentContext::Goal => original_messages.to_vec(),
+            AgentContext::Goal => AgentHandle::build_goal_input(original_messages),
             AgentContext::Last => {
-                let last = pipeline_messages
-                    .iter()
-                    .rev()
-                    .find(|m| matches!(m, Message::Assistant { .. }));
-
-                match last {
-                    Some(Message::Assistant { content, .. }) => vec![Message::User {
-                        content: content.clone(),
-                        response_id: None,
-                    }],
-                    _ => original_messages.to_vec(),
-                }
+                AgentHandle::build_last_input(original_messages, pipeline_messages)
             }
-            AgentContext::All => {
-                let mut input = original_messages.to_vec();
-    
-                let data: Vec<Message> = all_messages.iter()
-                    .filter(|m| !is_orchestrator_decision(m) && !is_decide_prompt(m))
-                    .cloned()
-                    .collect();
-                
-                input.extend(data);
-                
-                // clear handoff instruction
-                input.push(Message::User {
-                    content: "Synthesise all the research above into a final response for the user.".to_string(),
-                    response_id: None,
-                });
-                
-                input     
-            }
+            AgentContext::All => AgentHandle::build_all_input(original_messages, pipeline_messages),
         };
 
         debug!(
@@ -73,8 +49,24 @@ impl AgentHandle {
             agent_id, context, input
         );
         match self {
-            AgentHandle::Single(agent) => agent.complete_with_tools(&input).await,
+            AgentHandle::Single(agent) => agent.complete(&input).await,
             AgentHandle::Pipeline(runner) => Box::pin(runner.run(&input)).await,
+        }
+    }
+
+    pub async fn execute_sub_streaming(
+        &self,
+        agent_id: &str,
+        original_messages: &[Message],
+        pipeline_messages: &[Message],
+    ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
+        let input = AgentHandle::build_all_input(original_messages, pipeline_messages);
+        debug!("Agent: {} Input: {:#?}", agent_id, input);
+        match self {
+            AgentHandle::Single(agent) => agent.complete_with_streaming(&input).await,
+            AgentHandle::Pipeline(_) => Err(HttpError::CompletionRequestError(
+                "Pipeline cannot be an orchestrator".to_string(),
+            )),
         }
     }
 
@@ -87,13 +79,9 @@ impl AgentHandle {
         }
     }
 
-    pub async fn execute(
-        &self,
-        original_messages: &[Message],
-    ) -> HttpResult<CompletionResponse> {
-
+    pub async fn execute(&self, original_messages: &[Message]) -> HttpResult<CompletionResponse> {
         match self {
-            AgentHandle::Single(agent) => agent.complete_with_tools(&original_messages).await,
+            AgentHandle::Single(agent) => agent.complete(&original_messages).await,
             AgentHandle::Pipeline(runner) => {
                 // force pipeline runner to be stateless
                 let last = original_messages.last().unwrap();
@@ -102,6 +90,71 @@ impl AgentHandle {
                 Box::pin(runner.run(&input)).await
             }
         }
+    }
+
+    pub async fn execute_streaming(
+        &self,
+        original_messages: &[Message],
+    ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
+        match self {
+            AgentHandle::Single(agent) => agent.complete_with_streaming(&original_messages).await,
+            AgentHandle::Pipeline(runner) => {
+                let input = vec![original_messages.last().unwrap().clone()];
+                Box::pin(runner.clone().run_dynamic_streaming(&input)).await
+            }
+        }
+    }
+
+    pub fn build_goal_input(original_messages: &[Message]) -> Vec<Message> {
+        original_messages.to_vec()
+    }
+
+    pub fn build_last_input(
+        original_messages: &[Message],
+        pipeline_messages: &[Message],
+    ) -> Vec<Message> {
+        let last_content = pipeline_messages
+            .iter()
+            .rev()
+            .find_map(|m| match m {
+                Message::Assistant { content, .. } => Some(unwrap_agent_content(content)),
+                _ => None,
+            })
+            .unwrap_or_default();
+
+        if !last_content.is_empty() {
+            vec![Message::User {
+                content: last_content,
+                response_id: None,
+            }]
+        } else {
+            original_messages.to_vec()
+        }
+    }
+
+    pub fn build_all_input(
+        original_messages: &[Message],
+        pipeline_messages: &[Message],
+    ) -> Vec<Message> {
+        let merged = pipeline_messages
+            .iter()
+            .filter_map(|m| match m {
+                Message::Assistant { content, .. } => Some(content.as_str()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        vec![
+            original_messages[0].clone(),
+            Message::User {
+                content: format!(
+                    "Research data from specialist agents:\n\n{}\n\nSynthesise all the research above into a final response for the user.",
+                    merged
+                ),
+                response_id: None,
+            },
+        ]
     }
 }
 
@@ -159,7 +212,6 @@ impl PipeLineRunner {
             let response = self.orchestrator.decide(&all_messages).await.map_err(|_| {
                 HttpError::CompletionRequestError("No stage decision returned".to_string())
             })?;
-            let cresponse = response.clone();
             let decision = build_stage_decision(response.clone())?;
 
             info!(
@@ -167,115 +219,276 @@ impl PipeLineRunner {
                 decision.stop, decision.execution, decision.agents
             );
 
-            // Collect sub agent assistant messages.
-            let mut sub_agent_messages = Vec::new();
-
-            match decision.execution {
-                ExecutionMode::Sequential => {
-                    for sub_agent in decision.agents {
-                        if let Some(agent_handle) = self.agent_handles.get(&sub_agent) {
-                            info!("Sub agent {:?} executing...", sub_agent);
-                            let response = agent_handle
-                                .execute_sub(
-                                    self.agent_config.clone(),
-                                    &sub_agent,
-                                    original_messages,
-                                    &all_messages,
-                                    &pipeline_messages,
-                                )
-                                .await?;
-
-                            let nmessages = build_agent_messages(response.clone());
-                            info!("Sub agent response: {:#?}", build_clean_response_text(response.text()));
-
-                            sub_agent_messages.extend_from_slice(&nmessages);
-                        };
-                    }
-                }
-                ExecutionMode::Parallel => {
-                    let semaphore = Arc::new(Semaphore::new(5)); // max 3 parallel
-
-                    let futures: Vec<_> = decision
-                        .agents
-                        .iter()
-                        .filter_map(|id| self.agent_handles.get(id).map(|h| (id.clone(), h)))
-                        .map(|(id, handle)| {
-                            let sem = semaphore.clone();
-                            let pipeline_msgs = pipeline_messages.clone();
-                            let original_msgs = original_messages.to_vec();
-                            let all_msgs = all_messages.to_vec();
-                            let timeout_duration = Duration::from_secs(60);
-                            let agent_config = self.agent_config.clone();
-
-                            async move {
-                                let _permit = sem.acquire().await.unwrap();
-                                tokio::time::timeout(
-                                    timeout_duration,
-                                    handle.execute_sub(
-                                        agent_config,
-                                        &id,
-                                        &all_msgs,
-                                        &original_msgs,
-                                        &pipeline_msgs,
-                                    ),
-                                )
-                                .await
-                                .map_err(|_| HttpError::Timeout)?
-                            }
-                        })
-                        .collect();
-
-                    let results = futures::future::join_all(futures).await;
-                    for result in results {
-                        match result {
-                            Ok(response) => {
-                                let nmessages = build_agent_messages(response.clone());
-                                info!("Sub agent response: {:#?}", build_clean_response_text(response.text()));
-                                sub_agent_messages.extend_from_slice(&nmessages);
-                            }
-                            Err(e) => {
-                                warn!("Agent call error: {}", e.to_string());
-                            }
-                        };
-                    }
-                }
-            }
-
-            // debug!("sub agent messages: {:#?}", sub_agent_messages);
-            let merged = sub_agent_messages
-                .iter()
-                .rev()
-                .take_while(|m| matches!(m, Message::Assistant { .. }))
-                .collect::<Vec<_>>()
-                .iter()
-                .rev()
-                .filter_map(|m| match m {
-                    Message::Assistant { content, .. } => Some(content.as_str()),
-                    _ => None,
-                })
-                .collect::<Vec<_>>()
-                .join("\n\n");
+            let merged = self
+                .run_sub_agents(
+                    &decision,
+                    original_messages,
+                    &pipeline_messages,
+                    &all_messages,
+                )
+                .await?;
 
             all_messages.push(Message::Assistant {
                 content: merged.clone(),
-                response_id: Some(cresponse.response_id),
+                response_id: None,
             });
 
             debug!("sub agent merged messages: {:#?}", merged);
 
             // if the decision is stop then return the response.
             if decision.stop {
+                let final_content = unwrap_agent_content(&merged);
                 let mut rcontents: Vec<CompletionResponseContent> = Vec::new();
-                rcontents.push(CompletionResponseContent::Text(merged));
+                rcontents.push(CompletionResponseContent::Text(final_content));
                 let rresponse = CompletionResponse {
+                    id: response.id,
                     model: response.model,
                     response_id: String::new(),
                     contents: rcontents,
                     usage: response.usage,
                 };
-
                 return Ok(rresponse);
             }
         }
+    }
+
+    pub async fn run_dynamic_streaming(
+        self: Arc<Self>,
+        messages: &[Message],
+    ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
+        let (tx, rx) = mpsc::channel::<Result<CompletionChunkResponse, HttpError>>(200);
+
+        let original_messages = messages;
+        let mut all_messages = Vec::new();
+        all_messages.extend(messages.to_vec());
+        let runner = self.clone();
+
+        let mut spawn_all_messages = all_messages.to_owned();
+        let spawn_original_messages = original_messages.to_owned();
+
+        tokio::spawn(async move {
+            let mut iteration = 0;
+            const MAX_ITERATIONS: usize = 10;
+
+            info!("PipelineRunner - run_dynamic_streaming");
+            loop {
+                iteration += 1;
+                if iteration > MAX_ITERATIONS {
+                    error!("Error: {}", HttpError::MaxIterationsExceeded);
+                    let _ = tx.send(Err(HttpError::MaxIterationsExceeded)).await;
+                    break;
+                }
+
+                let pipeline_messages = spawn_all_messages.clone();
+
+                info!(
+                    "Loop: {} messsages: {}",
+                    iteration,
+                    spawn_all_messages.len()
+                );
+                // only append if last message is not User
+                if !matches!(spawn_all_messages.last(), Some(Message::User { .. })) {
+                    spawn_all_messages.push(Message::User {
+                        content: "Based on the above, decide the next agents to run.".to_string(),
+                        response_id: None,
+                    });
+                }
+
+                let response = match runner.orchestrator.decide(&spawn_all_messages).await {
+                    // HttpError::CompletionRequestError("No stage decision returned".to_string()),
+                    Ok(c) => c,
+                    Err(_) => {
+                        let _ = tx
+                            .send(Err(HttpError::CompletionRequestError(
+                                "No stage decision returned".to_string(),
+                            )))
+                            .await;
+                        break;
+                    }
+                };
+                let decision = match build_stage_decision(response.clone()) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        let _ = tx
+                            .send(Err(HttpError::CompletionRequestError(
+                                "Sstage decision build error".to_string(),
+                            )))
+                            .await;
+                        break;
+                    }
+                };
+
+                // after decision is made
+                let status = match decision.stop {
+                    true => "🧠 Synthesising...\n".to_string(),
+                    false => format!(
+                        "⚡ Running: {} ({})",
+                        decision.agents.join(", "),
+                        match decision.execution {
+                            ExecutionMode::Parallel => "parallel",
+                            ExecutionMode::Sequential => "sequential",
+                        }
+                    ),
+                };
+
+                info!(
+                    "decision: {:?} excecution: {:#?} status: {:?}",
+                    decision.stop, decision.execution, status
+                );
+
+                let _ = tx
+                    .send(Ok(CompletionChunkResponse::content(
+                        String::new(),
+                        status.clone(),
+                        String::new(),
+                    )))
+                    .await;
+
+                info!(
+                    "decision: {:?} excecution: {:#?} agents: {:?}",
+                    decision.stop, decision.execution, decision.agents
+                );
+
+                if decision.stop {
+                    if let Some(handle) = runner.agent_handles.get(&decision.agents[0]) {
+                        let input = match handle
+                            .execute_sub_streaming(
+                                &decision.agents[0],
+                                &spawn_original_messages,
+                                &pipeline_messages,
+                            )
+                            .await
+                        {
+                            Ok(c) => c,
+                            Err(_) => todo!(),
+                        };
+
+                        info!("Synthesising done");
+                        // pipe synthesizer stream to tx
+                        let mut stream = input;
+                        while let Some(chunk) = stream.next().await {
+                            let _ = tx.send(chunk).await;
+                        }
+                    }
+                    break;
+                } else {
+                    let start = std::time::Instant::now();
+
+                    //run the sub agents and merge
+                    let merged = match runner
+                        .run_sub_agents(
+                            &decision,
+                            &spawn_original_messages,
+                            &pipeline_messages,
+                            &spawn_all_messages,
+                        )
+                        .await
+                    {
+                        Ok(c) => c,
+                        Err(_) => {
+                            let _ = tx
+                                .send(Err(HttpError::CompletionRequestError(
+                                    "Sstage decision build error".to_string(),
+                                )))
+                                .await;
+                            break;
+                        }
+                    };
+                    let elapsed = start.elapsed();
+                    let done = format!("  ✅ {:.1}s\n", elapsed.as_secs_f32());
+                    let _ = tx
+                        .send(Ok(CompletionChunkResponse::content(
+                            String::new(),
+                            done,
+                            String::new(),
+                        )))
+                        .await;
+
+                    debug!("sub agent merged messages: {:#?}", merged);
+
+                    spawn_all_messages.push(Message::Assistant {
+                        content: merged.clone(),
+                        response_id: Some(response.response_id),
+                    });
+                }
+            }
+        });
+
+        Ok(ReceiverStream::new(rx))
+    }
+
+    pub async fn run_sub_agents(
+        &self,
+        decision: &StageDecision,
+        original_messages: &[Message],
+        pipeline_messages: &[Message],
+        all_messages: &[Message],
+    ) -> HttpResult<String> {
+        // Collect sub agent assistant messages.
+        let mut sub_agent_messages = Vec::new();
+
+        match decision.execution {
+            ExecutionMode::Sequential => {
+                for sub_agent in decision.agents.clone() {
+                    if let Some(agent_handle) = self.agent_handles.get(&sub_agent) {
+                        info!("Sub agent {:?} executing...", sub_agent);
+                        let response = agent_handle
+                            .execute_sub(
+                                self.agent_config.clone(),
+                                &sub_agent,
+                                original_messages,
+                                &pipeline_messages,
+                            )
+                            .await?;
+
+                        debug!("Sub agent response: {:#?}", response.text());
+                        build_sub_agent_messages(&mut sub_agent_messages, &response);
+                    };
+                }
+            }
+            ExecutionMode::Parallel => {
+                let semaphore = Arc::new(Semaphore::new(5)); // max 3 parallel
+
+                let futures: Vec<_> = decision
+                    .agents
+                    .iter()
+                    .filter_map(|id| self.agent_handles.get(id).map(|h| (id.clone(), h)))
+                    .map(|(id, handle)| {
+                        let sem = semaphore.clone();
+                        let pipeline_msgs = pipeline_messages;
+                        let all_msgs = all_messages.to_vec();
+                        let timeout_duration = Duration::from_secs(60);
+                        let agent_config = self.agent_config.clone();
+
+                        async move {
+                            let _permit = sem.acquire().await.unwrap();
+                            tokio::time::timeout(
+                                timeout_duration,
+                                handle.execute_sub(agent_config, &id, &all_msgs, &pipeline_msgs),
+                            )
+                            .await
+                            .map_err(|_| HttpError::Timeout)?
+                        }
+                    })
+                    .collect();
+
+                let results = futures::future::join_all(futures).await;
+                for result in results {
+                    match result {
+                        Ok(response) => {
+                            debug!("Sub agent response: {:#?}", response.text());
+                            build_sub_agent_messages(&mut sub_agent_messages, &response);
+                        }
+                        Err(e) => {
+                            warn!("Agent call error: {}", e.to_string());
+                        }
+                    };
+                }
+            }
+        }
+
+        let merged = build_merged_sub_agent_message(&mut sub_agent_messages);
+
+        Ok(merged)
     }
 }

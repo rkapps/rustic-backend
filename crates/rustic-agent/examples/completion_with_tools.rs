@@ -44,6 +44,7 @@ async fn main() -> Result<()> {
     let system_prompt = Some("You are a weather expert".to_string());
 
     let agent = Agent {
+        id: "".to_string(),
         client: Arc::new(client),
         enable_cache: true,
         llm: "gemini".to_string(),
@@ -62,7 +63,7 @@ async fn main() -> Result<()> {
         response_id: None,
     };
     println!("completion start---");
-    let response = agent.complete_with_tools(&vec![message]).await?;
+    let response = agent.complete(&vec![message]).await?;
     println!("Response: {:#?}", response);
 
     Ok(())

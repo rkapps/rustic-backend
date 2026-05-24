@@ -32,6 +32,7 @@ const MODEL_MAX_TOKENS: i32 = 5000;
 ///     .build().await?
 /// ```
 pub struct AgentBuilder<'a> {
+    id: String,
     service: &'a AgentService,
     llm: Option<String>,
     model: Option<String>,
@@ -48,8 +49,9 @@ pub struct AgentBuilder<'a> {
 
 impl<'a> AgentBuilder<'a> {
     /// Create a builder bound to `service`. Prefer [`AgentService::builder`] over calling this directly.
-    pub fn new(service: &'a AgentService) -> Self {
+    pub fn new(service: &'a AgentService, id: &str) -> Self {
         Self {
+            id: id.to_string(),
             service,
             llm: None,
             model: None,
@@ -298,6 +300,7 @@ impl<'a> AgentBuilder<'a> {
         let enable_cache = self.enable_cache;
 
         Ok(Agent {
+            id: self.id,
             llm,
             model,
             system_prompt,

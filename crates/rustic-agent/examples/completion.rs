@@ -36,6 +36,7 @@ async fn main() -> Result<()> {
         .with_context(|| anyhow::anyhow!("Error creating Gemini client"))?;
 
     let agent = Agent {
+        id: "".to_string(),
         client: Arc::new(client),
         enable_cache: true,
         llm: "gemini".to_string(),
