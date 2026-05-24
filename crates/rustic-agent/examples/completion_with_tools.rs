@@ -26,13 +26,10 @@ use crate::tools::get_weather::GetWeatherTool;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-
-
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
         "rustic_ai_api=debug,rustic_boot=info,rustic_agent=debug,fin_analyse=info".to_string()
     });
     set_logger(filter);
-
 
     let api_key = env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY envrionment variable not set");
     let client = GeminiClient::new(api_key.to_string())

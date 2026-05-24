@@ -34,7 +34,6 @@ use crate::{
 /// | [`complete_with_tools_streaming`](Self::complete_with_tools_streaming) | yes | yes |
 #[derive(Debug, Clone)]
 pub struct Agent {
-
     // agent id
     pub id: String,
     /// Provider label (e.g. `"Anthropic"`) used for logging and routing.
@@ -138,7 +137,6 @@ impl Agent {
             "Agent: {}, Model: {} tokens: {} temperature: {} reasoning_effort: {:?}",
             agent.id, agent.model, agent.max_tokens, agent.temperature, agent.reasoning_effort
         );
-
 
         tokio::spawn(async move {
             let mut iteration = 0;
@@ -301,10 +299,7 @@ impl Agent {
     ///
     /// Returns [`HttpError::MaxIterationsExceeded`] if the model keeps requesting
     /// tools beyond the iteration cap.
-    pub async fn complete(
-        &self,
-        messages: &[Message],
-    ) -> HttpResult<CompletionResponse> {
+    pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
         let mut definitions: Vec<ToolDefinition> = self
             .tool_registry
             .get_tools()
@@ -343,13 +338,19 @@ impl Agent {
 
         loop {
             iteration += 1;
-            info!("Agent: {} Iteration: {}/{}", agent_id, iteration, MAX_ITERATIONS);
+            info!(
+                "Agent: {} Iteration: {}/{}",
+                agent_id, iteration, MAX_ITERATIONS
+            );
             if iteration > 5 {
                 sleep(delay).await;
             }
 
             if iteration > MAX_ITERATIONS {
-                error!("Agent: {}, Max tool iterations exceeded: {}", agent_id, iteration);
+                error!(
+                    "Agent: {}, Max tool iterations exceeded: {}",
+                    agent_id, iteration
+                );
                 return Err(HttpError::MaxIterationsExceeded);
             }
 
@@ -372,7 +373,11 @@ impl Agent {
                 .collect();
 
             if tool_calls.is_empty() {
-                debug!("Agent: {} CompletionResponse: {:#?}", agent_id, response.text());
+                debug!(
+                    "Agent: {} CompletionResponse: {:#?}",
+                    agent_id,
+                    response.text()
+                );
                 return Ok(response); // Done - return final answer
             }
 

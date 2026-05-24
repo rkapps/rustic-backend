@@ -65,7 +65,6 @@ async fn main() -> Result<()> {
         Arc::new(RwLock::new(mcp_registry)),
     );
 
-    
     let agent = agent_service
         .builder(&String::new())
         .with_system_prompt(furniture_analyst_prompt.to_string())

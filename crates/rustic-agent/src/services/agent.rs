@@ -153,7 +153,6 @@ impl AgentService {
             .with_filtered_mcp(mcp_registry)
             .with_preset(preset)
             .with_provider(provider)
-            
             .await?
             .build()
             .await?;

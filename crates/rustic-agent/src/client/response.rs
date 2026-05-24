@@ -6,7 +6,6 @@ use crate::client::tools::ToolCallRequest;
 /// The complete, non-streaming response from a completion call.
 #[derive(Debug, Clone)]
 pub struct CompletionResponse {
-
     pub id: String,
     /// Provider-specific model identifier that generated the response.
     pub model: String,
@@ -29,7 +28,6 @@ pub enum CompletionResponseContent {
     ToolCall(ToolCallRequest),
 }
 
-
 impl CompletionResponse {
     pub fn text(&self) -> Option<&str> {
         self.contents.iter().find_map(|c| match c {
@@ -45,9 +43,7 @@ impl CompletionResponse {
         });
         content.unwrap_or_default().to_string()
     }
-
 }
-
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CompletionResponseTokenUsage {
@@ -98,7 +94,6 @@ impl std::ops::AddAssign for CompletionResponseTokenUsage {
 /// without manually zeroing unused fields.
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CompletionChunkResponse {
-
     pub id: String,
     /// Model that generated this chunk (only set on the final chunk).
     pub model: String,

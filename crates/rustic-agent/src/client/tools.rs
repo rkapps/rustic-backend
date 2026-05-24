@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt::Debug;
 
-
 /// A tool invocation requested by the model.
 ///
 /// Produced by deserializing the model's response and matched against registered

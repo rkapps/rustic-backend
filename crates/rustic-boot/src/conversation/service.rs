@@ -3,14 +3,12 @@ use chrono::Utc;
 use rustic_agent::{
     CompletionResponse,
     client::{
-        llm::CompletionStreamResponse,
-        message::Message,
-        response::CompletionResponseTokenUsage,
+        llm::CompletionStreamResponse, message::Message, response::CompletionResponseTokenUsage,
     },
     services::agent::AgentService,
 };
-use tracing::debug;
 use std::{collections::HashSet, sync::Arc};
+use tracing::debug;
 
 use crate::{
     conversation::{
@@ -253,7 +251,6 @@ impl ConversationService {
         conversation: &Conversation,
         messages: &[Message],
     ) -> Result<CompletionResponse> {
-
         debug!("Run Conversation: {:?}", conversation.id);
         // build based on the conversatoin type
         match conversation.conversation_type {
@@ -271,7 +268,6 @@ impl ConversationService {
             }
             ConversationType::Agent => {
                 if let Some(agent_id) = &conversation.agent_id {
-
                     // let config = self.agent_service.find_agent_config(agent_id).await?;
                     let mut visited = HashSet::new();
                     let handle = self
@@ -283,9 +279,7 @@ impl ConversationService {
                             &mut visited,
                         )
                         .await?;
-                    let response = handle
-                        .execute(messages)
-                        .await?;
+                    let response = handle.execute(messages).await?;
                     Ok(response)
                 } else {
                     return Err(anyhow::anyhow!("Conversation agent_id is blank."));
@@ -315,7 +309,6 @@ impl ConversationService {
             }
             ConversationType::Agent => {
                 if let Some(agent_id) = &conversation.agent_id {
-
                     // let config = self.agent_service.find_agent_config(agent_id).await?;
                     let mut visited = HashSet::new();
                     let handle = self

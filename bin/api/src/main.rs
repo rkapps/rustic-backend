@@ -54,12 +54,12 @@ async fn main() -> Result<()> {
     let fred_api_key = env::var("FRED_API_KEY").expect("FRED_API_KEY environment variable not set");
     let fred_client = Arc::new(FredClient::new(fred_api_key)?);
 
-    let census_api_key = env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY environment variable not set");
+    let census_api_key =
+        env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY environment variable not set");
     let census_client = Arc::new(CensusClient::new(census_api_key)?);
 
     let bea_api_key = env::var("BEA_API_KEY").expect("BEA_API_KEY environment variable not set");
     let bea_client = Arc::new(BeaClient::new(bea_api_key)?);
-
 
     let tools: Vec<Arc<dyn Tool>> = vec![
         Arc::new(TickerScreeningTool::new(

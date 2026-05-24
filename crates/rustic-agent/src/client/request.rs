@@ -6,7 +6,6 @@ use crate::client::{message::Message, tools::ToolDefinition};
 /// [`LlmClient::complete_with_stream`](crate::client::llm::LlmClient::complete_with_stream).
 #[derive(Debug, Clone)]
 pub struct CompletionRequest {
-
     pub id: String,
     /// Provider-specific model identifier (e.g. `"claude-opus-4-7"`).
     pub model: String,

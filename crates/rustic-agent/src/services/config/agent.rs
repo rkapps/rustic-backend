@@ -81,7 +81,7 @@ pub struct AvailableAgent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AgentContext {
-    Goal,  // original user messages
-    Last,  // last stage output
-    All,   // full accumulated context
+    Goal, // original user messages
+    Last, // last stage output
+    All,  // full accumulated context
 }

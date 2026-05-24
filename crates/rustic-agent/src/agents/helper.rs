@@ -1,36 +1,36 @@
 use rustic_core::{HttpError, HttpResult};
 use tracing::{debug, trace};
 
-use crate::{CompletionResponse, Message, agents::{StageDecision, SubAgentResponse}};
-
+use crate::{
+    CompletionResponse, Message,
+    agents::{StageDecision, SubAgentResponse},
+};
 
 pub fn build_merged_sub_agent_message(messages: &mut Vec<Message>) -> String {
-
-      let merged = messages
-      .iter()
-      .rev()
-      .take_while(|m| matches!(m, Message::Assistant { .. }))
-      .collect::<Vec<_>>()
-      .iter()
-      .rev()
-      .filter_map(|m| match m {
-          Message::Assistant { content, .. } => Some(content.as_str()),
-          _ => None,
-      })
-      .collect::<Vec<_>>()
-      .join("\n\n");
+    let merged = messages
+        .iter()
+        .rev()
+        .take_while(|m| matches!(m, Message::Assistant { .. }))
+        .collect::<Vec<_>>()
+        .iter()
+        .rev()
+        .filter_map(|m| match m {
+            Message::Assistant { content, .. } => Some(content.as_str()),
+            _ => None,
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n");
     merged
 }
 
-
-pub fn build_sub_agent_messages(messages: &mut Vec<Message>, response: &CompletionResponse ) {
+pub fn build_sub_agent_messages(messages: &mut Vec<Message>, response: &CompletionResponse) {
     if let Some(sub_response) = build_sub_agent_response(response) {
-
         let content = serde_json::json!({
             "agent": sub_response.agent_id,
             "content": sub_response.content
-        }).to_string();
-        
+        })
+        .to_string();
+
         debug!(content);
 
         messages.push(Message::Assistant {
@@ -50,14 +50,13 @@ pub fn build_sub_agent_response(response: &CompletionResponse) -> Option<SubAgen
     })
 }
 
-
 pub fn unwrap_agent_content(content: &str) -> String {
     if let Ok(v) = serde_json::from_str::<serde_json::Value>(content) {
         if let Some(inner) = v.get("content") {
             // handle both string and object
             match inner {
                 serde_json::Value::String(s) => s.clone(),
-                _ => inner.to_string(),  // serialize object back to string
+                _ => inner.to_string(), // serialize object back to string
             }
         } else {
             content.to_string()
@@ -94,7 +93,7 @@ pub fn unwrap_agent_content(content: &str) -> String {
 // }
 
 // pub fn build_clean_response_text(text: Option<&str>) -> String {
-//     if let Some(text) = text 
+//     if let Some(text) = text
 //         && !text.trim().is_empty() {
 //         build_clean_json(text)
 //     } else {
@@ -103,14 +102,12 @@ pub fn unwrap_agent_content(content: &str) -> String {
 // }
 
 pub fn build_clean_json(text: &str) -> String {
-    text
-    .trim()
-    .trim_start_matches("```json")
-    .trim_start_matches("```")
-    .trim_end_matches("```")
-    .trim()
-    .to_string()
-
+    text.trim()
+        .trim_start_matches("```json")
+        .trim_start_matches("```")
+        .trim_end_matches("```")
+        .trim()
+        .to_string()
 }
 
 pub fn is_decide_prompt(m: &Message) -> bool {
@@ -138,7 +135,6 @@ pub fn build_stage_decision(response: CompletionResponse) -> HttpResult<StageDec
     }
 }
 
-
 pub fn is_orchestrator_decision(m: &Message) -> bool {
     match m {
         Message::Assistant { content, .. } => {
@@ -149,6 +145,6 @@ pub fn is_orchestrator_decision(m: &Message) -> bool {
                 false
             }
         }
-        _ => false
+        _ => false,
     }
 }

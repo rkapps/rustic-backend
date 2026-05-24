@@ -3,15 +3,20 @@ use rustic_core::Tool;
 use std::sync::Arc;
 
 use crate::{
-    MCPRegistry, ToolRegistry, agents::Agent, client::{
+    MCPRegistry, ToolRegistry,
+    agents::Agent,
+    client::{
         llm::LlmClient, mcp::MCPServerAdapter, preset::Preset, provider::Provider,
-        request::ReasoningEffort, 
-    }, providers::{
+        request::ReasoningEffort,
+    },
+    providers::{
         anthropic::{self, completion::AnthropicClient},
         gemini::{self, completion::GeminiClient},
         local::completion::LocalClient,
         openai::{self, completion::OpenAIClient},
-    }, services::agent::AgentService, tools::mcp::MCPServerSetting
+    },
+    services::agent::AgentService,
+    tools::mcp::MCPServerSetting,
 };
 
 const MODEL_TEMPERATURE: f32 = 0.5;
@@ -284,7 +289,7 @@ impl<'a> AgentBuilder<'a> {
                 registry.register_tool_boxed(tool);
             }
             Arc::new(registry)
-        };        
+        };
         // let mcp_tool_guard = self.service.mcp_registry.read().await;
         // let mcp_registry = Arc::new(mcp_tool_guard.clone());
 

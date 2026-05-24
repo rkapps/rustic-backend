@@ -8,10 +8,7 @@ use crate::{
         request::{CompletionRequest, ReasoningEffort},
         tools::ToolDefinition,
     },
-    providers::gemini::{
-        MODEL_GEMINI_3_FLASH_PREVIEW,
-        helper::clean_for_gemini,
-    },
+    providers::gemini::{MODEL_GEMINI_3_FLASH_PREVIEW, helper::clean_for_gemini},
 };
 
 /// Serialized body sent to `POST /v1beta/interactions`.

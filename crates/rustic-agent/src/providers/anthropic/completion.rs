@@ -78,7 +78,7 @@ impl LlmClient for AnthropicClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
         let url = format!("{}/v1/messages", self.base_url);
 
-        let agent_id = request.id.clone();        
+        let agent_id = request.id.clone();
         let mut headers = reqwest::header::HeaderMap::new();
         let api_key: HeaderValue = self
             .api_key
@@ -94,7 +94,6 @@ impl LlmClient for AnthropicClient {
 
         let arequest = AnthropicCompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
-
 
         debug!("AnthropicCompletionRequest {:#?}", arequest);
 
@@ -164,7 +163,7 @@ impl LlmClient for AnthropicClient {
     ) -> HttpResult<CompletionStreamResponse> {
         let url = format!("{}/v1/messages", self.base_url);
 
-        let agent_id = request.id.clone();        
+        let agent_id = request.id.clone();
         let mut headers = reqwest::header::HeaderMap::new();
         let api_key: HeaderValue = self
             .api_key
