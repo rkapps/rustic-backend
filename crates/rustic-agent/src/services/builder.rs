@@ -204,22 +204,22 @@ impl<'a> AgentBuilder<'a> {
     /// `Balanced` — cache enabled, medium reasoning, 0.5 temperature, 2 048 max tokens.
     pub fn with_preset_balanced(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::Medium;
-        self.with_temperature(0.5).with_max_tokens(2048)
+        self.reasoning_effort = ReasoningEffort::Low;
+        self.with_temperature(0.5).with_max_tokens(8192)
     }
 
     /// `Precise` — cache enabled, high reasoning, 0.2 temperature, 4 096 max tokens.
     pub fn with_preset_precise(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::High;
-        self.with_temperature(0.2).with_max_tokens(4096)
+        self.reasoning_effort = ReasoningEffort::Low;
+        self.with_temperature(0.2).with_max_tokens(65536)
     }
 
     /// `Thorough` — cache enabled, high reasoning, 0.1 temperature, 8 192 max tokens.
     pub fn with_preset_thorough(mut self) -> Self {
         self.enable_cache = true;
         self.reasoning_effort = ReasoningEffort::High;
-        self.with_temperature(0.1).with_max_tokens(8192)
+        self.with_temperature(0.1).with_max_tokens(65536)
     }
 
     /// `Local` — no cache, no reasoning, 0.7 temperature, 4 096 max tokens. Tuned for Ollama.
