@@ -99,11 +99,11 @@ impl AnthropicThinking {
             },
             ReasoningEffort::Low => AnthropicThinking {
                 r#type: "enabled".to_string(),
-                budget_tokens: 1000,
+                budget_tokens: 2048,
             },
             ReasoningEffort::Medium => AnthropicThinking {
                 r#type: "enabled".to_string(),
-                budget_tokens: 4000,
+                budget_tokens: 4096,
             },
             ReasoningEffort::High => AnthropicThinking {
                 r#type: "enabled".to_string(),
