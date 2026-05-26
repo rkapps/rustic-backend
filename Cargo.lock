@@ -175,7 +175,7 @@ dependencies = [
  "bytes",
  "form_urlencoded",
  "futures-util",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "http-body-util",
  "hyper 1.9.0",
@@ -206,7 +206,7 @@ checksum = "08c78f31d7b1291f7ee735c1c6780ccde7785daae9a9206026862dab7d8792d1"
 dependencies = [
  "bytes",
  "futures-core",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "http-body-util",
  "mime",
@@ -1157,7 +1157,7 @@ checksum = "9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6"
 [[package]]
 name = "fin-analyse"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#43a325b63dd8e650c026a78d53a13b8eca4a5195"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#5ee06cb974df1ee896734773bd2946eaabeb0118"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1177,7 +1177,7 @@ dependencies = [
 [[package]]
 name = "fin-core"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#43a325b63dd8e650c026a78d53a13b8eca4a5195"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#5ee06cb974df1ee896734773bd2946eaabeb0118"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1212,7 +1212,7 @@ dependencies = [
 [[package]]
 name = "fin-domain"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#43a325b63dd8e650c026a78d53a13b8eca4a5195"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#5ee06cb974df1ee896734773bd2946eaabeb0118"
 dependencies = [
  "anyhow",
  "bson 3.1.0",
@@ -1230,7 +1230,7 @@ dependencies = [
 [[package]]
 name = "fin-providers"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#43a325b63dd8e650c026a78d53a13b8eca4a5195"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#5ee06cb974df1ee896734773bd2946eaabeb0118"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1245,7 +1245,7 @@ dependencies = [
 [[package]]
 name = "fin-storage"
 version = "0.1.0"
-source = "git+https://github.com/rkapps/fin-tracker-backend-rs#43a325b63dd8e650c026a78d53a13b8eca4a5195"
+source = "git+https://github.com/rkapps/fin-tracker-backend-rs#5ee06cb974df1ee896734773bd2946eaabeb0118"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1711,7 +1711,7 @@ dependencies = [
  "fnv",
  "futures-core",
  "futures-sink",
- "http 1.4.0",
+ "http 1.4.1",
  "indexmap 2.14.0",
  "slab",
  "tokio",
@@ -1911,9 +1911,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
+checksum = "8be7462df143984c4598a256ef469b251d7d7f9e271135073e78fc535414f3d0"
 dependencies = [
  "bytes",
  "itoa",
@@ -1937,7 +1937,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1efedce1fb8e6913f23e0c92de8e62cd5b772a67e7b3946df930a62566c93184"
 dependencies = [
  "bytes",
- "http 1.4.0",
+ "http 1.4.1",
 ]
 
 [[package]]
@@ -1948,7 +1948,7 @@ checksum = "b021d93e26becf5dc7e1b75b1bed1fd93124b374ceb73f43d4d4eafec896a64a"
 dependencies = [
  "bytes",
  "futures-core",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "pin-project-lite",
 ]
@@ -2000,7 +2000,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "h2 0.4.14",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "httparse",
  "httpdate",
@@ -2017,7 +2017,7 @@ version = "0.27.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33ca68d021ef39cf6463ab54c1d0f5daf03377b70561305bb89a8f83aab66e0f"
 dependencies = [
- "http 1.4.0",
+ "http 1.4.1",
  "hyper 1.9.0",
  "hyper-util",
  "rustls",
@@ -2065,7 +2065,7 @@ dependencies = [
  "bytes",
  "futures-channel",
  "futures-util",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "hyper 1.9.0",
  "ipnet",
@@ -2506,9 +2506,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.29"
+version = "0.4.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+checksum = "616ec5685824bcc94416c6d4a7a446eea774a31efd7062c8480ba6fd06d7a6e5"
 
 [[package]]
 name = "macro_magic"
@@ -3575,7 +3575,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "h2 0.4.14",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "http-body-util",
  "hyper 1.9.0",
@@ -3615,7 +3615,7 @@ checksum = "562ceb5a604d3f7c885a792d42c199fd8af239d0a51b2fa6a78aafa092452b04"
 dependencies = [
  "anyhow",
  "async-trait",
- "http 1.4.0",
+ "http 1.4.1",
  "reqwest 0.12.28",
  "serde",
  "thiserror 1.0.69",
@@ -4806,7 +4806,7 @@ dependencies = [
  "bitflags 2.11.1",
  "bytes",
  "futures-util",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body 1.0.1",
  "pin-project-lite",
  "tower",
@@ -5540,7 +5540,7 @@ dependencies = [
  "base64 0.22.1",
  "deadpool",
  "futures",
- "http 1.4.0",
+ "http 1.4.1",
  "http-body-util",
  "hyper 1.9.0",
  "hyper-util",

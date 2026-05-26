@@ -15,7 +15,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::sync::{Semaphore, mpsc};
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info, trace, warn};
 
 pub enum AgentHandle {
     Single(Agent),
@@ -371,6 +371,8 @@ impl PipeLineRunner {
                         let mut stream = input;
                         let mut chunk_count = 0;
                         while let Some(chunk_result) = stream.next().await {
+
+
                             if chunk_count == 0 {
                                 let _ = tx.send(Ok(CompletionChunkResponse::content(
                                     String::new(),
@@ -390,12 +392,19 @@ impl PipeLineRunner {
                                 }
                             };
 
-                            // info!("Chunk: {:?}", chunk);
-                            // let _ = tx.send(Ok(chunk.clone())).await;
+                            trace!("Chunk: {:?}", chunk);
                             
                             if chunk.is_final {
+
+                                info!("Chunk: {:?}", chunk);
+
+                                let mut final_chunk = chunk.clone();
+                                final_chunk.is_final = false;
+                                let _ = tx.send(Ok(final_chunk)).await;
+
                                 usage += chunk.usage.unwrap();
                                 info!("Synthesising and streaming done");
+
                                 let _ = tx
                                     .send(Ok(CompletionChunkResponse::stop(
                                         agent_id.clone(),
@@ -407,7 +416,7 @@ impl PipeLineRunner {
                             } else {
                                 let _ = tx.send(Ok(chunk)).await;
                             }
-                            // }
+
                         }
                     }
                     break;
