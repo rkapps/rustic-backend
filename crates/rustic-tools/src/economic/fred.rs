@@ -3,8 +3,8 @@ use async_trait::async_trait;
 use rustic_core::Tool;
 use rustic_providers::FredClient;
 use serde_json::{Value, json};
-use tracing::info;
 use std::sync::Arc;
+use tracing::info;
 
 #[derive(Debug)]
 pub struct FredTool {
@@ -49,24 +49,24 @@ impl Tool for FredTool {
 
     fn parameters(&self) -> Value {
         json!({
-            "type": "object",
-            "properties": {
-                "series_id": {
-                    "type": "string",
-                    "description": "FRED series ID. Examples: CPIAUCSL (CPI/inflation), PCE (consumer spending), UNRATE (unemployment), RSXFS (retail sales), UMCSENT (consumer sentiment), GDP, HOUST (housing starts), DSPIC96 (disposable income), MRTSSM44X72USS (clothing retail)"
-                },
-                "frequency": {
-                    "type": "string",
-                    "enum": ["d", "w", "m", "q", "a"],
-                    "description": "d=daily, w=weekly, m=monthly, q=quarterly, a=annual. Default: m"
-                },
-                "limit": {
-                    "type": "integer",
-                    "description": "Number of recent observations. Default: 12 (1 year monthly)"
-                }
-            },
-            "required": ["series_id"]
-        })
+                    "type": "object",
+                    "properties": {
+                        "series_id": {
+                            "type": "string",
+                            "description": "FRED series ID. Examples: CPIAUCSL (CPI/inflation), PCE (consumer spending), UNRATE (unemployment), RSXFS (retail sales), UMCSENT (consumer sentiment), GDP, HOUST (housing starts), DSPIC96 (disposable income), MRTSSM44X72USS (clothing retail)"
+                        },
+                        "frequency": {
+                        "type": "string",
+                        "enum": ["a", "q", "m", "sa"],
+                        "description": "Data frequency. a=annual, q=quarterly, m=monthly, sa=semi-annual. Omit to use series default."
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of recent observations. Default: 12 (1 year monthly)"
+                        }
+                    },
+                    "required": ["series_id"]
+                })
     }
 
     async fn execute(&self, params: Value) -> Result<Value> {
@@ -76,8 +76,16 @@ impl Tool for FredTool {
 
         let frequency = params["frequency"].as_str();
         let limit = params["limit"].as_u64().map(|l| l as usize);
-
-        info!("Series: {:?} Frequency: {:?} data: {:?}", series_id, frequency, limit);
+        let frequency = match frequency.as_deref() {
+            Some("annual") | Some("a") => Some("a"),
+            Some("quarterly") | Some("q") => Some("q"),
+            Some("monthly") | Some("m") => Some("m"),
+            _ => None,  // let FRED use default frequency for the series
+        };
+        info!(
+            "Series: {:?} Frequency: {:?} data: {:?}",
+            series_id, frequency, limit
+        );
 
         let data = self.client.get_series(series_id, frequency, limit).await?;
 

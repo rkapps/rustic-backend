@@ -57,24 +57,25 @@ impl Tool for CensusTool {
             "properties": {
                 "year": {
                     "type": "string",
-                    "description": "Survey year e.g. 2023. ACS 1-year available for 2005+. Default: 2023"
+                    "description": "Data year. Use 2023 (latest available).",
+                    "default": "2023"
                 },
                 "dataset": {
                     "type": "string",
                     "enum": ["acs1", "acs5"],
-                    "description": "acs1 = 1-year estimates (larger areas), acs5 = 5-year estimates (all areas including rural). Default: acs1"
+                    "description": "acs1=1-year estimates, acs5=5-year estimates (includes rural areas)"
                 },
                 "variables": {
                     "type": "array",
                     "items": { "type": "string" },
-                    "description": "Census variable codes. Common: B19013_001E (median household income), B01003_001E (population), B17001_002E (poverty), B23025_005E (unemployed), B25077_001E (median home value)"
+                    "description": "ACS variable codes e.g. B19013_001E (median income), B01003_001E (population)"
                 },
                 "geo": {
                     "type": "string",
-                    "description": "Geographic level. state:* (all states), county:* (all counties), us:1 (national). Default: state:*"
+                    "description": "Geography scope. Examples: 'state:*' (all states), 'state:04' (Arizona), 'county:*&in=state:04' (AZ counties), 'us:1' (national)"
                 }
             },
-            "required": ["variables"]
+            "required": ["year", "dataset", "variables", "geo"]
         })
     }
 
