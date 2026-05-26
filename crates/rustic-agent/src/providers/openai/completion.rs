@@ -9,7 +9,7 @@ use rustic_core::{
     http::{HttpClient, HttpResult},
 };
 use serde_json::Value;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, trace};
 
 use crate::{
     client::{
@@ -295,7 +295,7 @@ impl LlmClient for OpenAIClient {
                                  total_tokens: cusage.total_tokens,
                              };
 
-                              info!("Response stats - model: {:#?} response_id: {} usage: {:#?}",
+                              debug!("Response stats - model: {:#?} response_id: {} usage: {:#?}",
                                 response.model, response.id, usage );
 
                              yield Ok(CompletionChunkResponse::stop(

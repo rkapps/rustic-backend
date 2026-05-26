@@ -7,7 +7,7 @@ use rustic_core::{
     error::HttpError,
     http::{HttpClient, HttpResult},
 };
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 
 use crate::{
     client::{
@@ -244,7 +244,7 @@ impl LlmClient for GeminiClient {
                                  + cusage.total_thought_tokens,                                       // reasoning
                          };
 
-                       info!("Response stats - model: {:#?} response_id: {} usage: {:#?}",
+                       debug!("Response stats - model: {:#?} response_id: {} usage: {:#?}",
                              interaction.model, interaction.id, usage
                          );
 
