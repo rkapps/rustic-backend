@@ -1,5 +1,5 @@
 use rustic_core::{HttpError, HttpResult};
-use tracing::{debug, trace};
+use tracing::trace;
 
 use crate::{
     CompletionResponse, Message,

@@ -27,6 +27,7 @@ impl AgentHandle {
         &self,
         agent_config: AgentConfig,
         agent_id: &str,
+        goal: Option<String>,
         original_messages: &[Message],
         pipeline_messages: &[Message],
     ) -> HttpResult<CompletionResponse> {
@@ -45,13 +46,21 @@ impl AgentHandle {
             AgentContext::All => AgentHandle::build_all_input(original_messages, pipeline_messages),
         };
 
-        debug!(
-            "Agent: {} Context: {:?} Input: {:#?}",
-            agent_id, context, input
-        );
+        info!("Agent: {} Context: {:?} Goal: {:?}", agent_id, context, goal);
+        debug!("Input: {:#?}",input);
+
         match self {
             AgentHandle::Single(agent) => agent.complete(&input).await,
-            AgentHandle::Pipeline(runner) => Box::pin(runner.run(&input)).await,
+            AgentHandle::Pipeline(runner) => {
+                let input = match goal {
+                    Some(override_input) => vec![Message::User {
+                        content: override_input.clone(),
+                        response_id: None,
+                    }],
+                    None => vec![original_messages.last().unwrap().clone()],
+                };
+                Box::pin(runner.run(&input)).await
+            }
         }
     }
 
@@ -72,6 +81,9 @@ impl AgentHandle {
     }
 
     pub async fn decide(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
+
+        info!("Decide: {:#?}", messages);
+
         match self {
             AgentHandle::Single(agent) => agent.complete(messages).await,
             AgentHandle::Pipeline(_) => Err(HttpError::CompletionRequestError(
@@ -202,6 +214,7 @@ impl PipeLineRunner {
             let pipeline_messages = all_messages.clone();
 
             info!("Loop: {} messsages: {}", iteration, all_messages.len());
+            // debug!("all messages : {:?}", all_messages);
             // only append if last message is not User
             if !matches!(all_messages.last(), Some(Message::User { .. })) {
                 all_messages.push(Message::User {
@@ -209,6 +222,7 @@ impl PipeLineRunner {
                     response_id: None,
                 });
             }
+            debug!("all messages : {:?}", all_messages);
 
             let response = self.orchestrator.decide(&all_messages).await.map_err(|_| {
                 HttpError::CompletionRequestError("No stage decision returned".to_string())
@@ -216,8 +230,8 @@ impl PipeLineRunner {
             let decision = build_stage_decision(response.clone())?;
 
             info!(
-                "decision: {:?} excecution: {:#?} agents: {:?}",
-                decision.stop, decision.execution, decision.agents
+                "decision: {:?} excecution: {:#?} agents: {:?} goal: {:?}",
+                decision.stop, decision.execution, decision.agents, decision.goal
             );
 
             let merged = self
@@ -231,7 +245,7 @@ impl PipeLineRunner {
 
             all_messages.push(Message::Assistant {
                 content: merged.clone(),
-                response_id: None,
+                response_id: Some(response.response_id),
             });
 
             debug!("sub agent merged messages: {:#?}", merged);
@@ -266,7 +280,6 @@ impl PipeLineRunner {
 
         let mut spawn_all_messages = all_messages.to_owned();
         let spawn_original_messages = original_messages.to_owned();
-
         debug!("User Prompt {:#?}", messages);
 
         tokio::spawn(async move {
@@ -291,13 +304,18 @@ impl PipeLineRunner {
                     iteration,
                     spawn_all_messages.len()
                 );
+
+                debug!("all messages : {:?}", spawn_all_messages);
+
                 // only append if last message is not User
                 if !matches!(spawn_all_messages.last(), Some(Message::User { .. })) {
                     spawn_all_messages.push(Message::User {
                         content: "Based on the above, decide the next agents to run.".to_string(),
+                        // response_id: previous_response_id,
                         response_id: None,
                     });
                 }
+                debug!("all messages : {:?}", spawn_all_messages);
 
                 let response = match runner.orchestrator.decide(&spawn_all_messages).await {
                     // HttpError::CompletionRequestError("No stage decision returned".to_string()),
@@ -311,6 +329,7 @@ impl PipeLineRunner {
                         break;
                     }
                 };
+
                 let decision = match build_stage_decision(response.clone()) {
                     Ok(c) => c,
                     Err(_) => {
@@ -336,7 +355,10 @@ impl PipeLineRunner {
                     ),
                 };
 
-                info!("decision: {:?} status: {:?}", decision.stop, status);
+                info!(
+                    "decision: {:?} status: {:?} goal: {:?}",
+                    decision.stop, status, decision.goal
+                );
                 info!(
                     "    Reasonining: {:?}\n",
                     decision.reasoning.clone().unwrap_or_default()
@@ -371,15 +393,15 @@ impl PipeLineRunner {
                         let mut stream = input;
                         let mut chunk_count = 0;
                         while let Some(chunk_result) = stream.next().await {
-
-
                             if chunk_count == 0 {
-                                let _ = tx.send(Ok(CompletionChunkResponse::content(
-                                    String::new(),
-                                    format!("  ✅ {:.1}s\n", start.elapsed().as_secs_f32()),
-                                    String::new(),
-                                ))).await;
-                            }                            
+                                let _ = tx
+                                    .send(Ok(CompletionChunkResponse::content(
+                                        String::new(),
+                                        format!("  ✅ {:.1}s\n", start.elapsed().as_secs_f32()),
+                                        String::new(),
+                                    )))
+                                    .await;
+                            }
                             chunk_count += 1;
 
                             let chunk = match chunk_result {
@@ -393,9 +415,8 @@ impl PipeLineRunner {
                             };
 
                             trace!("Chunk: {:?}", chunk);
-                            
-                            if chunk.is_final {
 
+                            if chunk.is_final {
                                 info!("Chunk: {:?}", chunk);
 
                                 let mut final_chunk = chunk.clone();
@@ -416,7 +437,6 @@ impl PipeLineRunner {
                             } else {
                                 let _ = tx.send(Ok(chunk)).await;
                             }
-
                         }
                     }
                     break;
@@ -489,6 +509,7 @@ impl PipeLineRunner {
                             .execute_sub(
                                 self.agent_config.clone(),
                                 &sub_agent,
+                                decision.goal.clone(),
                                 original_messages,
                                 &pipeline_messages,
                             )
@@ -517,7 +538,13 @@ impl PipeLineRunner {
                             let _permit = sem.acquire().await.unwrap();
                             tokio::time::timeout(
                                 timeout_duration,
-                                handle.execute_sub(agent_config, &id, &all_msgs, &pipeline_msgs),
+                                handle.execute_sub(
+                                    agent_config,
+                                    &id,
+                                    decision.goal.clone(),
+                                    &all_msgs,
+                                    &pipeline_msgs,
+                                ),
                             )
                             .await
                             .map_err(|_| HttpError::Timeout)?

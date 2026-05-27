@@ -14,6 +14,7 @@ pub struct StageDecision {
     pub execution: ExecutionMode,
     pub stop: bool,
     pub reasoning: Option<String>,
+    pub goal: Option<String>,  // override input for all agents in this stage
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
