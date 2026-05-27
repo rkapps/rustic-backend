@@ -12,7 +12,7 @@ GCS_BUCKET="$PROJECT_ID-data"
 RUSTIC_AI_CONFIG_PATH="gs://$GCS_BUCKET/config"
 FINTRACKER_DB_NAME="finTracker"
 RUSTIC_AI_DB_NAME="rusticai"
-RUST_LOG_VALUE="rustic-ai-api=info,agentic_boot=info,agentic_core=info"
+RUST_LOG_VALUE="rustic_ai_api=info,rustic_boot=info,rustic_agent=info"
 
 
 docker build --no-cache -f Dockerfile.api \
@@ -31,6 +31,10 @@ docker build --no-cache -f Dockerfile.api \
         --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY \
         --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY \
         --set-env-vars ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
+        --set-env-vars FRED_API_KEY=$FRED_API_KEY \
+        --set-env-vars CENSUS_API_KEY=$CENSUS_API_KEY \
+        --set-env-vars BEA_API_KEY=$BEA_API_KEY \
+        --set-env-vars APIFY_API_KEY=$APIFY_API_KEY \
         --set-env-vars "^|^RUST_LOG=$RUST_LOG_VALUE" \
         --set-env-vars LOG_FORMAT=json
 
