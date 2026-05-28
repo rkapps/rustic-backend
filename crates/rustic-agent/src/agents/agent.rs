@@ -7,7 +7,7 @@ use tokio::{
 };
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, info, trace, warn};
+use tracing::{debug, error, info, trace};
 
 use crate::{
     client::{
@@ -56,44 +56,6 @@ pub struct Agent {
 }
 
 impl Agent {
-    // /// Run a single completion pass without tool use.
-    // ///
-    // /// Useful for simple chat flows where tool calling is not required.
-    // pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
-    //     let request = CompletionRequest {
-    //         model: self.model.clone(),
-    //         system: self.system_prompt.clone(),
-    //         messages: messages.to_owned(),
-    //         temperature: self.temperature,
-    //         max_tokens: self.max_tokens,
-    //         reasoning_effort: self.reasoning_effort.clone(),
-    //         enable_cache: self.enable_cache,
-    //         stream: false,
-    //         definitions: Vec::new(),
-    //     };
-
-    //     self.client.complete(request).await
-    // }
-
-    // /// Run a single completion pass without tool use, returning a token stream.
-    // pub async fn complete_with_stream(
-    //     &self,
-    //     messages: &[Message],
-    // ) -> HttpResult<CompletionStreamResponse> {
-    //     let request = CompletionRequest {
-    //         model: self.model.clone(),
-    //         system: self.system_prompt.clone(),
-    //         messages: messages.to_owned(),
-    //         temperature: self.temperature,
-    //         max_tokens: self.max_tokens,
-    //         reasoning_effort: self.reasoning_effort.clone(),
-    //         enable_cache: self.enable_cache,
-    //         stream: true,
-    //         definitions: Vec::new(),
-    //     };
-
-    //     self.client.complete_with_stream(request).await
-    // }
 
     /// Run an agentic tool-use loop, streaming output chunks to the caller.
     ///
@@ -120,7 +82,15 @@ impl Agent {
             .iter()
             .map(|e| ToolDefinition::from_tool(e.as_ref()))
             .collect();
+
+        debug!(target: "agent-tool", 
+            defintions= ?definitions, 
+            "Agent: {} - Tool definitions", self.id);
+
         let mcp_definitions = self.mcp_registry.definitions.clone();
+        debug!(target: "agent-tool", 
+            defintions= ?mcp_definitions, 
+            "Agent: {} - Mcp_definitions", self.id);
 
         mcp_definitions
             .iter()
@@ -133,9 +103,11 @@ impl Agent {
         let new_definitions = definitions.clone();
         let agent_id = self.id.clone();
 
-        info!(
-            "Agent: {}, Model: {} tokens: {} temperature: {} reasoning_effort: {:?}",
-            agent.id, agent.model, agent.max_tokens, agent.temperature, agent.reasoning_effort
+        info!(  model= %agent.model,
+                temperature= %agent.temperature,
+                reasoning= ?&agent.reasoning_effort,
+                maxtokens= %agent.max_tokens,
+                "Agent: {} - Completion Start", agent_id
         );
 
         tokio::spawn(async move {
@@ -151,19 +123,19 @@ impl Agent {
             });
             let mut usage = crate::client::response::CompletionResponseTokenUsage::default();
 
-            trace!("Message: {:#?} ", current_messages);
+            debug!(target: "agent-messages",
+                "Agent: {} - Current messages: {:#?}", agent_id, current_messages
+            );
 
             loop {
                 iteration += 1;
                 if iteration > MAX_ITERATIONS {
                     break;
                 }
-                info!(
-                    "Agent: {} Iteration: {} messsages: {} last_response_id: {:?}",
-                    agent_id,
-                    iteration,
-                    current_messages.len(),
-                    last_assistant
+                info!(iteration= %iteration,
+                    messages= ?current_messages.len(),
+                    last_response_id = ?last_assistant,
+                    "Agent: {} - ", agent_id
                 );
 
                 let request = CompletionRequest {
@@ -206,10 +178,12 @@ impl Agent {
                         }
                     };
                     if let Some(call) = chunk.tool_call {
-                        debug!("Agent: {} call: {:?}", agent_id, call);
+                        // debug!("Agent: {} call: {:?}", agent_id, call);
+                        debug!(target: "agent-tool", agent= %agent_id, tool_call= ?call, "Tool Call");
                         tool_calls.push(call);
                     } else {
-                        trace!("Agent: {} chunk: {:?}", agent_id, chunk);
+                        // trace!("Agent: {} chunk: {:?}", agent_id, chunk);
+                        debug!(target: "agent-tool", agent= %agent_id, chunk= ?chunk, "Chunk");
 
                         if chunk.is_final {
                             usage += chunk.usage.unwrap();
@@ -221,19 +195,24 @@ impl Agent {
                             thought_content.push_str(&chunk.thought);
                             // while antropic thoughts are text, gemini are random characters. we need to collect the thoughts because
                             // gemini requires the thoughts to be sent back.
-
                             // Do not send the chunks for now..
                             // let _ = tx.send(Ok(chunk)).await;
                         }
                     }
                 }
 
-                info!("Agent: {} Tool Calls: {}", agent_id, tool_calls.len());
+                info!(tool_calls= %tool_calls.len(),
+                    "Agent: {} - ", agent_id
+                );
+
                 if tool_calls.is_empty() {
-                    info!(
-                        "Agent: {} Final Response stats - model: {:#?} response_id: {} usage: {:#?}",
-                        agent_id, model, response_id, usage
+                    info!(  
+                        model=%model, 
+                        response_id= ?response_id, 
+                        usage= %format_args!("{:#?}", usage),
+                        "Agent: {} - Response Stats final", agent_id
                     );
+
                     let _ = tx
                         .send(Ok(CompletionChunkResponse::stop(
                             agent_id.clone(),
@@ -270,13 +249,25 @@ impl Agent {
                 for result in results {
                     match result {
                         Ok((tool_call, tool_output)) => {
-                            debug!("Agent: {}  Tool Call: {:?}", agent_id, tool_call);
-                            debug!("Agent: {}     Output: {:?}", agent_id, tool_output);
+                            // debug!(target: "agent-tool", tool_call= ?tool_call, "Tool Call");
+                            debug!(target: "agent-tool", 
+                                tool_call= ?tool_call,
+                                "Agent: {} - ", agent_id
+                            );
+                            debug!(target: "agent-tool", 
+                                tool_output= ?tool_output,
+                                "Agent: {} - ", agent_id
+                            );
                             nmessages.push(tool_call);
                             nmessages.push(tool_output);
                         }
                         Err(e) => {
-                            warn!("Tool Call error: {}", e.to_string());
+
+                            error!(target: "agent-tool", 
+                                error= ?e,
+                                "Agent: {} - Tool Call Error", agent_id
+                            );
+
                         }
                     };
                 }
@@ -300,6 +291,9 @@ impl Agent {
     /// Returns [`HttpError::MaxIterationsExceeded`] if the model keeps requesting
     /// tools beyond the iteration cap.
     pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
+        let agent_id = &self.id;
+        let agent = self.clone();
+
         let mut definitions: Vec<ToolDefinition> = self
             .tool_registry
             .get_tools()
@@ -307,14 +301,35 @@ impl Agent {
             .iter()
             .map(|e| ToolDefinition::from_tool(e.as_ref()))
             .collect();
-        debug!("Message: {:#?}", messages);
-        trace!("too definitions: {:#?}", definitions);
+
+
+        debug!(target: "agent-messages",
+          "Agent: {} - Current messages: {:#?}", agent_id, messages
+        );
+        debug!(target: "agent-tool", 
+            defintions= ?definitions, 
+            "Agent: {} - Tool definitions", self.id
+        );
+
+
         let mcp_definitions = self.mcp_registry.definitions.clone();
+
+        debug!(target: "agent-tool", 
+            defintions= ?mcp_definitions, 
+            "Agent: {} - Mcp_definitions", self.id
+        );
+
+        info!(  model= %agent.model,
+            temperature= %agent.temperature,
+            reasoning= ?&agent.reasoning_effort,
+            maxtokens= %agent.max_tokens,
+            "Agent: {} - Completion Start", agent_id
+        );
+
+
         mcp_definitions
             .iter()
             .for_each(|e| definitions.push(e.1.clone()));
-        // debug!("All definitions: {:#?}", definitions);
-        trace!("Mcp_definitions: {:#?}", mcp_definitions);
 
         let request = CompletionRequest {
             id: self.id.clone(),
@@ -334,7 +349,6 @@ impl Agent {
 
         let mut nrequest = request;
         let delay = Duration::from_millis(2000);
-        let agent_id = self.id.clone();
 
         loop {
             iteration += 1;
@@ -373,20 +387,24 @@ impl Agent {
                 .collect();
 
             if tool_calls.is_empty() {
-                debug!(
-                    "Agent: {} CompletionResponse: {:#?}",
-                    agent_id,
-                    response.text()
+                
+                info!(  
+                    response= %format_args!("{:#?}", response.text() ),
+                    usage= %format_args!("{:#?}", response.usage),
+                    "Agent: {} - Response Stats final", agent_id
                 );
+
+
                 return Ok(response); // Done - return final answer
             }
 
-            info!(
-                "Agent: {} CompletionResponse: {:#?} tool calls: {}",
-                agent_id,
-                response.response_id,
-                tool_calls.len()
+            info!(  
+                tool_calls= ?tool_calls.len(), 
+                response_id= ?response.response_id, 
+                "Agent: {} - Response Stats final", agent_id
             );
+
+
             trace!("CompletionResponse: {:#?}", response);
 
             let thoughts: Vec<Message> = response
@@ -433,13 +451,14 @@ impl Agent {
             for result in results {
                 match result {
                     Ok((tool_call, tool_output)) => {
-                        trace!("Tool Call: {:?}", tool_call);
-                        debug!("     Output: {:?}", tool_output);
+
+                        debug!(target: "agent-tool", tool_call= ?tool_call, "Agent: {} - ", agent_id);
+                        debug!(target: "agent-tool", tool_output= ?tool_output, "Agent: {} - ", agent_id );
                         nmessages.push(tool_call);
                         nmessages.push(tool_output);
                     }
                     Err(e) => {
-                        warn!("Tool Call error: {}", e.to_string());
+                        error!(target: "agent-tool", agent= %agent_id, error= ?e, "Tool Call Error");
                     }
                 };
             }
@@ -457,22 +476,33 @@ impl Agent {
     /// found in either registry a JSON error payload is returned to the model so it can recover
     /// gracefully rather than crashing the loop.
     async fn execute_tool_call(&self, call: ToolCallRequest) -> anyhow::Result<(Message, Message)> {
+        let agent_id = &self.id;
         let tool_call_message = Message::ToolCall {
             call_id: call.id.clone(),
             arguments: call.arguments.to_string(),
             name: call.name.clone(),
         };
 
-        info!(
-            "Agent: {} Executing tool: {:#?} args: {:?}",
-            self.id, call.name, call.arguments
-        );
-
         let output = match self.tool_registry.get_tool(&call.name) {
-            Some(tool) => tool.execute(call.arguments.clone()).await?,
+            Some(tool) => {
+
+                info!(target: "agent-tool", 
+                    name= ?call.name, 
+                    arguments= ?call.arguments,
+                    "Agent: {} - Executing tool...", agent_id
+                );
+
+                tool.execute(call.arguments.clone()).await?
+            }
             None => {
                 if self.mcp_registry.has_tool(&call.name) {
-                    // info!("Executing MCP call_tool: {} args: {:?}", call.name, call.arguments);
+
+                    info!(target: "agent-tool", 
+                        name= ?call.name, 
+                        arguments= ?call.arguments,
+                        "Agent: {} - Executing Mcp tool...", agent_id
+                    );
+
                     match self
                         .mcp_registry
                         .call_tool(&call.name, call.arguments.clone())
@@ -480,13 +510,23 @@ impl Agent {
                     {
                         Ok(c) => c,
                         Err(e) => {
+
+                            error!(target: "agent-tool", 
+                                error= ?e, 
+                                arguments= ?call.arguments,
+                                "Agent: {} - Executing McpTool error...", agent_id);
+        
                             serde_json::json!({
                                 "error": format!("{:?}", e)
                             })
                         }
                     }
                 } else {
-                    // return error message to LLM — let it recover
+                    error!(target: "agent-tool", 
+                        name= %call.name,
+                        "Agent: {} - Tool not found...", agent_id
+                    );
+
                     serde_json::json!({
                         "error": format!("Tool '{}' is not available", call.name)
                     })

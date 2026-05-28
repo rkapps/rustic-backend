@@ -46,9 +46,6 @@ impl AgentHandle {
             AgentContext::All => AgentHandle::build_all_input(original_messages, pipeline_messages),
         };
 
-        info!("Agent: {} Context: {:?} Goal: {:?}", agent_id, context, goal);
-        debug!("Input: {:#?}",input);
-
         match self {
             AgentHandle::Single(agent) => agent.complete(&input).await,
             AgentHandle::Pipeline(runner) => {
@@ -80,9 +77,15 @@ impl AgentHandle {
         }
     }
 
-    pub async fn decide(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
-
-        info!("Decide: {:#?}", messages);
+    pub async fn decide(
+        &self,
+        agent_id: &str,
+        messages: &[Message],
+    ) -> HttpResult<CompletionResponse> {
+        info!(
+            messages= %format_args!("{:#?}", messages),
+            "Agent: {} Deciding...", agent_id
+        );
 
         match self {
             AgentHandle::Single(agent) => agent.complete(messages).await,
@@ -203,7 +206,11 @@ impl PipeLineRunner {
 
         const MAX_ITERATIONS: usize = 10;
 
-        info!("PipelineRunner - run_dynamic");
+        info!(
+            "Agent: {} - Pipeline_runner run_dynamic",
+            self.agent_config.id
+        );
+
         loop {
             iteration += 1;
             if iteration > MAX_ITERATIONS {
@@ -213,25 +220,46 @@ impl PipeLineRunner {
 
             let pipeline_messages = all_messages.clone();
 
-            info!("Loop: {} messsages: {}", iteration, all_messages.len());
-            // debug!("all messages : {:?}", all_messages);
+            info!(
+                iteration= %iteration,
+                messages= ?all_messages.len(),
+                "Agent: {}", self.agent_config.id
+            );
+
             // only append if last message is not User
             if !matches!(all_messages.last(), Some(Message::User { .. })) {
-                all_messages.push(Message::User {
-                    content: "Based on the above, decide the next agents to run.".to_string(),
-                    response_id: None,
+                // build the decide message with the last response_id
+                let last_response_id = all_messages.iter().rev().find_map(|m| match m {
+                    Message::Assistant { response_id, .. } => response_id.clone(),
+                    _ => None,
                 });
-            }
-            debug!("all messages : {:?}", all_messages);
 
-            let response = self.orchestrator.decide(&all_messages).await.map_err(|_| {
-                HttpError::CompletionRequestError("No stage decision returned".to_string())
-            })?;
+                let decide_content = "Based on the prior agent outputs above, decide the next agent or agents to run. Follow your sequencing rules exactly.".to_string();
+
+                let decide_message = Message::User {
+                    content: decide_content,
+                    response_id: last_response_id, // ← carry forward
+                };
+
+                all_messages.push(decide_message);
+            }
+
+            let response = self
+                .orchestrator
+                .decide(&self.agent_config.id, &all_messages)
+                .await
+                .map_err(|_| {
+                    HttpError::CompletionRequestError("No stage decision returned".to_string())
+                })?;
             let decision = build_stage_decision(response.clone())?;
 
             info!(
-                "decision: {:?} excecution: {:#?} agents: {:?} goal: {:?}",
-                decision.stop, decision.execution, decision.agents, decision.goal
+                // "decision: {:?} excecution: {:#?} agents: {:?} goal: {:?}",
+                stop= %decision.stop,
+                execution= ?decision.execution,
+                agents= ?decision.agents,
+                goal= ?decision.goal,
+                "Agent: {} Decision", self.agent_config.id
             );
 
             let merged = self
@@ -280,14 +308,22 @@ impl PipeLineRunner {
 
         let mut spawn_all_messages = all_messages.to_owned();
         let spawn_original_messages = original_messages.to_owned();
-        debug!("User Prompt {:#?}", messages);
+        // debug!("User Prompt {:#?}", messages);
+        info!(
+            user_prompt=%format_args!("{:#?}", messages),
+            "Agent: {} - Pipeline_runner run_dynamic", self.agent_config.id
+        );
 
         tokio::spawn(async move {
             let mut iteration = 0;
             const MAX_ITERATIONS: usize = 10;
             let mut usage = CompletionResponseTokenUsage::default();
 
-            info!("PipelineRunner - run_dynamic_streaming\n");
+            info!(
+                "Agent: {} - Pipeline_runner run_dynamic",
+                self.agent_config.id
+            );
+
             loop {
                 iteration += 1;
                 if iteration > MAX_ITERATIONS {
@@ -300,31 +336,41 @@ impl PipeLineRunner {
                 let loop_start = std::time::Instant::now();
 
                 info!(
-                    "Loop: {} messsages: {}",
-                    iteration,
-                    spawn_all_messages.len()
+                    iteration= %iteration,
+                    messages= ?spawn_all_messages.len(),
+                    "Agent: {}", self.agent_config.id
                 );
-
-                debug!("all messages : {:?}", spawn_all_messages);
 
                 // only append if last message is not User
                 if !matches!(spawn_all_messages.last(), Some(Message::User { .. })) {
-                    spawn_all_messages.push(Message::User {
-                        content: "Based on the above, decide the next agents to run.".to_string(),
-                        // response_id: previous_response_id,
-                        response_id: None,
+                    // build the decide message with the last response_id
+                    let last_response_id = spawn_all_messages.iter().rev().find_map(|m| match m {
+                        Message::Assistant { response_id, .. } => response_id.clone(),
+                        _ => None,
                     });
-                }
-                debug!("all messages : {:?}", spawn_all_messages);
 
-                let response = match runner.orchestrator.decide(&spawn_all_messages).await {
-                    // HttpError::CompletionRequestError("No stage decision returned".to_string()),
+                    let decide_content = "Based on the prior agent outputs above, decide the next agent or agents to run. Follow your sequencing rules exactly.".to_string();
+
+                    let decide_message = Message::User {
+                        content: decide_content,
+                        response_id: last_response_id, // ← carry forward
+                    };
+
+                    spawn_all_messages.push(decide_message);
+                }
+
+                let response = match runner
+                    .orchestrator
+                    .decide(&self.agent_config.id, &spawn_all_messages)
+                    .await
+                {
                     Ok(c) => c,
-                    Err(_) => {
+                    Err(e) => {
                         let _ = tx
-                            .send(Err(HttpError::CompletionRequestError(
-                                "No stage decision returned".to_string(),
-                            )))
+                            .send(Err(HttpError::CompletionRequestError(format!(
+                                "No stage decision returned error: {}",
+                                e
+                            ))))
                             .await;
                         break;
                     }
@@ -332,11 +378,12 @@ impl PipeLineRunner {
 
                 let decision = match build_stage_decision(response.clone()) {
                     Ok(c) => c,
-                    Err(_) => {
+                    Err(e) => {
                         let _ = tx
-                            .send(Err(HttpError::CompletionRequestError(
-                                "Stage decision build error".to_string(),
-                            )))
+                            .send(Err(HttpError::CompletionRequestError(format!(
+                                "Stage decision build error: {}",
+                                e
+                            ))))
                             .await;
                         break;
                     }
@@ -356,12 +403,12 @@ impl PipeLineRunner {
                 };
 
                 info!(
-                    "decision: {:?} status: {:?} goal: {:?}",
-                    decision.stop, status, decision.goal
-                );
-                info!(
-                    "    Reasonining: {:?}\n",
-                    decision.reasoning.clone().unwrap_or_default()
+                    // "decision: {:?} excecution: {:#?} agents: {:?} goal: {:?}",
+                    stop= %decision.stop,
+                    execution= ?decision.execution,
+                    agents= ?decision.agents,
+                    goal= ?decision.goal,
+                    "Agent: {} Decision", self.agent_config.id
                 );
 
                 let _ = tx
@@ -417,14 +464,16 @@ impl PipeLineRunner {
                             trace!("Chunk: {:?}", chunk);
 
                             if chunk.is_final {
-                                info!("Chunk: {:?}", chunk);
+                                info!(
+                                    chunk = format_args!("{:#?}", chunk),
+                                    "Agent: {} Synthesising done.", agent_id
+                                );
 
                                 let mut final_chunk = chunk.clone();
                                 final_chunk.is_final = false;
                                 let _ = tx.send(Ok(final_chunk)).await;
 
                                 usage += chunk.usage.unwrap();
-                                info!("Synthesising and streaming done");
 
                                 let _ = tx
                                     .send(Ok(CompletionChunkResponse::stop(
@@ -473,7 +522,10 @@ impl PipeLineRunner {
                         )))
                         .await;
 
-                    debug!("sub agent merged messages: {:#?}", merged);
+                    debug!(
+                        merged= ?merged,
+                        "Agent: {}", self.agent_config.id
+                    );
 
                     spawn_all_messages.push(Message::Assistant {
                         content: merged.clone(),
@@ -483,7 +535,10 @@ impl PipeLineRunner {
 
                 let elapsed = loop_start.elapsed();
                 let done = format!("  ✅ {:.1}s\n", elapsed.as_secs_f32());
-                info!("Loop: {}{}", iteration, done);
+                info!(
+                    "Agent: {} Loop: {}-{}",
+                    self.agent_config.id, iteration, done,
+                );
             }
         });
 
@@ -504,7 +559,11 @@ impl PipeLineRunner {
             ExecutionMode::Sequential => {
                 for sub_agent in decision.agents.clone() {
                     if let Some(agent_handle) = self.agent_handles.get(&sub_agent) {
-                        info!("Sub agent {:?} executing...", sub_agent);
+                        info!(
+                            "Agent: {} Executing sub agent: {}",
+                            self.agent_config.id, sub_agent
+                        );
+
                         let response = agent_handle
                             .execute_sub(
                                 self.agent_config.clone(),
@@ -515,7 +574,11 @@ impl PipeLineRunner {
                             )
                             .await?;
 
-                        debug!("Sub agent response: {:#?}", response.text());
+                        debug!(
+                            response= ?response.text(),
+                            "Agent: {}", self.agent_config.id
+                        );
+
                         build_sub_agent_messages(&mut sub_agent_messages, &response);
                     };
                 }
@@ -534,6 +597,10 @@ impl PipeLineRunner {
                         let timeout_duration = Duration::from_secs(120);
                         let agent_config = self.agent_config.clone();
 
+                        info!(
+                            "Agent: {} Executing sub agent: {}",
+                            self.agent_config.id, id
+                        );
                         async move {
                             let _permit = sem.acquire().await.unwrap();
                             tokio::time::timeout(
@@ -556,7 +623,10 @@ impl PipeLineRunner {
                 for result in results {
                     match result {
                         Ok(response) => {
-                            debug!("Sub agent response: {:#?}", response.text());
+                            debug!(
+                                response= ?response.text(),
+                                "Agent: {}", self.agent_config.id
+                            );
                             build_sub_agent_messages(&mut sub_agent_messages, &response);
                         }
                         Err(e) => {
