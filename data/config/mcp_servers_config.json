@@ -1,0 +1,32 @@
+{
+  "mcp_servers": [
+    {
+      "name": "Apify",
+      "url": "https://mcp.apify.com",
+      "api_key_env": "APIFY_API_KEY",
+      "enabled_tools": [
+        "apify--rag-web-browser",
+        "call-actor",
+        "fetch-actor-details",
+        "fetch-apify-docs",
+        "get-actor-run",
+        "get-actor-output",
+        "get-dataset-items",         
+        "search-apify-docs",
+        "search-actors"
+      ],
+      "all_tools": [
+        "apify--rag-web-browser",
+        "call-actor",
+        "fetch-actor-details",
+        "fetch-apify-docs",
+        "get-actor-run",
+        "get-actor-output",
+        "get-dataset-items",         
+        "search-apify-docs",
+        "search-actors"
+      ]
+    }
+   
+  ]
+}

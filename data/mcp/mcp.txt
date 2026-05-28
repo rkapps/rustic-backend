@@ -1,0 +1,68 @@
+curl https://mcp.alphavantage.co/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer GG216NYO5GM8L88X" \
+  -d '{}'
+
+// tool list
+curl -X POST https://mcp.alphavantage.co/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer GG216NYO5GM8L88X" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": 1
+  }'  
+
+//
+curl -X POST https://mcp.alphavantage.co/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer GG216NYO5GM8L88X" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "TOOL_LIST"
+    },    
+    "id": 1
+  }'  
+
+
+curl -X POST https://mcp.alphavantage.co/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer GG216NYO5GM8L88X" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "TOOL_GET",
+      "arguments" : {
+        "tool_name": "TIME_SERIES_INTRADAY"
+      }
+    },    
+    "id": 1
+  }'    
+
+
+  curl -X POST https://mcp.alphavantage.co/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer GG216NYO5GM8L88X" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "TIME_SERIES_DAILY",
+      "arguments" : {
+        "symbol": "AAPL"
+      }
+    },    
+    "id": 1
+  }'    
+
+curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent" \
+    -H 'Content-Type: application/json' \
+    -H "x-goog-api-key: AIzaSyDFA8zNEpTnV2ABUZAZ5fY8FtNYITe1Mdc" \
+    -d '{
+        "content": {"parts":[{ "text": "The world is small"}, {"text": "the world is big"}]},
+        "output_dimensionality": 768
+    }'
+  

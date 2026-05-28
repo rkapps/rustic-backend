@@ -1,0 +1,16 @@
+Before
+-------------------------
+⚡ Running: finance-prompt-analyser (sequential) ✅ 9.3s
+⚡ Running: finance-ticker-taxonomy (sequential) ✅ 6.4s
+⚡ Running: finance-ticker-screener (sequential) ✅ 8.6s
+⚡ Running: finance-ticker-snapshot, finance-ticker-indicator, finance-ticker-sentiment (parallel) ✅ 58.7s
+🧠 Synthesising... ✅ 35.5s
+
+
+after changing preset for sub agents to fast
+-----------------------------------------------------------------
+⚡ Running: finance-prompt-analyser (sequential) ✅ 8.1s
+⚡ Running: finance-ticker-taxonomy (sequential) ✅ 2.9s
+⚡ Running: finance-ticker-screener (sequential) ✅ 5.8s
+⚡ Running: finance-ticker-snapshot, finance-ticker-indicator, finance-ticker-sentiment (parallel) ✅ 12.0s
+🧠 Synthesising... ✅ 24.1s

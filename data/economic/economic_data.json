@@ -1,0 +1,191 @@
+{
+    "observation_date": "2026-04-01",
+    "consumer_spending": {
+        "total_pce": [
+            {
+                "date": "2026-03-01",
+                "value": 21860.5,
+                "units": "Billions of Dollars"
+            },
+            {
+                "date": "2026-02-01",
+                "value": 21665.1,
+                "units": "Billions of Dollars"
+            },
+            {
+                "date": "2026-01-01",
+                "value": 21525.5,
+                "units": "Billions of Dollars"
+            }
+        ],
+        "sector_specific": "unavailable"
+    },
+    "consumer_health": {
+        "cpi": [
+            {
+                "date": "2026-04-01",
+                "value": 332.407,
+                "units": "Index 1982-1984=100"
+            },
+            {
+                "date": "2026-03-01",
+                "value": 330.293,
+                "units": "Index 1982-1984=100"
+            },
+            {
+                "date": "2026-02-01",
+                "value": 327.46,
+                "units": "Index 1982-1984=100"
+            }
+        ],
+        "consumer_sentiment": [
+            {
+                "date": "2026-04-01",
+                "value": 49.8,
+                "units": "Index 1966:Q1=100"
+            },
+            {
+                "date": "2026-03-01",
+                "value": 53.3,
+                "units": "Index 1966:Q1=100"
+            },
+            {
+                "date": "2026-02-01",
+                "value": 56.6,
+                "units": "Index 1966:Q1=100"
+            }
+        ],
+        "unemployment_rate": [
+            {
+                "date": "2026-04-01",
+                "value": 4.3,
+                "units": "Percent"
+            },
+            {
+                "date": "2026-03-01",
+                "value": 4.3,
+                "units": "Percent"
+            },
+            {
+                "date": "2026-02-01",
+                "value": 4.4,
+                "units": "Percent"
+            }
+        ],
+        "real_disposable_personal_income": [
+            {
+                "date": "2026-03-01",
+                "value": 18108.7,
+                "units": "Billions of Chained 2017 Dollars"
+            },
+            {
+                "date": "2026-02-01",
+                "value": 18118.9,
+                "units": "Billions of Chained 2017 Dollars"
+            },
+            {
+                "date": "2026-01-01",
+                "value": 18187.0,
+                "units": "Billions of Chained 2017 Dollars"
+            }
+        ]
+    },
+    "housing": {
+        "state_level": "unavailable"
+    },
+    "regional": {
+        "geography_requested": "Scottsdale, AZ",
+        "geography_available": "Arizona state; Maricopa County included in BEA regional results but not separately requested from Census",
+        "bea_personal_income_state": [
+            {
+                "date": "2024",
+                "geo": "Arizona",
+                "value": 498903598,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2023",
+                "geo": "Arizona",
+                "value": 471040184,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2022",
+                "geo": "Arizona",
+                "value": 435718737,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2021",
+                "geo": "Arizona",
+                "value": 415893138,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2020",
+                "geo": "Arizona",
+                "value": 374282371,
+                "units": "Thousands of dollars"
+            }
+        ],
+        "bea_personal_income_maricopa": [
+            {
+                "date": "2024",
+                "geo": "Maricopa County, AZ",
+                "value": 337283056,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2023",
+                "geo": "Maricopa County, AZ",
+                "value": 317707305,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2022",
+                "geo": "Maricopa County, AZ",
+                "value": 293477159,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2021",
+                "geo": "Maricopa County, AZ",
+                "value": 278260901,
+                "units": "Thousands of dollars"
+            },
+            {
+                "date": "2020",
+                "geo": "Maricopa County, AZ",
+                "value": 249056599,
+                "units": "Thousands of dollars"
+            }
+        ]
+    },
+    "demographics": {
+        "source_year": "2023",
+        "geography": "Arizona",
+        "median_household_income": {
+            "date": "2023",
+            "value": 76872,
+            "units": "USD"
+        },
+        "median_home_value": {
+            "date": "2023",
+            "value": null,
+            "units": "USD",
+            "status": "unavailable"
+        },
+        "owner_occupied_housing_units": {
+            "date": "2023",
+            "value": null,
+            "units": "housing units",
+            "status": "unavailable"
+        },
+        "median_age": {
+            "date": "2023",
+            "value": null,
+            "units": "years",
+            "status": "unavailable"
+        }
+    }
+}

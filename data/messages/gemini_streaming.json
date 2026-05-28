@@ -1,0 +1,47 @@
+[
+    {
+        "event": "content.delta",
+        "data": {
+            "delta": {
+                "text": "Hello there! I'm so excited to be your quiz administrator today. We're going to have a great time testing your knowledge and learning some cool new things along",
+                "type": "text"
+            },
+            "event_type": "content.delta",
+            "index": 1
+        }
+    },
+    {
+        "event": "content.delta",
+        "data": {
+            "delta": {
+                "text": " let me know, we'll jump right into our 20-question challenge! I'm ready when you are! 😊",
+                "type": "text"
+            },
+            "event_type": "content.delta",
+            "index": 1
+        }
+    },
+    {
+        "event": "interaction.complete",
+        "data": {
+            "event_type":"interaction.complete",
+            "interaction":{
+                "created":"2026-01-10T16:50:08Z",
+                "id":"v1_ChdQNE5pYVlqcEFiZmdfdU1Qa3NxQXlBMBIXUDROaWFZanBBYmZnX3VNUGtzcUF5QTA",
+                "model":"gemini-3-flash-preview",
+                "object":"interaction",
+                "role":"model",
+                "status":"completed",
+                "updated":"2026-01-10T16:50:08Z",
+                "usage":{
+                    "total_cached_tokens":0,
+                    "total_input_tokens":0,
+                    "total_output_tokens":183,
+                    "total_thought_tokens":333,
+                    "total_tokens":516,
+                    "total_tool_use_tokens":0
+                }
+            }
+        }
+    }    
+]

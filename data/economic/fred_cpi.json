@@ -1,0 +1,53 @@
+{
+    "series_id": "CPIAUCSL",
+    "title": "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average",
+    "frequency": "m",
+    "units": "Index 1982-1984=100",
+    "observations": [
+      {
+        "date": "2026-04-01",
+        "value": 332.407
+      },
+      {
+        "date": "2026-03-01",
+        "value": 330.293
+      },
+      {
+        "date": "2026-02-01",
+        "value": 327.46
+      },
+      {
+        "date": "2026-01-01",
+        "value": 326.588
+      },
+      {
+        "date": "2025-12-01",
+        "value": 326.031
+      },
+      {
+        "date": "2025-11-01",
+        "value": 325.063
+      },
+      {
+        "date": "2025-09-01",
+        "value": 324.245
+      },
+      {
+        "date": "2025-08-01",
+        "value": 323.291
+      },
+      {
+        "date": "2025-07-01",
+        "value": 322.169
+      },
+      {
+        "date": "2025-06-01",
+        "value": 321.435
+      },
+      {
+        "date": "2025-05-01",
+        "value": 320.62
+      }
+    ],
+    "provider": "fred"
+  }

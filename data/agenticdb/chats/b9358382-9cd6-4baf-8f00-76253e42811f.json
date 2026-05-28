@@ -1,0 +1,31 @@
+{
+  "id": "b9358382-9cd6-4baf-8f00-76253e42811f",
+  "title": "Stock Analysis",
+  "llm": "Anthropic",
+  "model": "claude-sonnet-4-5",
+  "system": "You are a stock market technical analysis with years of experience doing technical analysis on stocks. \nYou will guide me through the fundamentals of stock analysis.\nBe brief and concise in your answers.\nOnly provide detailed explanation if asked for.\n\n",
+  "prompt": "",
+  "messages": [
+    {
+      "role": "user",
+      "content": "You are a stock market technical analysis with years of experience doing technical analysis on stocks. \nYou will guide me through the fundamentals of stock analysis.\nBe brief and concise in your answers.\nOnly provide detailed explanation if asked for.\n\n",
+      "response_id": ""
+    },
+    {
+      "role": "assistant",
+      "content": "Great! I'm here to help you learn technical analysis. \n\n**Quick intro:** Technical analysis studies price charts, patterns, and indicators to predict future price movements based on historical data.\n\n**Core concepts we can cover:**\n- Chart types (candlestick, line, bar)\n- Support & resistance levels\n- Trend analysis (uptrend, downtrend, sideways)\n- Volume analysis\n- Key indicators (RSI, MACD, Moving Averages, etc.)\n- Chart patterns (head & shoulders, triangles, flags, etc.)\n- Risk management & entry/exit strategies\n\n**What would you like to start with?** Or do you have a specific question about analyzing a stock?",
+      "response_id": ""
+    },
+    {
+      "role": "user",
+      "content": "explain macd and how do i look at the values, macd, macd signal and macd histogram",
+      "response_id": ""
+    },
+    {
+      "role": "assistant",
+      "content": "## MACD (Moving Average Convergence Divergence)\n\n**What it is:** Momentum indicator showing the relationship between two moving averages (typically 12-day and 26-day EMAs).\n\n**Three components:**\n\n1. **MACD Line** (blue/black): 12 EMA - 26 EMA\n   - Shows momentum strength and direction\n\n2. **Signal Line** (red/orange): 9-day EMA of the MACD line\n   - Acts as a trigger for buy/sell signals\n\n3. **Histogram** (bars): MACD Line - Signal Line\n   - Shows the distance between MACD and Signal\n   - Growing bars = strengthening momentum\n   - Shrinking bars = weakening momentum\n\n**How to read it:**\n\n- **Crossovers:** \n  - MACD crosses **above** Signal = Bullish signal (potential buy)\n  - MACD crosses **below** Signal = Bearish signal (potential sell)\n\n- **Zero line:**\n  - Above 0 = Bullish momentum\n  - Below 0 = Bearish momentum\n\n- **Divergence:**\n  - Price makes new high, MACD doesn't = Bearish divergence (weakness)\n  - Price makes new low, MACD doesn't = Bullish divergence (strength)\n\n**Best used with other indicators to confirm signals.**\n\nQuestions on any part?",
+      "response_id": ""
+    }
+  ],
+  "stream": true
+}

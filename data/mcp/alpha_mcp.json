@@ -1,0 +1,54 @@
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+        "tools": [
+            {
+                "name": "TOOL_LIST",
+                "description": "List all available Alpha Vantage API tools with their names and descriptions.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            },
+            {
+                "name": "TOOL_GET",
+                "description": "Get the full schema for one or more tools including all parameters.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "tool_name": {
+                            "type": "string",
+                            "description": "The name of the tool to get schema for (e.g., \"TIME_SERIES_DAILY\"),"
+                        }
+                    },
+                    "required": [
+                        "tool_name"
+                    ]
+                }
+            },
+            {
+                "name": "TOOL_CALL",
+                "description": "Execute a tool by name with the provided arguments.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "tool_name": {
+                            "type": "string",
+                            "description": "The name of the tool to call (e.g., \"TIME_SERIES_DAILY\")"
+                        },
+                        "arguments": {
+                            "type": "string",
+                            "description": "Dictionary of arguments matching the tool's parameter schema"
+                        }
+                    },
+                    "required": [
+                        "tool_name",
+                        "arguments"
+                    ]
+                }
+            }
+        ]
+    }
+}

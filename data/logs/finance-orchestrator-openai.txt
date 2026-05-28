@@ -1,0 +1,36 @@
+2026-05-24T03:50:03.377102Z  INFO rustic_agent::agents::pipeline_runner:273: PipelineRunner - run_dynamic_streaming
+2026-05-24T03:50:03.377141Z  INFO rustic_agent::agents::pipeline_runner:284: Loop: 1 messsages: 1
+2026-05-24T03:50:07.038907Z  INFO rustic_agent::agents::pipeline_runner:334: decision: false excecution: Sequential status: "⚡ Running: finance-prompt-analyser (sequential)"
+2026-05-24T03:50:07.038963Z  INFO rustic_agent::agents::pipeline_runner:347: decision: false excecution: Sequential agents: ["finance-prompt-analyser"]
+2026-05-24T03:50:07.038990Z  INFO rustic_agent::agents::pipeline_runner:434: Sub agent "finance-prompt-analyser" executing...
+2026-05-24T03:50:07.039014Z DEBUG rustic_agent::agents::pipeline_runner:47: Agent: finance-prompt-analyser Context: Goal Input: [
+    User {
+        content: "is apple a buy\n\n",
+        response_id: None,
+    },
+]
+2026-05-24T03:50:08.535581Z DEBUG rustic_agent::agents::pipeline_runner:444: Sub agent response: Some(
+    "{\"tickers\":[\"AAPL\"],\"intent\":\"evaluate\",\"horizon\":\"unspecified\"}",
+)
+2026-05-24T03:50:08.536058Z DEBUG rustic_agent::agents::pipeline_runner:407: sub agent merged messages: "{\"agent\":\"finance-prompt-analyser\",\"content\":\"{\\\"tickers\\\":[\\\"AAPL\\\"],\\\"intent\\\":\\\"evaluate\\\",\\\"horizon\\\":\\\"unspecified\\\"}\"}"
+2026-05-24T03:50:08.536233Z  INFO rustic_agent::agents::pipeline_runner:284: Loop: 2 messsages: 2
+2026-05-24T03:50:12.100943Z  INFO rustic_agent::agents::pipeline_runner:334: decision: false excecution: Parallel status: "⚡ Running: finance-ticker-snapshot, finance-ticker-indicator, finance-ticker-sentiment (parallel)"
+2026-05-24T03:50:12.100991Z  INFO rustic_agent::agents::pipeline_runner:347: decision: false excecution: Parallel agents: ["finance-ticker-snapshot", "finance-ticker-indicator", "finance-ticker-sentiment"]
+2026-05-24T03:50:12.101079Z DEBUG rustic_agent::agents::pipeline_runner:47: Agent: finance-ticker-snapshot Context: Last Input: [
+    User {
+        content: "{\"tickers\":[\"AAPL\"],\"intent\":\"evaluate\",\"horizon\":\"unspecified\"}",
+        response_id: None,
+    },
+]
+2026-05-24T03:50:12.101338Z DEBUG rustic_agent::agents::pipeline_runner:47: Agent: finance-ticker-indicator Context: Last Input: [
+    User {
+        content: "{\"tickers\":[\"AAPL\"],\"intent\":\"evaluate\",\"horizon\":\"unspecified\"}",
+        response_id: None,
+    },
+]
+2026-05-24T03:50:12.101616Z DEBUG rustic_agent::agents::pipeline_runner:47: Agent: finance-ticker-sentiment Context: Last Input: [
+    User {
+        content: "{\"tickers\":[\"AAPL\"],\"intent\":\"evaluate\",\"horizon\":\"unspecified\"}",
+        response_id: None,
+    },
+]

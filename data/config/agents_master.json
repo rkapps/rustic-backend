@@ -1,0 +1,342 @@
+{
+    "agents": [
+      {
+        "id": "finance-agent",
+        "name": "Finance Agent",
+        "description": "Analyses stocks, tickers, ML signals and portfolios.",
+        "execution": "single_agent",
+        "system_prompt": "prompts/agents/finance-system.md",
+        "tools": [
+          "ticker_indicator",
+          "ticker_peers",
+          "ticker_price_history",
+          "ticker_screening",
+          "ticker_snapshot",
+          "ticker_taxonomy"
+          ],
+        "model_assignment": {
+          "default": { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+          "allowed": [
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+            { "provider": "anthropic", "model": "claude-opus-4-6" },
+            { "provider": "openai",    "model": "gpt-5.4" },
+            { "provider": "openai",    "model": "gpt-5.4-mini" },
+            { "provider": "local",     "model": "llama3.1:8b" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateless",
+          "allowed_strategies": ["stateless", "stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      },
+  
+      {
+        "id": "finance-orchestrator",
+        "name": "Finance Research Orchestrator",
+        "description": "Deep multi-perspective stock research combining screening, sentiment and fundamentals.",
+        "execution": "pipeline",
+        "system_prompt": "prompts/agents/finance-orchestrator-system.md",
+        "tools": [],
+        "pipeline": {
+          "type": "dynamic",
+          "available_agents": [
+            "user-prompt-analyser",
+            "ticker-snapshot-agent",
+            "ticker-screener-agent",
+            "ticker-sentiment-agent",
+            "synthesizer-agent"
+          ]
+        },
+        "model_assignment": {
+          "default": { "provider": "anthropic", "model": "claude-opus-4-6" },
+          "allowed": [
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+            { "provider": "anthropic", "model": "claude-opus-4-6" },
+            { "provider": "openai",    "model": "gpt-5.4" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateless",
+          "allowed_strategies": ["stateless", "stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      },
+  
+      {
+        "id": "user-prompt-analyser",
+        "name": "User Prompt Analyser",
+        "description": "Extracts tickers, intent and time horizon from a finance query.",
+        "execution": "pipeline_agent",
+        "system_prompt": "prompts/agents/user-prompt-analyser-system.md",
+        "tools": [],
+        "model_assignment": {
+          "default": { "provider": "local", "model": "qwen3:8b-q4_K_M" },
+          "allowed": [
+            { "provider": "local",     "model": "qwen3:8b-q4_K_M" },
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" }
+          ]
+        },
+        "blackboard": {
+          "reads": [],
+          "writes": ["prompt.tickers", "prompt.intent", "prompt.horizon"]
+        },
+        "conversation": null
+      },
+  
+      {
+        "id": "ticker-info-agent",
+        "name": "Ticker Info Agent",
+        "description": "Retrieves fundamentals and price data for tickers.",
+        "execution": "pipeline_agent",
+        "system_prompt": "prompts/agents/ticker-snapshot-system.md",
+        "tools": ["get_ticker_price", "get_fundamentals"],
+        "model_assignment": {
+          "default": { "provider": "local", "model": "llama3.1:8b" },
+          "allowed": [
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "local",     "model": "mistral:7b-instruct-q4_0" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" }
+          ]
+        },
+        "blackboard": {
+          "reads": ["prompt.tickers"],
+          "writes": ["ticker.snapshot"]
+        },
+        "conversation": null
+      },
+  
+      {
+        "id": "ticker-screener-agent",
+        "name": "Ticker Screener Agent",
+        "description": "Screens tickers using technical indicators and ML signals.",
+        "execution": "pipeline_agent",
+        "system_prompt": "prompts/agents/ticker-screener-system.md",
+        "tools": ["get_ml_signals", "get_technical_indicators"],
+        "model_assignment": {
+          "default": { "provider": "local", "model": "llama3.1:8b" },
+          "allowed": [
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "local",     "model": "mistral:7b-instruct-q4_0" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" }
+          ]
+        },
+        "blackboard": {
+          "reads": ["prompt.tickers"],
+          "writes": ["ticker.signals"]
+        },
+        "conversation": null
+      },
+  
+      {
+        "id": "ticker-sentiment-agent",
+        "name": "Ticker Sentiment Agent",
+        "description": "Analyses news sentiment and analyst ratings for tickers.",
+        "execution": "pipeline_agent",
+        "system_prompt": "prompts/agents/ticker-sentiment-system.md",
+        "tools": ["get_news", "get_analyst_ratings"],
+        "model_assignment": {
+          "default": { "provider": "local", "model": "mistral:7b-instruct-q4_0" },
+          "allowed": [
+            { "provider": "local",     "model": "mistral:7b-instruct-q4_0" },
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" }
+          ]
+        },
+        "blackboard": {
+          "reads": ["prompt.tickers"],
+          "writes": ["ticker.sentiment"]
+        },
+        "conversation": null
+      },
+  
+      {
+        "id": "synthesizer-agent",
+        "name": "Synthesizer Agent",
+        "description": "Synthesises all research outputs into a coherent response.",
+        "execution": "pipeline_agent",
+        "system_prompt": "prompts/agents/synthesizer-system.md",
+        "tools": [],
+        "model_assignment": {
+          "default": { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+          "allowed": [
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+            { "provider": "anthropic", "model": "claude-opus-4-6" },
+            { "provider": "openai",    "model": "gpt-5.4" },
+            { "provider": "openai",    "model": "gpt-5.4-mini" }
+          ]
+        },
+        "blackboard": {
+          "reads": [
+            "prompt.intent",
+            "prompt.horizon",
+            "ticker.info",
+            "ticker..signals",
+            "ticker.sentiment"
+          ],
+          "writes": ["output.final"]
+        },
+        "conversation": null
+      },
+  
+      {
+        "id": "document-analyser",
+        "name": "Document Analyser",
+        "description": "Upload any document for deep analysis. Works with contracts, invoices, reports and research papers.",
+        "execution": "pipeline",
+        "system_prompt": "prompts/agents/document-analyser-system.md",
+        "tools": [],
+        "pipeline": {
+          "type": "dynamic",
+          "available_agents": [
+            "document-parser",
+            "content-classifier",
+            "deep-analyser",
+            "insight-extractor",
+            "synthesizer-agent"
+          ],
+          "followup_agent": "document-qa-agent",
+          "persisted_blackboard_keys": [
+            "doc.raw_text",
+            "doc.type",
+            "doc.structure",
+            "doc.analysis",
+            "doc.insights"
+          ]
+        },
+        "model_assignment": {
+          "default": { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+          "allowed": [
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+            { "provider": "anthropic", "model": "claude-opus-4-6" },
+            { "provider": "openai",    "model": "gpt-5.4" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateful",
+          "allowed_strategies": ["stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      },
+  
+      {
+        "id": "meeting-notes",
+        "name": "Meeting Notes",
+        "description": "Paste meeting notes and get decisions, action items and owners extracted.",
+        "execution": "pipeline",
+        "system_prompt": "prompts/agents/meeting-notes-system.md",
+        "tools": [],
+        "pipeline": {
+          "type": "deterministic",
+          "stages": [
+            "document-parser",
+            "topic-extractor",
+            "action-item-extractor",
+            "decision-extractor",
+            "synthesizer-agent"
+          ],
+          "followup_agent": "document-qa-agent",
+          "persisted_blackboard_keys": [
+            "doc.raw_text",
+            "doc.topics",
+            "doc.actions",
+            "doc.decisions"
+          ]
+        },
+        "model_assignment": {
+          "default": { "provider": "local", "model": "llama3.1:8b" },
+          "allowed": [
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "local",     "model": "qwen3:8b-q4_K_M" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" },
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateful",
+          "allowed_strategies": ["stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      },
+  
+      {
+        "id": "code-review",
+        "name": "Code Review",
+        "description": "Review your code for quality, security and performance.",
+        "execution": "pipeline",
+        "system_prompt": "prompts/agents/code-review-system.md",
+        "tools": [],
+        "pipeline": {
+          "type": "deterministic",
+          "stages": [
+            "code-analyser",
+            "security-scanner",
+            "synthesizer-agent"
+          ],
+          "followup_agent": "document-qa-agent",
+          "persisted_blackboard_keys": [
+            "code.raw",
+            "code.language",
+            "code.analysis",
+            "code.security"
+          ]
+        },
+        "model_assignment": {
+          "default": { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+          "allowed": [
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+            { "provider": "anthropic", "model": "claude-opus-4-6" },
+            { "provider": "openai",    "model": "gpt-5.4" },
+            { "provider": "openai",    "model": "gpt-5.4-mini" },
+            { "provider": "local",     "model": "llama3.1:8b" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateful",
+          "allowed_strategies": ["stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      },
+  
+      {
+        "id": "cv-matcher",
+        "name": "CV Matcher",
+        "description": "Upload a CV and paste a job description. Get a gap analysis and coaching suggestions.",
+        "execution": "pipeline",
+        "system_prompt": "prompts/agents/cv-matcher-system.md",
+        "tools": [],
+        "pipeline": {
+          "type": "deterministic",
+          "stages": [
+            "document-parser",
+            "cv-parser",
+            "job-analyser",
+            "gap-analyser",
+            "synthesizer-agent"
+          ],
+          "followup_agent": "document-qa-agent",
+          "persisted_blackboard_keys": [
+            "cv.skills",
+            "cv.experience",
+            "job.requirements",
+            "job.gaps"
+          ]
+        },
+        "model_assignment": {
+          "default": { "provider": "local", "model": "llama3.1:8b" },
+          "allowed": [
+            { "provider": "local",     "model": "llama3.1:8b" },
+            { "provider": "local",     "model": "qwen3:8b-q4_K_M" },
+            { "provider": "anthropic", "model": "claude-haiku-4-5" },
+            { "provider": "anthropic", "model": "claude-sonnet-4-6" }
+          ]
+        },
+        "conversation": {
+          "default_strategy": "stateful",
+          "allowed_strategies": ["stateful"],
+          "default_history_mode": "trimmed_full"
+        }
+      }
+    ]
+  }

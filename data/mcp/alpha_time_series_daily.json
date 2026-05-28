@@ -1,0 +1,28 @@
+{
+    "description": "\\nReturns raw daily time series (OHLCV) of the global equity specified, covering 20+ years of historical data.\\n\\nArgs:\\n    symbol: The name of the equity. For example: symbol=IBM\\n    outputsize: \"compact\" (100 data points) or \"full\" (20+ years of historical data)\\n    datatype: By default, datatype=csv. Strings json and csv are accepted with the following specifications:\\n             json returns the data in JSON format; csv returns the data as a CSV (comma separated value) file.\\n\\n\\n        entitlement: \"delayed\" for 15-minute delayed data, \"realtime\" for realtime data\\nReturns:\\n    Dict or string containing the daily time series data based on datatype parameter.\\n",
+    "name": "TIME_SERIES_DAILY",
+    "parameters": {
+        "properties": {
+            "datatype": {
+                "description": "By default, datatype=csv. Strings json and csv are accepted with the following specifications:",
+                "type": "string"
+            },
+            "entitlement": {
+                "description": "\"delayed\" for 15-minute delayed data, \"realtime\" for realtime data",
+                "type": "string"
+            },
+            "outputsize": {
+                "description": "\"compact\" (100 data points) or \"full\" (20+ years of historical data)",
+                "type": "string"
+            },
+            "symbol": {
+                "description": "The name of the equity. For example: symbol=IBM",
+                "type": "string"
+            }
+        },
+        "required": [
+            "symbol"
+        ],
+        "type": "object"
+    }
+}

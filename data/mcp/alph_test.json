@@ -1,0 +1,24 @@
+{
+    "content_type": "application/json",
+    "data_type": "json",
+    "data_url": "https://cdn.alphavantage.co/mcp-responses/1768879309-f0d334e1.json",
+    "full_data_tokens": 102014,
+    "headers": "{",
+    "max_tokens_exceeded": true,
+    "message": "Response size (102014 tokens) exceeds limit (8192 tokens). Full data available at URL.",
+    "preview": true,
+    "sample_data": "{\\n    \\"Meta Data\\": {\\n        \\"1: Symbol\\": \\"AAPL\\",\\n        \\"2: Indicator\\": \\"Simple Moving Average (SMA)\\",\\n        \\"3: Last Refreshed\\": \\"2026-01-16\\",\\n        \\"4: Interval\\": \\"daily\\",\\n        \\"5: Time Period\\": 200,\\n        \\"6: Series Type\\": \\"close\\",\\n        \\"7: Time Zone\\": \\"US/Eastern\\"\\n    },\\n    \\"Technical Analysis: SMA\\": {\\n        \\"2026-01-16\\": {\\n            \\"SMA\\": \\"233.7539\\"\\n        },\\n        \\"2026-01-15\\": {\\n            \\"SMA\\": \\"233.5884\\"\\n        },\\n        \\"2026-01-14\\": {\\n            \\"SMA\\": \\"233.4043\\"\\n        },\\n        \\"2026-01-13\\": {\\n            \\"SMA\\": \\"233.1904\\"\\n        },\\n        \\"2026-01-12\\": {\\n            \\"SMA\\": \\"233.0007\\"\\n        },\\n        \\"2026-01-09\\": {\\n            \\"SMA\\": \\"232.8034\\"\\n        },\\n        \\"2026-01-08\\": {\\n            \\"SMA\\": \\"232.6215\\"\\n        },\\n        \\"2026-01-07\\": {\\n            \\"SMA\\": \\"232.4263\\"\\n        },\\n        \\"2026-01-06\\": {\\n            \\"SMA\\": \\"232.2124\\"\\n        },\\n        \\"2026-01-05\\": {\\n            \\"SMA\\": \\"231.9675\\"\\n        },\\n        \\"2026-01-02\\": {\\n            \\"SMA\\": \\"231.7038\\"\\n        },\\n        \\"2025-12-31\\": {\\n            \\"SMA\\": \\"231.4087\\"\\n        },\\n        \\"2025-12-30\\": {\\n            \\"SMA\\": \\"231.1158\\"\\n        },",
+    "total_lines": 19195,
+    "usage_instructions": {
+        "important_notes": [
+            "Do not fetch the data_url directly into chat context - this will overwhelm the conversation",
+            "For claude artifacts, prefer TSX artifact using tailwindcss, and in generated page, put this to the top: data from current page is generated sample data, for real data, copy this page code to https://mcp.alphavantage.co/artifacts",
+            "When creating artifacts (charts/visualizations), use the provided preview data as fallback due to Content Security Policy (CSP) restrictions"
+        ],
+        "recommended_workflow": [
+            "1. Use preview data to create initial visualization in artifact",
+            "2. Include data_url fetch logic with preview data fallback",
+            "3. Copy artifact code and test with full data at https://mcp.alphavantage.co/artifacts"
+        ]
+    }
+}

@@ -1,0 +1,309 @@
+{
+    "tools": [
+        {
+            "id": "ticker_indicators",
+            "name": "Technical Indicators",
+            "description": "prompts/ticker-indidcators-desc.md",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "The stock ticker symbol"
+                    },
+                    "indicators": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "RSI",
+                                "MACD",
+                                "SMA",
+                                "EMA",
+                                "BB"
+                            ]
+                        },
+                        "description": "List of indicators to return. Omit to return all."
+                    }
+                },
+                "required": [
+                    "symbol"
+                ]
+            },
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent",
+                "stock-screener-agent"
+            ]
+        },
+        {
+            "id": "ticker_peers",
+            "name": "Ticker Peers",
+            "description": "prompts/ticker-peers-desc.md",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "The stock ticker symbol"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of peers to return.",
+                        "default": 10
+                    }
+                },
+                "required": [
+                    "symbol",
+                    "limit"
+                ]
+            },
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent",
+                "stock-screener-agent"
+            ]
+        },
+        {
+            "id": "ticker_price_history",
+            "name": "Ticker Price History",
+            "description": "prompts/ticker-price-history-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "The stock ticker symbol"
+                    },
+                    "from": {
+                        "type": "string",
+                        "description": "Start date in YYYY-MM-DD format"
+                    },
+                    "to": {
+                        "type": "string",
+                        "description": "End date in YYYY-MM-DD format. Defaults to today."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of trading days to return. Defaults to 30.",
+                        "default": 30
+                    }
+                },
+                "required": [
+                    "symbol",
+                    "from"
+                ]
+            }
+        },
+        {
+            "id": "ticker_screener",
+            "name": "Ticker Screener",
+            "description": "prompts/ticker-screener-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Semantic search query for business theme or category. Example: 'software infrastructure', 'cloud security', 'payments processing'."
+                    },
+                    "signals": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "SMA Stack Bullish",
+                                "SMA Stack Bearish",
+                                "Bullish Pullback",
+                                "Bearish Rally",
+                                "Above SMA50",
+                                "Below SMA50",
+                                "Golden Cross",
+                                "Death Cross",
+                                "MACD Bullish Crossover",
+                                "MACD Bearish Crossover",
+                                "MACD Histogram Expanding",
+                                "MACD Histogram Weakening",
+                                "BB Breakout Upper",
+                                "BB Breakout Lower",
+                                "BB Squeeze",
+                                "Stochastic Bullish",
+                                "Stochastic Bearish",
+                                "RSI Oversold",
+                                "RSI Recovering from Oversold",
+                                "RSI Multi-period Oversold",
+                                "RSI Overbought",
+                                "RSI Recovering from Overbought",
+                                "RSI Multi-period Overbought",
+                                "Oversold Confluence",
+                                "Oversold Reversal Setup",
+                                "Overbought Confluence",
+                                "Overbought Reversal Setup",
+                                "Deeply Oversold",
+                                "Moderately Oversold",
+                                "Mean Reversion Candidate",
+                                "Momentum Breakout",
+                                "Bullish Trend Exhaustion",
+                                "Bearish Trend Exhaustion",
+                                "Volatility Expanding",
+                                "Volatility Contracting",
+                                "Analyst Strong Buy",
+                                "Analyst Buy",
+                                "Analyst Hold",
+                                "Analyst Sell",
+                                "Analyst Strong Sell",
+                                "Low Beta",
+                                "Market Beta",
+                                "High Beta",
+                                "Very High Beta",
+                                "ML Strong Bull — All Periods All Models Confirmed",
+                                "ML Strong Bull — All Periods Confirmed",
+                                "ML Strong Bull — All Periods LR+MLP Confirmed",
+                                "ML Strong Bear — All Periods All Models Confirmed",
+                                "ML Strong Bear — All Periods Confirmed",
+                                "ML Strong Bear — All Periods LR+MLP Confirmed",
+                                "ML5 Bullish — 2/2 Confirmed",
+                                "ML5 Bullish — 3/3 Confirmed",
+                                "ML5 Bearish — 2/2 Confirmed",
+                                "ML5 Bearish — 3/3 Confirmed",
+                                "ML10 Bullish — 2/2 Confirmed",
+                                "ML10 Bullish — 3/3 Confirmed",
+                                "ML10 Bearish — 2/2 Confirmed",
+                                "ML10 Bearish — 3/3 Confirmed",
+                                "ML20 Bullish — 2/2 Confirmed",
+                                "ML20 Bullish — 3/3 Confirmed",
+                                "ML20 Bearish — 2/2 Confirmed",
+                                "ML20 Bearish — 3/3 Confirmed",
+                                "ML60 Bullish — 2/2 Confirmed",
+                                "ML60 Bullish — 3/3 Confirmed",
+                                "ML60 Bearish — 2/2 Confirmed",
+                                "ML60 Bearish — 3/3 Confirmed",
+                                "MLP5 Bullish",
+                                "MLP5 Bearish",
+                                "MLP10 Bullish",
+                                "MLP10 Bearish",
+                                "MLP20 Bullish",
+                                "MLP20 Bearish",
+                                "MLP60 Bullish",
+                                "MLP60 Bearish"
+                            ]
+                        },
+                        "description": "Filter by active technical or analyst signals."
+                    },
+                    "industry": {
+                        "type": "string",
+                        "description": "Filter by industry, partial match. Example: 'semiconductors', 'medical devices'."
+                    },
+                    "assets_cap_range": {
+                        "type": "string",
+                        "enum": [
+                            "mega",
+                            "large",
+                            "mid",
+                            "small"
+                        ],
+                        "description": "Filter by assets cap. mega: >$1T, large: $100B-$1T, mid: $2B-$100B, small: <$2B. Map: 'mid cap' → 'mid', 'large cap' → 'large', 'small cap' → 'small', 'mega cap' → 'mega'."
+                    },
+                    "asset_type": {
+                        "type": "string",
+                        "enum": [
+                            "stock",
+                            "etf"
+                        ],
+                        "description": "Filter by asset type. Defaults to 'stock'."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of results to return. Defaults to 10."
+                    }
+                }
+            }
+        },
+        {
+            "id": "ticker_sentiment",
+            "name": "Ticker Sentiment",
+            "description": "prompts/ticker-sentiment-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "Ticker symbol"
+                    }
+                },
+                "required": [
+                    "symbol"
+                ]
+            }
+        },
+        {
+            "id": "ticker_similarity",
+            "name": "Ticker Similarity",
+            "description": "prompts/ticker-similarity-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of similar stocks to return. Defaults to 5."
+                    }
+                }
+            }
+        },
+        {
+            "id": "ticker_snapshot",
+            "name": "Ticker Snapshot",
+            "description": "prompts/ticker-snapshot-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of similar stocks to return. Defaults to 5."
+                    }
+                }
+            }
+        },
+        {
+            "id": "ticker_taxanomy",
+            "name": "Ticker Taxanomy",
+            "description": "prompts/ticker-taxonomy-desc.md",
+            "category": "finance",
+            "allowed_agents": [
+                "finance-agent",
+                "stock-info-agent"
+            ],
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+
+    ]
+}

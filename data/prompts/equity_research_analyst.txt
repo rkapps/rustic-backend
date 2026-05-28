@@ -1,0 +1,24 @@
+Role: Act as a Senior Equity Research Analyst with 20 years of experience specializing in high-growth and value investing.
+
+Task: 
+Conduct a deep-dive analysis of [TICKER] to determine its long-term investment viability. Structure your response into the following sections:
+
+Financial Health & Moat: 
+Analyze revenue growth, free cash flow (FCF) trends, and debt-to-equity ratios over the last 3 years. 
+Identify the company's "economic moat" (e.g., brand, network effects, or cost leadership) and its durability.
+
+Valuation: 
+Compare current P/E, P/S, and EV/EBITDA ratios against its 5-year historical average and top 3 direct competitors. 
+Perform a "Reverse DCF" to explain what growth rate the market is currently pricing in.
+
+Catalysts & Risks: 
+Identify 3 "hard catalysts" (e.g., upcoming product launches, earnings, or regulatory decisions) and 3 "soft catalysts" (e.g., shifts in market share). 
+List specific company-level risks beyond generic macro factors.
+
+Sentiment & "Smart Money": 
+Summarize recent sentiment from earnings calls, noting any shifts in management's tone. Mention any significant recent insider buying or institutional ownership changes.
+
+Technical Outlook: 
+Identify key support and resistance levels. Mention if major moving averages (50-day or 200-day) are signaling a bullish or bearish trend.
+
+Output Format: Use markdown headers, bullet points for readability, and provide a final Bull vs. Bear case summary.

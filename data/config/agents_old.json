@@ -1,0 +1,62 @@
+{
+    "agents": [
+        {
+            "id": "chat",
+            "name": "Chat",
+            "description": "General purpose assistant",
+            "execution": "single_agent",
+            "system_prompt": "You are a helpful assistant.",
+            "tools": [],
+            "model_assignment": {
+              "default": { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+              "allowed": [
+                { "provider": "anthropic", "model": "claude-haiku-4-5" },
+                { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+                { "provider": "anthropic", "model": "claude-opus-4-6" },
+                { "provider": "openai",    "model": "gpt-5.4-mini" },
+                { "provider": "openai",    "model": "gpt-5.4" },
+                { "provider": "gemini",    "model": "gemini-3-flash-preview" },
+                { "provider": "local",     "model": "qwen3:8b-q4_K_M" },
+                { "provider": "local",     "model": "llama3.1:8b" }
+              ]
+            },
+            "conversation": {
+              "default_strategy": "stateful",
+              "allowed_strategies": ["stateful"],
+              "default_history_mode": "trimmed_full"
+            }
+        },
+        {
+            "id": "finance-agent",
+            "name": "Finance Agent",
+            "description": "Analyses stocks, tickers, ML signals and portfolios.",
+            "execution": "single_agent",
+            "system_prompt": "prompts/finance-agent-system.md",
+            "tools": [
+              "get_indicators",
+              "get_peers",
+              "get_price_history",
+              "get_screener",
+              "get_sentiment",
+              "get_snapshot",
+              "get_taxanomy"
+            ],
+            "model_assignment": {
+              "default": { "provider": "gemini", "model": "gemini-3-flash-preview" },
+              "allowed": [
+                { "provider": "anthropic", "model": "claude-sonnet-4-6" },
+                { "provider": "anthropic", "model": "claude-opus-4-6" },
+                { "provider": "gemini",    "model": "gemini-3-flash-preview" },
+                { "provider": "openai",    "model": "gpt-5.4" },
+                { "provider": "openai",    "model": "gpt-5.4-mini" },
+                { "provider": "local",     "model": "llama3.1:8b" }
+              ]
+            },
+            "conversation": {
+              "default_strategy": "stateless",
+              "allowed_strategies": ["stateless", "stateful"],
+              "default_history_mode": "trimmed_full"
+            }
+        }
+    ]
+}

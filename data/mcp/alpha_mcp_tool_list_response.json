@@ -1,0 +1,474 @@
+[
+    {
+        "name": "TIME_SERIES_INTRADAY",
+        "description": "Returns current and 20+ years of historical intraday OHLCV time series of the equity specified."
+    },
+    {
+        "name": "TIME_SERIES_DAILY",
+        "description": "Returns raw daily time series (OHLCV) of the global equity specified, covering 20+ years of historical data."
+    },
+    {
+        "name": "TIME_SERIES_DAILY_ADJUSTED",
+        "description": "Returns raw daily OHLCV values, adjusted close values, and historical split/dividend events."
+    },
+    {
+        "name": "TIME_SERIES_WEEKLY",
+        "description": "Returns weekly time series (last trading day of each week, OHLCV) covering 20+ years of historical data."
+    },
+    {
+        "name": "TIME_SERIES_WEEKLY_ADJUSTED",
+        "description": "Returns weekly adjusted time series (OHLCV, adjusted close, volume, dividend) covering 20+ years."
+    },
+    {
+        "name": "TIME_SERIES_MONTHLY",
+        "description": "Returns monthly time series (last trading day of each month, OHLCV) covering 20+ years."
+    },
+    {
+        "name": "TIME_SERIES_MONTHLY_ADJUSTED",
+        "description": "Returns monthly adjusted time series (OHLCV, adjusted close, volume, dividend) covering 20+ years."
+    },
+    {
+        "name": "GLOBAL_QUOTE",
+        "description": "Returns the latest price and volume information for a ticker."
+    },
+    {
+        "name": "REALTIME_BULK_QUOTES",
+        "description": "Returns realtime quotes for US-traded symbols in bulk, accepting up to 100 symbols per request."
+    },
+    {
+        "name": "SYMBOL_SEARCH",
+        "description": "Returns best-matching symbols and market information based on keywords."
+    },
+    {
+        "name": "MARKET_STATUS",
+        "description": "Returns the current market status (open vs. closed) of major trading venues worldwide."
+    },
+    {
+        "name": "REALTIME_OPTIONS",
+        "description": "Returns realtime US options data with full market coverage."
+    },
+    {
+        "name": "HISTORICAL_OPTIONS",
+        "description": "Returns the full historical options chain for a specific symbol on a specific date."
+    },
+    {
+        "name": "NEWS_SENTIMENT",
+        "description": "Returns live and historical market news & sentiment data from premier news outlets worldwide."
+    },
+    {
+        "name": "EARNINGS_CALL_TRANSCRIPT",
+        "description": "Returns earnings call transcript for a company in a specific quarter."
+    },
+    {
+        "name": "TOP_GAINERS_LOSERS",
+        "description": "Returns top 20 gainers, losers, and most active traded tickers in the US market."
+    },
+    {
+        "name": "INSIDER_TRANSACTIONS",
+        "description": "Returns latest and historical insider transactions by key stakeholders."
+    },
+    {
+        "name": "ANALYTICS_FIXED_WINDOW",
+        "description": "Returns advanced analytics metrics for time series over a fixed temporal window."
+    },
+    {
+        "name": "ANALYTICS_SLIDING_WINDOW",
+        "description": "Returns advanced analytics metrics for time series over sliding time windows."
+    },
+    {
+        "name": "WTI",
+        "description": "This API returns the West Texas Intermediate (WTI) crude oil prices in daily, weekly, and monthly horizons."
+    },
+    {
+        "name": "BRENT",
+        "description": "This API returns the Brent (Europe) crude oil prices in daily, weekly, and monthly horizons."
+    },
+    {
+        "name": "NATURAL_GAS",
+        "description": "This API returns the Henry Hub natural gas spot prices in daily, weekly, and monthly horizons."
+    },
+    {
+        "name": "COPPER",
+        "description": "This API returns the global price of copper in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "ALUMINUM",
+        "description": "This API returns the global price of aluminum in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "WHEAT",
+        "description": "This API returns the global price of wheat in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "CORN",
+        "description": "This API returns the global price of corn in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "COTTON",
+        "description": "This API returns the global price of cotton in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "SUGAR",
+        "description": "This API returns the global price of sugar in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "COFFEE",
+        "description": "This API returns the global price of coffee in monthly, quarterly, and annual horizons."
+    },
+    {
+        "name": "ALL_COMMODITIES",
+        "description": "This API returns the global price index of all commodities in monthly, quarterly, and annual temporal dimensions."
+    },
+    {
+        "name": "CURRENCY_EXCHANGE_RATE",
+        "description": "This API returns the realtime exchange rate for any pair of digital currency (e.g., Bitcoin) or physical currency (e.g., USD)."
+    },
+    {
+        "name": "CRYPTO_INTRADAY",
+        "description": "This API returns intraday time series (timestamp, open, high, low, close, volume) of the cryptocurrency specified, updated realtime."
+    },
+    {
+        "name": "DIGITAL_CURRENCY_DAILY",
+        "description": "This API returns the daily historical time series for a digital currency (e.g., BTC) traded on a specific market (e.g., EUR/Euro), refreshed daily at midnight (UTC). Prices and volumes are quoted in both the market-specific currency and USD."
+    },
+    {
+        "name": "DIGITAL_CURRENCY_WEEKLY",
+        "description": "This API returns the weekly historical time series for a digital currency (e.g., BTC) traded on a specific market (e.g., EUR/Euro), refreshed daily at midnight (UTC). Prices and volumes are quoted in both the market-specific currency and USD."
+    },
+    {
+        "name": "DIGITAL_CURRENCY_MONTHLY",
+        "description": "This API returns the monthly historical time series for a digital currency (e.g., BTC) traded on a specific market (e.g., EUR/Euro), refreshed daily at midnight (UTC). Prices and volumes are quoted in both the market-specific currency and USD."
+    },
+    {
+        "name": "REAL_GDP",
+        "description": "This API returns the annual and quarterly Real GDP of the United States."
+    },
+    {
+        "name": "REAL_GDP_PER_CAPITA",
+        "description": "This API returns the quarterly Real GDP per Capita data of the United States."
+    },
+    {
+        "name": "TREASURY_YIELD",
+        "description": "This API returns the daily, weekly, and monthly US treasury yield of a given maturity timeline (e.g., 5 year, 30 year, etc)."
+    },
+    {
+        "name": "FEDERAL_FUNDS_RATE",
+        "description": "This API returns the daily, weekly, and monthly federal funds rate (interest rate) of the United States."
+    },
+    {
+        "name": "CPI",
+        "description": "This API returns the monthly and semiannual consumer price index (CPI) of the United States. CPI is widely regarded as the barometer of inflation levels in the broader economy."
+    },
+    {
+        "name": "INFLATION",
+        "description": "This API returns the annual inflation rates (consumer prices) of the United States."
+    },
+    {
+        "name": "RETAIL_SALES",
+        "description": "This API returns the monthly Advance Retail Sales: Retail Trade data of the United States."
+    },
+    {
+        "name": "DURABLES",
+        "description": "This API returns the monthly manufacturers' new orders of durable goods in the United States."
+    },
+    {
+        "name": "UNEMPLOYMENT",
+        "description": "This API returns the monthly unemployment data of the United States. The unemployment rate represents the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces."
+    },
+    {
+        "name": "NONFARM_PAYROLL",
+        "description": "This API returns the monthly US All Employees: Total Nonfarm (commonly known as Total Nonfarm Payroll), a measure of the number of U.S. workers in the economy that excludes proprietors, private household employees, unpaid volunteers, farm employees, and the unincorporated self-employed."
+    },
+    {
+        "name": "FX_INTRADAY",
+        "description": "This API returns intraday time series (timestamp, open, high, low, close) of the FX currency pair specified, updated realtime."
+    },
+    {
+        "name": "FX_DAILY",
+        "description": "This API returns the daily time series (timestamp, open, high, low, close) of the FX currency pair specified, updated realtime."
+    },
+    {
+        "name": "FX_WEEKLY",
+        "description": "This API returns the weekly time series (timestamp, open, high, low, close) of the FX currency pair specified, updated realtime. The latest data point is the price information for the week (or partial week) containing the current trading day, updated realtime."
+    },
+    {
+        "name": "FX_MONTHLY",
+        "description": "This API returns the monthly time series (timestamp, open, high, low, close) of the FX currency pair specified, updated realtime. The latest data point is the prices information for the month (or partial month) containing the current trading day, updated realtime."
+    },
+    {
+        "name": "COMPANY_OVERVIEW",
+        "description": "Returns company information, financial ratios, and key metrics for the specified equity."
+    },
+    {
+        "name": "ETF_PROFILE",
+        "description": "Returns key ETF metrics and holdings with allocation by asset types and sectors."
+    },
+    {
+        "name": "DIVIDENDS",
+        "description": "Returns historical and future (declared) dividend distributions."
+    },
+    {
+        "name": "SPLITS",
+        "description": "Returns historical split events."
+    },
+    {
+        "name": "INCOME_STATEMENT",
+        "description": "Returns annual and quarterly income statements with normalized fields."
+    },
+    {
+        "name": "BALANCE_SHEET",
+        "description": "Returns annual and quarterly balance sheets with normalized fields."
+    },
+    {
+        "name": "CASH_FLOW",
+        "description": "Returns annual and quarterly cash flow with normalized fields."
+    },
+    {
+        "name": "EARNINGS",
+        "description": "Returns annual and quarterly earnings (EPS) for the company."
+    },
+    {
+        "name": "EARNINGS_ESTIMATES",
+        "description": "Returns annual and quarterly EPS and revenue estimates with analyst data."
+    },
+    {
+        "name": "LISTING_STATUS",
+        "description": "Returns a list of active or delisted US stocks and ETFs."
+    },
+    {
+        "name": "EARNINGS_CALENDAR",
+        "description": "Returns a list of company earnings expected in the next 3, 6, or 12 months."
+    },
+    {
+        "name": "IPO_CALENDAR",
+        "description": "Returns a list of IPOs expected in the next 3 months."
+    },
+    {
+        "name": "SMA",
+        "description": "Returns the simple moving average (SMA) values."
+    },
+    {
+        "name": "EMA",
+        "description": "Returns the exponential moving average (EMA) values."
+    },
+    {
+        "name": "WMA",
+        "description": "Returns the weighted moving average (WMA) values."
+    },
+    {
+        "name": "DEMA",
+        "description": "Returns the double exponential moving average (DEMA) values."
+    },
+    {
+        "name": "TEMA",
+        "description": "Returns the triple exponential moving average (TEMA) values."
+    },
+    {
+        "name": "TRIMA",
+        "description": "Returns the triangular moving average (TRIMA) values."
+    },
+    {
+        "name": "KAMA",
+        "description": "Returns the Kaufman adaptive moving average (KAMA) values."
+    },
+    {
+        "name": "MAMA",
+        "description": "Returns the MESA adaptive moving average (MAMA) values."
+    },
+    {
+        "name": "VWAP",
+        "description": "Returns the volume weighted average price (VWAP) for intraday time series."
+    },
+    {
+        "name": "T3",
+        "description": "Returns the triple exponential moving average (T3) values."
+    },
+    {
+        "name": "MACD",
+        "description": "Returns the moving average convergence / divergence (MACD) values."
+    },
+    {
+        "name": "MACDEXT",
+        "description": "Returns the moving average convergence / divergence values with controllable moving average type."
+    },
+    {
+        "name": "STOCH",
+        "description": "Returns the stochastic oscillator (STOCH) values."
+    },
+    {
+        "name": "STOCHF",
+        "description": "Returns the stochastic fast (STOCHF) values."
+    },
+    {
+        "name": "RSI",
+        "description": "Returns the relative strength index (RSI) values."
+    },
+    {
+        "name": "STOCHRSI",
+        "description": "Returns the stochastic relative strength index (STOCHRSI) values."
+    },
+    {
+        "name": "WILLR",
+        "description": "Returns the Williams' %R (WILLR) values."
+    },
+    {
+        "name": "ADX",
+        "description": "Returns the average directional movement index (ADX) values."
+    },
+    {
+        "name": "ADXR",
+        "description": "Returns the average directional movement index rating (ADXR) values."
+    },
+    {
+        "name": "APO",
+        "description": "Returns the absolute price oscillator (APO) values."
+    },
+    {
+        "name": "PPO",
+        "description": "Returns the percentage price oscillator (PPO) values."
+    },
+    {
+        "name": "MOM",
+        "description": "Returns the momentum (MOM) values."
+    },
+    {
+        "name": "BOP",
+        "description": "Returns the balance of power (BOP) values."
+    },
+    {
+        "name": "CCI",
+        "description": "Returns the commodity channel index (CCI) values."
+    },
+    {
+        "name": "CMO",
+        "description": "Returns the Chande momentum oscillator (CMO) values."
+    },
+    {
+        "name": "ROC",
+        "description": "Returns the rate of change (ROC) values."
+    },
+    {
+        "name": "ROCR",
+        "description": "Returns the rate of change ratio (ROCR) values."
+    },
+    {
+        "name": "AROON",
+        "description": "Returns the Aroon (AROON) values."
+    },
+    {
+        "name": "AROONOSC",
+        "description": "Returns the Aroon oscillator (AROONOSC) values."
+    },
+    {
+        "name": "MFI",
+        "description": "Returns the money flow index (MFI) values."
+    },
+    {
+        "name": "TRIX",
+        "description": "Returns the 1-day rate of change of a triple smooth exponential moving average (TRIX) values."
+    },
+    {
+        "name": "ULTOSC",
+        "description": "Returns the ultimate oscillator (ULTOSC) values."
+    },
+    {
+        "name": "DX",
+        "description": "Returns the directional movement index (DX) values."
+    },
+    {
+        "name": "MINUS_DI",
+        "description": "Returns the minus directional indicator (MINUS_DI) values."
+    },
+    {
+        "name": "PLUS_DI",
+        "description": "Returns the plus directional indicator (PLUS_DI) values."
+    },
+    {
+        "name": "MINUS_DM",
+        "description": "Returns the minus directional movement (MINUS_DM) values."
+    },
+    {
+        "name": "PLUS_DM",
+        "description": "Returns the plus directional movement (PLUS_DM) values."
+    },
+    {
+        "name": "BBANDS",
+        "description": "Returns the Bollinger bands (BBANDS) values."
+    },
+    {
+        "name": "MIDPOINT",
+        "description": "Returns the midpoint (MIDPOINT) values. MIDPOINT = (highest value + lowest value)/2."
+    },
+    {
+        "name": "MIDPRICE",
+        "description": "Returns the midpoint price (MIDPRICE) values. MIDPRICE = (highest high + lowest low)/2."
+    },
+    {
+        "name": "SAR",
+        "description": "Returns the parabolic SAR (SAR) values."
+    },
+    {
+        "name": "TRANGE",
+        "description": "Returns the true range (TRANGE) values."
+    },
+    {
+        "name": "ATR",
+        "description": "Returns the average true range (ATR) values."
+    },
+    {
+        "name": "NATR",
+        "description": "Returns the normalized average true range (NATR) values."
+    },
+    {
+        "name": "AD",
+        "description": "Returns the Chaikin A/D line (AD) values."
+    },
+    {
+        "name": "ADOSC",
+        "description": "Returns the Chaikin A/D oscillator (ADOSC) values."
+    },
+    {
+        "name": "OBV",
+        "description": "Returns the on balance volume (OBV) values."
+    },
+    {
+        "name": "HT_TRENDLINE",
+        "description": "Returns the Hilbert transform, instantaneous trendline (HT_TRENDLINE) values."
+    },
+    {
+        "name": "HT_SINE",
+        "description": "Returns the Hilbert transform, sine wave (HT_SINE) values."
+    },
+    {
+        "name": "HT_TRENDMODE",
+        "description": "Returns the Hilbert transform, trend vs cycle mode (HT_TRENDMODE) values."
+    },
+    {
+        "name": "HT_DCPERIOD",
+        "description": "Returns the Hilbert transform, dominant cycle period (HT_DCPERIOD) values."
+    },
+    {
+        "name": "HT_DCPHASE",
+        "description": "Returns the Hilbert transform, dominant cycle phase (HT_DCPHASE) values."
+    },
+    {
+        "name": "HT_PHASOR",
+        "description": "Returns the Hilbert transform, phasor components (HT_PHASOR) values."
+    },
+    {
+        "name": "PING",
+        "description": "Check if the service is healthy."
+    },
+    {
+        "name": "ADD_TWO_NUMBERS",
+        "description": "Add two numbers together."
+    },
+    {
+        "name": "SEARCH",
+        "description": "Search for relevant Alpha Vantage data based on natural language query."
+    },
+    {
+        "name": "FETCH",
+        "description": "Fetch complete financial data by calling the specified Alpha Vantage API function."
+    }
+]
