@@ -210,7 +210,7 @@ impl GeminiInteractionsRequest {
             model: MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
             input: inputs,
             system_instruction: request.system.clone().unwrap_or_default(),
-            previous_interaction_id: None,
+            previous_interaction_id: id,
             stream: request.stream,
             store: request.store,
             generation_config: GeminiCompletionRequestConfig::new(&crequest),
