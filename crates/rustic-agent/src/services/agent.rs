@@ -9,11 +9,7 @@ use tokio::sync::RwLock;
 
 use crate::{
     agents::{Agent, PipeLineRunner, pipeline_runner::AgentHandle},
-    client::{
-        llm::LlmClient,
-        preset::Preset,
-        provider::Provider,
-    },
+    client::{llm::LlmClient, preset::Preset, provider::Provider},
     services::{
         builder::AgentBuilder,
         config::agent::{AgentConfig, ExecutionType},
@@ -76,7 +72,7 @@ impl AgentService {
         model: &str,
         system_prompt: Option<String>,
     ) -> Result<Agent> {
-        let provider = self.resolve_provider(llm, Some(model))?;
+        let provider = self.resolve_provider("", llm, Some(model))?;
 
         let preset = match &provider {
             Provider::Local { .. } => Preset::Local,
@@ -115,7 +111,7 @@ impl AgentService {
     ) -> Result<Agent> {
         let agent_config = self.find_agent_config(agent_id).await?;
 
-        let provider = self.resolve_provider(llm, Some(model))?;
+        let provider = self.resolve_provider(agent_id, llm, Some(model))?;
 
         let mut dpreset = match &provider {
             Provider::Local { .. } => Preset::Local,
@@ -151,23 +147,32 @@ impl AgentService {
             filtered
         };
 
-        // filter MCP tools — only include ones in agent_config.tools
         let mcp_registry = {
             let global = self.mcp_registry.read().await;
-            let mut filtered = MCPRegistry::new();
-            for tool_id in &agent_config.tools {
-                if tool_id.contains("___") {
+
+            if agent_config.mcp_tools.is_empty() {
+                MCPRegistry::new()
+            } else {
+                let mut filtered = MCPRegistry::new();
+                for tool_id in &agent_config.mcp_tools {
                     if let Some(def) = global.get_tool(tool_id) {
                         filtered.definitions.insert(tool_id.clone(), def);
                     }
                 }
+
+                // clone the registry
+                filtered.registry = global.registry.clone();
+                filtered
             }
-            filtered
         };
 
-        info!("Agent Config: {} preset: {:?}", agent_config.id, dpreset);
-        trace!("System Prompt: {}", agent_config.system_prompt);
-        debug!("Tools: {}", tool_registry.get_tools().len());
+        // info!("System Prompt: {}", agent_config.system_prompt);
+        info!(
+            preset= ?dpreset,
+            tools= ?tool_registry.get_tools().len(),
+            // system_prompt= ?agent_config.system_prompt,
+           "Agent: {} - build_agent_handle", agent_config.id
+        );
 
         let agent = self
             .builder(&agent_config.id)
@@ -190,7 +195,12 @@ impl AgentService {
         model: &str,
         visited: &mut HashSet<String>,
     ) -> Result<PipeLineRunner> {
-        debug!("build_pipeline_runner - Agent: {}", agent_id);
+
+        debug!(
+           "Agent: {} - Build Pipeline Runner", agent_id
+        );
+
+
         let agent_config = self.find_agent_config(agent_id).await?;
 
         // orchestrator is a single agent
@@ -233,11 +243,14 @@ impl AgentService {
         preset: Option<Preset>,
         visited: &mut HashSet<String>,
     ) -> Result<AgentHandle> {
+
         let config = self.find_agent_config(agent_id).await?;
+
         debug!(
-            "build_agent_handle - Agent: {} execution: {:?}",
-            config.id, config.execution
+            execution= ?config.execution,
+           "Agent: {} - Build Agent Handle", config.id
         );
+
         if !visited.insert(config.id.to_string()) {
             return Err(anyhow::anyhow!(
                 "Circular pipeline reference detected: {}",
@@ -273,8 +286,14 @@ impl AgentService {
     ///
     /// Returns an error if the provider is not registered, the required API key is missing,
     /// or a local provider has no `base_url` configured.
-    pub fn resolve_provider(&self, id: &str, model: Option<&str>) -> anyhow::Result<Provider> {
-        debug!("Resolve Provider: llm: {:?} model: {:?}", id, model);
+    pub fn resolve_provider(&self,agent_id: &str, id: &str, model: Option<&str>) -> anyhow::Result<Provider> {
+        debug!(
+            llm= %id,
+            model= ?model,
+           "Agent: {} - Resolve Provider", agent_id
+        );
+
+
         let provider = self
             .provider_registry
             .find(id)

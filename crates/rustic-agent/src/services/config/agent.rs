@@ -29,6 +29,8 @@ pub struct AgentConfig {
     pub system_prompt: String,
     /// IDs of tools from the global `ToolRegistry` this agent is permitted to use.
     pub tools: Vec<String>,
+    #[serde(default)]
+    pub mcp_tools: Vec<String>,
     pub model_assignment: ModelAssignment,
     /// Conversation strategy overrides; `None` uses the server default.
     pub conversation: Option<ConversationConfig>,
@@ -80,7 +82,7 @@ pub struct AvailableAgent {
     pub id: String,
     pub context: AgentContext,
     #[serde(default)]
-    pub preset: Option<Preset>
+    pub preset: Option<Preset>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
