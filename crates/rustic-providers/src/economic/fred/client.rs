@@ -12,6 +12,10 @@ use crate::economic::{
 
 const FRED_BASE_URL: &str = "https://api.stlouisfed.org/fred";
 
+/// Async client for the [FRED API](https://fred.stlouisfed.org/docs/api/fred/) (St. Louis Fed).
+///
+/// Implements [`EconomicProvider`] with plain FRED series IDs such as `"CPIAUCSL"` or
+/// `"UNRATE"`. Observations and series metadata are fetched concurrently in [`FredClient::get_series`].
 #[derive(Debug, Clone)]
 pub struct FredClient {
     http_client: Arc<HttpClient>,
@@ -35,6 +39,7 @@ impl EconomicProvider for FredClient {
 }
 
 impl FredClient {
+    /// Create a new client. Requires a FRED API key (free at <https://fred.stlouisfed.org/docs/api/api_key.html>).
     pub fn new(api_key: impl Into<String>) -> Result<Self> {
         Ok(Self {
             http_client: Arc::new(HttpClient::new()?),
@@ -42,7 +47,10 @@ impl FredClient {
         })
     }
 
-    /// Fetch observations for a series
+    /// Fetch observations only (no metadata). Results are sorted descending and
+    /// missing values (FRED sends `"."`) are silently dropped.
+    ///
+    /// Defaults: `frequency = "m"`, `limit = 12`.
     pub async fn get_observations(
         &self,
         series_id: &str,
@@ -77,12 +85,12 @@ impl FredClient {
             title: None,
             frequency: frequency.to_string(),
             units: None,
-            observations,
+            data_points: observations,
             provider: "fred".to_string(),
         })
     }
 
-    /// Fetch series metadata
+    /// Fetch metadata for a series (title, units, frequency, seasonal adjustment).
     pub async fn get_series_info(&self, series_id: &str) -> Result<SeriesInfo> {
         let url = format!(
             "{}/series?series_id={}&api_key={}&file_type=json",
@@ -109,7 +117,7 @@ impl FredClient {
         })
     }
 
-    /// Fetch observations with metadata in one call
+    /// Fetch observations and metadata concurrently, returning a fully-populated [`SeriesData`].
     pub async fn get_series(
         &self,
         series_id: &str,
@@ -161,7 +169,7 @@ mod tests {
 
         println!("{}", serde_json::to_string_pretty(&data).unwrap());
         assert_eq!(data.series_id, "CPIAUCSL");
-        assert!(!data.observations.is_empty());
+        assert!(!data.data_points.is_empty());
         assert!(data.title.is_some());
 
         Ok(())

@@ -24,7 +24,7 @@ pub struct BeaResults {
     pub data: Option<serde_json::Value>, // ← flexible, handle both
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct BeaDataRow {
     #[serde(rename = "TableName")]
     pub table_name: String,
@@ -46,7 +46,7 @@ pub struct BeaDataRow {
     pub data_value: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct BeaRegionalRow {
     #[serde(rename = "Code")]
     pub code: String,

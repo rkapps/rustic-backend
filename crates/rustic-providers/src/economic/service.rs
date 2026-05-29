@@ -1,10 +1,28 @@
-// rustic-providers/src/economic/service.rs
-
 use super::traits::EconomicProvider;
 use super::types::SeriesData;
 use anyhow::Result;
 use std::sync::Arc;
 
+/// Facade that routes requests to the appropriate [`EconomicProvider`].
+///
+/// Construct via [`EconomicDataService::builder()`]. Any subset of providers
+/// may be configured; calling a method for an unconfigured provider returns an
+/// error rather than panicking.
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use std::sync::Arc;
+/// use rustic_providers::{EconomicDataService, FredClient};
+///
+/// # #[tokio::main] async fn main() -> anyhow::Result<()> {
+/// let service = EconomicDataService::builder()
+///     .with_fred(Arc::new(FredClient::new(std::env::var("FRED_API_KEY")?)?))
+///     .build();
+///
+/// let data = service.fred_series("UNRATE", Some("m"), Some(24)).await?;
+/// # Ok(()) }
+/// ```
 #[derive(Debug, Clone)]
 pub struct EconomicDataService {
     fred: Option<Arc<dyn EconomicProvider>>,
@@ -13,11 +31,12 @@ pub struct EconomicDataService {
 }
 
 impl EconomicDataService {
+    /// Return a builder for constructing an [`EconomicDataService`].
     pub fn builder() -> EconomicDataServiceBuilder {
         EconomicDataServiceBuilder::default()
     }
 
-    /// Fetch FRED series
+    /// Fetch a FRED time series. `series_id` is a plain FRED series code such as `"CPIAUCSL"`.
     pub async fn fred_series(
         &self,
         series_id: &str,
@@ -31,7 +50,7 @@ impl EconomicDataService {
             .await
     }
 
-    /// Fetch BEA series
+    /// Fetch a BEA series. `series_id` format: `"TABLE:SERIES_CODE"`, e.g. `"T20100:A065RC"`.
     pub async fn bea_series(
         &self,
         series_id: &str,
@@ -45,7 +64,8 @@ impl EconomicDataService {
             .await
     }
 
-    /// Fetch Census series
+    /// Fetch a Census series. `series_id` format: `"YEAR/DATASET/VARIABLE/GEO"`,
+    /// e.g. `"2023/acs1/B19013_001E/state:*"`.
     pub async fn census_series(
         &self,
         series_id: &str,
@@ -60,8 +80,7 @@ impl EconomicDataService {
     }
 }
 
-// ── Builder ───────────────────────────────────────────────────────────────────
-
+/// Builder for [`EconomicDataService`]. All providers are optional.
 #[derive(Debug, Default)]
 pub struct EconomicDataServiceBuilder {
     fred: Option<Arc<dyn EconomicProvider>>,

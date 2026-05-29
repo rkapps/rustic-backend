@@ -10,6 +10,14 @@ use crate::economic::types::{DataPoint, SeriesData};
 
 const CENSUS_BASE_URL: &str = "https://api.census.gov/data";
 
+/// Async client for the [U.S. Census Bureau API](https://www.census.gov/data/developers/data-sets.html).
+///
+/// Supports the **ACS** (American Community Survey), **SAIPE** poverty estimates,
+/// and **International Trade** datasets. The Census API returns rows as arrays of
+/// arrays; this client parses them into typed [`CensusRecord`]s.
+///
+/// Implements [`EconomicProvider`] with the series ID format
+/// `"YEAR/DATASET/VARIABLE/GEO"`, e.g. `"2023/acs1/B19013_001E/state:*"`.
 #[derive(Debug, Clone)]
 pub struct CensusClient {
     http_client: Arc<HttpClient>,
@@ -17,6 +25,7 @@ pub struct CensusClient {
 }
 
 impl CensusClient {
+    /// Create a new client. Requires a Census API key (free at <https://api.census.gov/data/key_signup.html>).
     pub fn new(api_key: impl Into<String>) -> Result<Self> {
         Ok(Self {
             http_client: Arc::new(HttpClient::new()?),
@@ -24,17 +33,19 @@ impl CensusClient {
         })
     }
 
-    /// Fetch ACS data
-    /// dataset: "acs1" (1-year) or "acs5" (5-year)
-    /// variables: e.g. ["NAME", "B19013_001E"]
-    /// geo: e.g. "state:*", "county:*", "us:1"
+    /// Fetch rows from the American Community Survey (ACS).
     ///
-    /// Common variables:
-    /// B19013_001E → Median household income
-    /// B01003_001E → Total population
-    /// B17001_002E → Population below poverty level
-    /// B23025_005E → Unemployed population
-    /// B25077_001E → Median home value
+    /// - `dataset`: `"acs1"` (1-year estimates) or `"acs5"` (5-year estimates).
+    /// - `variables`: column codes to retrieve, e.g. `["NAME", "B19013_001E"]`.
+    ///   Include `"NAME"` to get human-readable geography names.
+    /// - `geo`: geography filter, e.g. `"state:*"`, `"county:*"`, `"us:1"`.
+    ///
+    /// Common variable codes:
+    /// - `B19013_001E` — Median household income
+    /// - `B01003_001E` — Total population
+    /// - `B17001_002E` — Population below poverty level
+    /// - `B23025_005E` — Unemployed civilian population
+    /// - `B25077_001E` — Median home value
     pub async fn get_acs(
         &self,
         year: &str,
@@ -54,7 +65,7 @@ impl CensusClient {
         Ok(self.parse_response(raw, variables))
     }
 
-    /// Fetch Current Population Survey data
+    /// Fetch Small Area Income and Poverty Estimates (SAIPE) data.
     pub async fn get_cps(
         &self,
         year: &str,
@@ -73,7 +84,7 @@ impl CensusClient {
         Ok(self.parse_response(raw, variables))
     }
 
-    /// Fetch International Trade data
+    /// Fetch International Trade (imports) data for a given year.
     pub async fn get_trade(&self, year: &str, variables: &[&str]) -> Result<Vec<CensusRecord>> {
         let vars = variables.join(",");
         let url = format!(
@@ -137,7 +148,7 @@ impl CensusClient {
             title: None,
             frequency: "A".to_string(),
             units: None,
-            observations,
+            data_points: observations,
             provider: "census".to_string(),
         }
     }
@@ -173,7 +184,7 @@ impl EconomicProvider for CensusClient {
         let mut data = self.map_to_series(records, series_id, year);
 
         if let Some(limit) = limit {
-            data.observations.truncate(limit);
+            data.data_points.truncate(limit);
         }
 
         Ok(data)
@@ -231,6 +242,6 @@ mod tests {
             .unwrap();
 
         println!("{}", serde_json::to_string_pretty(&data).unwrap());
-        assert!(!data.observations.is_empty());
+        assert!(!data.data_points.is_empty());
     }
 }

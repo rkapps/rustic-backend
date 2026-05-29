@@ -11,6 +11,13 @@ use crate::economic::types::{DataPoint, SeriesData};
 
 const BEA_BASE_URL: &str = "https://apps.bea.gov/api/data";
 
+/// Async client for the [Bureau of Economic Analysis (BEA) API](https://apps.bea.gov/API/signup/).
+///
+/// Supports the **NIPA** dataset (national accounts: GDP, personal income) and the
+/// **Regional** dataset (state- and county-level economic metrics).
+///
+/// Implements [`EconomicProvider`] with the series ID format `"TABLE:SERIES_CODE"`,
+/// e.g. `"T20100:A065RC"`.
 #[derive(Debug, Clone)]
 pub struct BeaClient {
     http_client: Arc<HttpClient>,
@@ -18,6 +25,7 @@ pub struct BeaClient {
 }
 
 impl BeaClient {
+    /// Create a new client. Requires a BEA API key (free at <https://apps.bea.gov/API/signup/>).
     pub fn new(api_key: impl Into<String>) -> Result<Self> {
         Ok(Self {
             http_client: Arc::new(HttpClient::new()?),
@@ -25,11 +33,15 @@ impl BeaClient {
         })
     }
 
-    /// Fetch NIPA table data
-    /// Common tables:
-    /// T20100 → Personal Income and Outlays
-    /// T10101 → GDP
-    /// T20200 → Personal Income by State
+    /// Fetch rows from a NIPA (National Income and Product Accounts) table.
+    ///
+    /// Common `table_name` values:
+    /// - `"T10101"` — GDP
+    /// - `"T20100"` — Personal Income and Outlays
+    /// - `"T20200"` — Personal Income by State
+    ///
+    /// `frequency`: `"A"` (annual), `"Q"` (quarterly), `"M"` (monthly).
+    /// `year`: specific year (`"2024"`) or `"LAST5"` for the last 5 years.
     pub async fn get_nipa(
         &self,
         table_name: &str,
@@ -63,11 +75,14 @@ impl BeaClient {
         Ok(rows)
     }
 
-    /// Fetch Regional data by state
-    /// Common tables:
-    /// CAINC1  → Personal Income by State
-    /// CAINC4  → Personal Income by County
-    /// SASUMMARY → State Annual Summary
+    /// Fetch rows from the Regional dataset (state- and county-level metrics).
+    ///
+    /// Common `table_name` values:
+    /// - `"CAINC1"` — Personal Income by State
+    /// - `"CAINC4"` — Personal Income by County
+    /// - `"SASUMMARY"` — State Annual Summary
+    ///
+    /// `geo_fips`: `"STATE"` for all states, a FIPS code for a specific area.
     pub async fn get_regional(
         &self,
         table_name: &str,
@@ -131,7 +146,7 @@ impl BeaClient {
             title: None,
             frequency: "A".to_string(),
             units: None,
-            observations,
+            data_points: observations,
             provider: "bea".to_string(),
         }
     }
@@ -164,7 +179,7 @@ impl EconomicProvider for BeaClient {
 
         // apply limit
         if let Some(limit) = limit {
-            data.observations.truncate(limit);
+            data.data_points.truncate(limit);
         }
 
         Ok(data)
@@ -244,6 +259,6 @@ mod tests {
             .unwrap();
 
         println!("{}", serde_json::to_string_pretty(&data).unwrap());
-        assert!(!data.observations.is_empty());
+        assert!(!data.data_points.is_empty());
     }
 }
