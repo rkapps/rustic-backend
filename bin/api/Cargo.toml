@@ -29,7 +29,7 @@ rustic-core.workspace=true
 rustic-ml.workspace=true
 rustic-providers.workspace=true
 rustic-storage.workspace = true
-rustic-tools.workspace=true
+rustic-economic.workspace = true
 
 #fin-tracker packages
 fin-analyse.workspace = true

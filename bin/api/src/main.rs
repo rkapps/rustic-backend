@@ -15,9 +15,13 @@ use rustic_boot::{
     },
 };
 use rustic_core::{Tool, logger::set_logger};
+use rustic_economic::{
+    service::EconomicDataService,
+    storage::EconomicStorageManager,
+    tools::{bea::BeaDataTool, census::CensusDataTool, fred::FredSeriesTool},
+};
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 use rustic_providers::{BeaClient, CensusClient, FredClient};
-use rustic_tools::{BeaTool, CensusTool, FredTool};
 use tracing::debug;
 
 #[tokio::main]
@@ -60,6 +64,13 @@ async fn main() -> Result<()> {
 
     let bea_api_key = env::var("BEA_API_KEY").expect("BEA_API_KEY environment variable not set");
     let bea_client = Arc::new(BeaClient::new(bea_api_key)?);
+    let economic_storage_manager = EconomicStorageManager::new(&mongo_uri, &mongo_db).await?;
+    let economic_data_service = EconomicDataService::new(
+        Arc::new(economic_storage_manager),
+        fred_client,
+        bea_client,
+        census_client,
+    );
 
     let tools: Vec<Arc<dyn Tool>> = vec![
         Arc::new(TickerScreeningTool::new(
@@ -75,9 +86,9 @@ async fn main() -> Result<()> {
         Arc::new(TickerPriceHistoryTool::new(storage_service.clone())),
         Arc::new(TickerIndicatorTool::new(storage_service.clone())),
         Arc::new(TickerPeersTool::new(storage_service.clone())),
-        Arc::new(FredTool::new(fred_client)),
-        Arc::new(CensusTool::new(census_client)),
-        Arc::new(BeaTool::new(bea_client)),
+        Arc::new(FredSeriesTool::new(Arc::new(economic_data_service.clone()))),
+        Arc::new(CensusDataTool::new(Arc::new(economic_data_service.clone()))),
+        Arc::new(BeaDataTool::new(Arc::new(economic_data_service.clone()))),
     ];
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());

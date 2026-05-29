@@ -4,7 +4,7 @@ members = [
     "bin/api", 
     "crates/rustic-agent",
     "crates/rustic-boot", 
-    "crates/rustic-core", 
+    "crates/rustic-core", "crates/rustic-economic", 
     "crates/rustic-ml"
     , "crates/rustic-providers", "crates/rustic-storage", "crates/rustic-tools"]
 
@@ -59,7 +59,7 @@ rustic-core = { path = "crates/rustic-core" }
 rustic-ml = { path = "crates/rustic-ml" }
 rustic-providers = { path = "crates/rustic-providers" }
 rustic-storage = { path = "crates/rustic-storage" }
-rustic-tools = { path = "crates/rustic-tools" }
+rustic-economic = { path = "crates/rustic-economic" }
 
 #fin-analyse = { path = "../fin-tracker-backend-rs/crates/fin-analyse" }
 #fin-storage = { path = "../fin-tracker-backend-rs/crates/fin-storage" }

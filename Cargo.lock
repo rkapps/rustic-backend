@@ -3729,7 +3729,6 @@ dependencies = [
  "futures-util",
  "reqwest 0.12.28",
  "rustic-core",
- "rustic-tools",
  "serde",
  "serde_json",
  "tokio",
@@ -3751,10 +3750,10 @@ dependencies = [
  "rustic-agent",
  "rustic-boot",
  "rustic-core",
+ "rustic-economic",
  "rustic-ml",
  "rustic-providers",
  "rustic-storage",
- "rustic-tools",
  "serde",
  "serde_json",
  "serde_with",
@@ -3802,6 +3801,22 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "wiremock",
+]
+
+[[package]]
+name = "rustic-economic"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "rustic-core",
+ "rustic-providers",
+ "rustic-storage",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
