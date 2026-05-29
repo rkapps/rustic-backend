@@ -8,11 +8,10 @@
 //! ```
 
 pub mod agents;
-pub mod error;
 pub mod http;
 pub mod logger;
 
 pub use agents::tools::Tool;
-pub use error::HttpError;
-pub use http::{HttpClient, HttpResponse, HttpResult};
+pub use http::error::HttpError;
+pub use http::http::{HttpClient, HttpResponse, HttpResult};
 pub use logger::set_logger;

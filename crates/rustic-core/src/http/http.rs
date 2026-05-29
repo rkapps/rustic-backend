@@ -20,7 +20,8 @@ use anyhow::Result;
 use reqwest::{Client, header::HeaderMap};
 use tracing::{debug, error, trace};
 
-use crate::error::HttpError;
+use crate::http::error::HttpError;
+
 /// Convenience alias for results that carry an [`HttpError`] on failure.
 pub type HttpResult<T> = std::result::Result<T, HttpError>;
 

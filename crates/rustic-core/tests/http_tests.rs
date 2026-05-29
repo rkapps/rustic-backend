@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rustic_core::http::HttpClient;
+    use rustic_core::HttpClient;
     use serde::{Deserialize, Serialize};
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};

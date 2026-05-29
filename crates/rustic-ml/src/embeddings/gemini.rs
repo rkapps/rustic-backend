@@ -1,6 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use rustic_core::http::HttpClient;
+use rustic_core::HttpClient;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
