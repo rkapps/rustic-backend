@@ -1,24 +1,24 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
-use rustic_providers::CensusClient;
 use serde_json::{Value, json};
 use std::sync::Arc;
-use tracing::info;
+
+use crate::service::EconomicDataService;
 
 #[derive(Debug)]
-pub struct CensusTool {
-    client: Arc<CensusClient>,
+pub struct CensusDataTool {
+    service: Arc<EconomicDataService>,
 }
 
-impl CensusTool {
-    pub fn new(client: Arc<CensusClient>) -> Self {
-        Self { client }
+impl CensusDataTool {
+    pub fn new(service: Arc<EconomicDataService>) -> Self {
+        Self { service }
     }
 }
 
 #[async_trait]
-impl Tool for CensusTool {
+impl Tool for CensusDataTool {
     fn name(&self) -> String {
         "census_data".to_string()
     }
@@ -80,10 +80,6 @@ impl Tool for CensusTool {
     }
 
     async fn execute(&self, params: Value) -> Result<Value> {
-        let year = params["year"].as_str().unwrap_or("2023");
-        let dataset = params["dataset"].as_str().unwrap_or("acs1");
-        let geo = params["geo"].as_str().unwrap_or("state:*");
-
         let variables: Vec<&str> = params["variables"]
             .as_array()
             .ok_or_else(|| anyhow::anyhow!("variables required"))?
@@ -91,34 +87,25 @@ impl Tool for CensusTool {
             .filter_map(|v| v.as_str())
             .collect();
 
-        info!(
-            "Year: {:?} Dataser {:?} Geo: {:?} Variables: {:?}",
-            year, dataset, geo, variables
-        );
+        let geo = params["geo"]
+            .as_str()
+            .ok_or_else(|| anyhow::anyhow!("geo required"))?;
 
-        if variables.is_empty() {
-            return Err(anyhow::anyhow!("at least one variable required"));
-        }
+        let dataset = params["dataset"].as_str().unwrap_or("acs5");
 
-        // always include NAME for readability
-        let mut vars_with_name = vec!["NAME"];
-        vars_with_name.extend(variables.iter());
-        vars_with_name.dedup();
+        let year = params["year"].as_str().unwrap_or("2023");
 
         let records = self
-            .client
-            .get_acs(year, dataset, &vars_with_name, geo)
+            .service
+            .get_census_data(&variables, geo, dataset, year)
             .await?;
 
+        // census
         Ok(json!({
-            "year":      year,
-            "dataset":   dataset,
-            "geo":       geo,
-            "variables": variables,
-            "data":      records,
-            "count":     records.len(),
-            "provider":  "census",
-            "note":      "Values are estimates. Negative values (-666666666) indicate data not available."
+            "dataset": dataset,
+            "geo": geo,
+            "year": year,
+            "records": records
         }))
     }
 }
