@@ -3873,19 +3873,6 @@ dependencies = [
  "tracing",
 ]
 
-[[package]]
-name = "rustic-tools"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "chrono",
- "rustic-core",
- "rustic-providers",
- "serde",
- "serde_json",
- "tracing",
-]
 
 [[package]]
 name = "rustix"

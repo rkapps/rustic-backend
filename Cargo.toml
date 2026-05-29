@@ -6,7 +6,7 @@ members = [
     "crates/rustic-boot", 
     "crates/rustic-core", "crates/rustic-economic", 
     "crates/rustic-ml"
-    , "crates/rustic-providers", "crates/rustic-storage", "crates/rustic-tools"]
+    , "crates/rustic-providers", "crates/rustic-storage"]
 
 [workspace.dependencies]
 anyhow = "1.0.100"
@@ -77,6 +77,5 @@ rustic-core    = { path = "crates/rustic-core" }
 rustic-ml      = { path = "crates/rustic-ml" }
 rustic-providers = { path = "crates/rustic-providers" }
 rustic-storage = { path = "crates/rustic-storage" }
-rustic-tools = { path = "crates/rustic-tools" }
 
 
