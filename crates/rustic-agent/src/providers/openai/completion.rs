@@ -155,7 +155,6 @@ impl LlmClient for OpenAIClient {
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
         let url = format!("{}/v1/responses", self.base_url,);
-        debug!("OpenAI Request: {:#?}", request);
 
         let mut headers = reqwest::header::HeaderMap::new();
 
@@ -177,6 +176,8 @@ impl LlmClient for OpenAIClient {
 
         let request = OpenAICompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
+
+        debug!("OpenAI Request: {:#?}", request);
 
         let body = serde_json::json!(request);
         let response = self
@@ -218,8 +219,8 @@ impl LlmClient for OpenAIClient {
                              e, &event.data
                          ))
                      })?;
-                debug!("delta: {:?}", event.event.as_str());
-                debug!("Chunk: {:?}", chunk);
+                trace!("delta: {:?}", event.event.as_str());
+                trace!("Chunk: {:?}", chunk);
 
                 match event.event.as_str() {
                      "response.output_text.delta" => {
@@ -259,7 +260,7 @@ impl LlmClient for OpenAIClient {
                      "response.output_item.added" => {
                          if let Some(item) = chunk.item
                              && item.r#type == "function_call" {
-                                 debug!("item: {:?}", item);
+                                 trace!("item: {:?}", item);
 
                                  tool_buffers.insert(
                                      item.id.clone(),
@@ -280,7 +281,7 @@ impl LlmClient for OpenAIClient {
 
                          if let Some(response) = chunk.response {
                              let cusage = response.usage.unwrap();
-                            // info!("chunk token: {:#?}", cusage);
+                            debug!("chunk token: {:#?}", cusage);
 
                              let usage = CompletionResponseTokenUsage {
                                 input_tokens: cusage.input_tokens,

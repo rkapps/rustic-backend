@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     );
     let pipeline = EconomicDataPipeline::new(Arc::new(economic_data_service));
     // let _ = pipeline.clean().await;
-    let _ = pipeline.run().await;
+    // let _ = pipeline.run().await;
 
     Ok(())
 }
