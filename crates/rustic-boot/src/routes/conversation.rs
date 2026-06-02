@@ -5,7 +5,7 @@ use axum::{
     extract::{FromRef, Path, Query, State},
     middleware::from_fn_with_state,
     response::{IntoResponse, Sse, sse::Event},
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
 };
 use futures::StreamExt;
 use reqwest::StatusCode;
@@ -16,7 +16,7 @@ use crate::{
     auth::firebase::{FirebaseClaims, firebase_auth_middleware},
     boot::BootState,
     conversation::{
-        domain::{Conversation, ConversationRequest, Turn},
+        domain::{Conversation, ConversationRequest, ConversationUpdateRequest, Turn},
         dto::{ConversationsQuery, TurnRequest, TurnResponse},
     },
 };
@@ -30,6 +30,7 @@ where
         // conversations
         .route("/conversations", get(get_conversations_handler))
         .route("/conversations", post(create_conversation_handler))
+        .route("/conversations/{id}", patch(update_conversation_handler))
         .route("/conversations/{id}", get(get_conversation_handler))
         .route("/conversations/{id}", delete(delete_conversation_handler))
         .route("/conversations/{id}/turns", get(get_turns_handler))
@@ -39,7 +40,6 @@ where
             post(send_turn_streaming_handler),
         )
         .route_layer(from_fn_with_state(state, firebase_auth_middleware::<S>))
-    // .route("/conversations/:id", patch(update_conversation_handler))
 }
 
 pub async fn create_conversation_handler(
@@ -82,6 +82,28 @@ pub async fn delete_conversation_handler(
             )
         })?;
     Ok(())
+}
+
+pub async fn update_conversation_handler(
+    State(boot_state): State<Arc<BootState>>,
+    Extension(claims): Extension<FirebaseClaims>, // 👈 opt-in
+    Path(id): Path<String>,
+    Json(payload): Json<ConversationUpdateRequest>,
+) -> Result<Json<Conversation>, (StatusCode, String)> {
+    debug!("config: {:?}", payload);
+
+    let service = boot_state.conversation_service()?; // ← one line
+
+    let conversation = service
+        .update_conversation(&claims.sub, &id,payload)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::BAD_REQUEST,
+                format!("Save Conversation error: {}", e),
+            )
+        })?;
+    Ok(Json(conversation))
 }
 
 pub async fn get_conversations_handler(

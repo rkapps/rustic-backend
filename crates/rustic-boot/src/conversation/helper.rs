@@ -1,30 +1,46 @@
 use rustic_agent::{
     client::{message::Message, response::CompletionResponseTokenUsage},
-    services::registry::provider::ProviderRegistry,
+    services::{config::agent::{ConversationStrategy, HistoryMode}, registry::provider::ProviderRegistry},
 };
 
 use crate::conversation::domain::Turn;
 
-pub fn build_completions_message(turns: Vec<Turn>) -> Vec<Message> {
-    let mut messages = Vec::new();
-    for turn in turns {
-        // user message
-        let nmessage = Message::User {
-            content: turn.user_prompt,
-            response_id: None,
-        };
-        messages.push(nmessage);
+pub fn build_completions_messages(
+    turns: Vec<Turn>,
+    strategy: &ConversationStrategy,
+    history_mode: Option<&HistoryMode>,
+    max_turns: Option<u32>,
+) -> Vec<Message> {
+    match strategy {
+        ConversationStrategy::Stateless => {
+            // no history — current message will be added after
+            vec![]
+        }
+        ConversationStrategy::Stateful => {
+            let turns = match (history_mode, max_turns) {
+                (Some(HistoryMode::Trimmed), Some(max)) => {
+                    let skip = turns.len().saturating_sub(max as usize);
+                    turns.into_iter().skip(skip).collect::<Vec<_>>()
+                }
+                _ => turns, // full — all turns
+            };
 
-        // assistant message
-        let nmessage = Message::Assistant {
-            content: turn.response_content,
-            response_id: turn.response_id,
-        };
-        messages.push(nmessage);
+            let mut messages = Vec::new();
+            for turn in turns {
+                messages.push(Message::User {
+                    content: turn.user_prompt,
+                    response_id: None,
+                });
+                messages.push(Message::Assistant {
+                    content: turn.response_content,
+                    response_id: turn.response_id,
+                });
+            }
+            messages
+        }
     }
-
-    messages
 }
+
 
 pub fn calculate_turn_cost(
     llm: &str,

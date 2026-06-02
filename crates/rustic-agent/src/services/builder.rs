@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use rustic_core::Tool;
 use std::sync::Arc;
+use tracing::debug;
 
 use crate::{
     MCPRegistry, ToolRegistry,
@@ -15,7 +16,7 @@ use crate::{
         local::completion::LocalClient,
         openai::{self, completion::OpenAIClient},
     },
-    services::agent::AgentService,
+    services::{agent::AgentService, config::agent::ConversationStrategy},
     tools::mcp::MCPServerSetting,
 };
 
@@ -47,10 +48,10 @@ pub struct AgentBuilder<'a> {
     max_tokens: Option<i32>,
     enable_cache: bool,
     reasoning_effort: ReasoningEffort,
-    store: bool,
     /// Tools accumulated via `with_tool*` — registered into the shared registry on `build`.
     pending_tools: Vec<Arc<dyn Tool>>,
     filtered_mcp: Option<MCPRegistry>,
+    strategy: Option<ConversationStrategy>,
 }
 
 impl<'a> AgentBuilder<'a> {
@@ -67,9 +68,9 @@ impl<'a> AgentBuilder<'a> {
             max_tokens: None,
             enable_cache: false,
             reasoning_effort: ReasoningEffort::None,
-            store: true,
             pending_tools: Vec::new(),
             filtered_mcp: None,
+            strategy: None,
         }
     }
 
@@ -79,8 +80,8 @@ impl<'a> AgentBuilder<'a> {
         self
     }
 
-    pub fn with_store(mut self, store: bool) -> Self {
-        self.store = store;
+    pub fn with_strategy(mut self, strategy: ConversationStrategy) -> Self {
+        self.strategy = Some(strategy);
         self
     }
 
@@ -290,6 +291,7 @@ impl<'a> AgentBuilder<'a> {
         let max_tokens = self.max_tokens.unwrap_or(MODEL_MAX_TOKENS);
         let system_prompt = self.system_prompt;
 
+        debug!("Pending tools: {}", self.pending_tools.len());
         let tool_registry = {
             let mut registry = ToolRegistry::new();
             for tool in self.pending_tools {
@@ -297,8 +299,6 @@ impl<'a> AgentBuilder<'a> {
             }
             Arc::new(registry)
         };
-        // let mcp_tool_guard = self.service.mcp_registry.read().await;
-        // let mcp_registry = Arc::new(mcp_tool_guard.clone());
 
         // use filtered MCP if provided, otherwise use full shared registry
         let mcp_registry = if let Some(filtered) = self.filtered_mcp {
@@ -310,8 +310,14 @@ impl<'a> AgentBuilder<'a> {
 
         let reasoning_effort = self.reasoning_effort;
         let enable_cache = self.enable_cache;
-        let store = self.store;
 
+        let store = match &self.strategy {
+            Some(ConversationStrategy::Stateful) => true,
+            Some(ConversationStrategy::Stateless) => false,
+            None => false, // default to stateless
+        };
+
+        
         Ok(Agent {
             id: self.id,
             llm,

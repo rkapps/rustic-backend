@@ -1,3 +1,4 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::Preset;
@@ -53,13 +54,6 @@ pub struct ModelProvider {
     pub model: String,
 }
 
-/// Overrides for conversation history and routing strategy.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ConversationConfig {
-    pub default_strategy: String,
-    pub allowed_strategies: Vec<String>,
-    pub default_history_mode: String,
-}
 
 /// Pipeline-specific configuration used when `execution` is `Pipeline` or `PipelineAgent`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -91,4 +85,44 @@ pub enum AgentContext {
     Goal, // original user messages
     Last, // last stage output
     All,  // full accumulated context
+}
+
+
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ConversationConfig {
+    pub default_strategy: ConversationStrategy,
+    pub allowed_strategies: Vec<ConversationStrategy>,
+    pub stateful: Option<StatefulConfig>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum ConversationStrategy {
+    #[default]
+    Stateless,
+    Stateful,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum HistoryMode {
+    Full,
+    Trimmed,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct StatefulConfig {
+    pub history_mode: HistoryMode,
+    pub max_turns: Option<u32>,  // only valid for trimmed
+}
+
+
+impl StatefulConfig {
+    pub fn validate(&self) -> Result<()> {
+        if self.history_mode == HistoryMode::Full && self.max_turns.is_some() {
+            return Err(anyhow::anyhow!("max_turns is not valid for history_mode=full"));
+        }
+        Ok(())
+    }
 }

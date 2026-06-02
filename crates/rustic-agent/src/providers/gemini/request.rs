@@ -119,34 +119,18 @@ impl GeminiInteractionsRequest {
                         });
                     }
 
-                    // if state only add the last user
-                    if request.store {
-                        user_input = Some(GeminiCompletionRequestInput::Content {
-                            role: "user".to_string(),
-                            content,
-                        });
-                    } else {
-                        let user_input1 = GeminiCompletionRequestInput::Content {
-                            role: "user".to_string(),
-                            content,
-                        };
-                        inputs.push(user_input1);
-                    }
+                    user_input = Some(GeminiCompletionRequestInput::Content {
+                        role: "user".to_string(),
+                        content,
+                    });
                 }
 
                 Message::Assistant {
-                    content,
+                    content: _,
                     response_id,
                 } => {
-                    id = response_id;
-
-                    // only add assistant if it is a stateless
-                    if !request.store {
-                        let user_input = GeminiCompletionRequestInput::Content {
-                            role: "model".to_string(),
-                            content,
-                        };
-                        inputs.push(user_input);
+                    if request.store {
+                        id = response_id;
                     }
                 }
 
@@ -182,12 +166,9 @@ impl GeminiInteractionsRequest {
             }
         }
 
-        // for stateless push the alst input
-        if request.store {
-            // Push user message
-            if let Some(input) = user_input {
-                inputs.push(input);
-            }
+        // Push user message
+        if let Some(input) = user_input {
+            inputs.push(input);
         }
 
         // Push model message with thought + function calls combined

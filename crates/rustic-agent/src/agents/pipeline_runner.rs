@@ -131,8 +131,19 @@ impl AgentHandle {
     /// `Pipeline` handles are run statelessly: only the last message from `original_messages`
     /// is forwarded so the nested pipeline starts fresh rather than inheriting outer context.
     pub async fn execute(&self, original_messages: &[Message]) -> HttpResult<CompletionResponse> {
+
+        info!("Executing agent...");
         match self {
-            AgentHandle::Single(agent) => agent.complete(original_messages).await,
+            AgentHandle::Single(agent) => {
+                let last_message;
+                let messages: &[Message] = if agent.store {
+                    original_messages
+                } else {
+                    last_message = vec![original_messages.last().unwrap().clone()];
+                    &last_message
+                };
+                agent.complete(messages).await
+            }
             AgentHandle::Pipeline(runner) => {
                 // force pipeline runner to be stateless
                 let last = original_messages.last().unwrap();
@@ -151,11 +162,22 @@ impl AgentHandle {
         &self,
         original_messages: &[Message],
     ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
+
+        info!("Executing agent...");
+
         match self {
-            AgentHandle::Single(agent) => agent.complete_with_streaming(original_messages).await,
+            AgentHandle::Single(agent) => {
+                // let last_message;
+                // let messages: &[Message] = if agent.store {
+                //     original_messages
+                // } else {
+                //     last_message = vec![original_messages.last().unwrap().clone()];
+                //     &last_message
+                // };
+                agent.complete_with_streaming(original_messages).await
+            }
             AgentHandle::Pipeline(runner) => {
-                let input = vec![original_messages.last().unwrap().clone()];
-                Box::pin(runner.clone().run_dynamic_streaming(&input)).await
+                Box::pin(runner.clone().run_dynamic_streaming(original_messages)).await
             }
         }
     }
@@ -354,7 +376,7 @@ impl PipeLineRunner {
             // if the decision is stop then return the response.
             if decision.stop {
                 let final_content = unwrap_agent_content(&merged);
-                let rcontents =vec![CompletionResponseContent::Text(final_content)];
+                let rcontents = vec![CompletionResponseContent::Text(final_content)];
                 // rcontents.push();
                 let rresponse = CompletionResponse {
                     id: response.id,
@@ -460,6 +482,10 @@ impl PipeLineRunner {
                 let decision = match build_stage_decision(response.clone()) {
                     Ok(c) => c,
                     Err(e) => {
+                        error!(
+                            "Stage decision build response: {:#?} error: {:?} ",
+                            response, e
+                        );
                         let _ = tx
                             .send(Err(HttpError::CompletionRequestError(format!(
                                 "Stage decision build error: {}",
@@ -550,6 +576,7 @@ impl PipeLineRunner {
                                     "Agent: {} Synthesising done.", agent_id
                                 );
 
+                                let response_id = chunk.response_id.clone();
                                 let mut final_chunk = chunk.clone();
                                 final_chunk.is_final = false;
                                 let _ = tx.send(Ok(final_chunk)).await;
@@ -560,7 +587,7 @@ impl PipeLineRunner {
                                     .send(Ok(CompletionChunkResponse::stop(
                                         agent_id.clone(),
                                         chunk.model,
-                                        String::new(),
+                                        response_id,
                                         Some(usage.clone()),
                                     )))
                                     .await;

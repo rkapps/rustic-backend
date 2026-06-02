@@ -1,5 +1,9 @@
+use anyhow::Result;
 use chrono::{DateTime, Utc};
-use rustic_agent::client::response::CompletionResponseTokenUsage;
+use rustic_agent::{
+    client::response::CompletionResponseTokenUsage,
+    services::config::agent::{ConversationStrategy, HistoryMode, StatefulConfig},
+};
 use rustic_storage::core::repository::RepoModel;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -20,7 +24,6 @@ pub struct ConversationRequest {
 
     // chat only
     pub template_id: Option<String>,
-    pub system_prompt: Option<String>,
 
     // agent only
     pub agent_id: Option<String>,
@@ -29,6 +32,11 @@ pub struct ConversationRequest {
     pub llm: String,   // provider user picked
     pub model: String, // model user picked
     pub stream: bool,
+    pub system_prompt: Option<String>,
+
+    pub strategy: Option<ConversationStrategy>,
+    pub stateful: Option<StatefulConfig>,
+
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -40,12 +48,17 @@ pub struct Conversation {
     pub template_id: Option<String>,   // "rust-expert"
     pub agent_id: Option<String>,      // None for chat
     pub system_prompt: Option<String>, // copied from template at creation
+    pub orig_system_prompt: Option<String>,
     pub llm: String,                   // provider user picked
     pub model: String,                 // model user picked
     pub stream: bool,
     pub response_id: Option<String>,
-    // pub strategy: String,                 // "stateful"
-    pub history_mode: String, // "trimmed_full"
+    #[serde(default)]
+    pub strategy: ConversationStrategy,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub history_mode: Option<HistoryMode>, // None when strategy=stateless
+    #[serde(default)]
+    pub max_turns: Option<u32>,
     pub created_at: DateTime<Utc>,
     pub last_updated_at: DateTime<Utc>,
     pub usage: Option<CompletionResponseTokenUsage>,
@@ -71,11 +84,15 @@ impl Conversation {
         let title = request.title.unwrap_or_default();
         let now = Utc::now();
 
+        let (history_mode, max_turns) = match &request.stateful {
+            Some(s) => (Some(s.history_mode.clone()), s.max_turns),
+            None => (None, None),
+        };
+
         Conversation {
             agent_id: request.agent_id,
             conversation_type: request.conversation_type,
             created_at: now,
-            history_mode: "stateful".to_string(),
             id,
             title,
             last_updated_at: now,
@@ -83,9 +100,13 @@ impl Conversation {
             model: request.model,
             stream: request.stream,
             response_id: None,
-            system_prompt: request.system_prompt,
+            system_prompt: request.system_prompt.clone(),
+            orig_system_prompt: request.system_prompt,
             template_id: request.template_id,
             uid,
+            strategy: request.strategy.unwrap_or(ConversationStrategy::Stateless),
+            history_mode,
+            max_turns,
             usage: None,
             input_tokens_cost: 0.0,
             cached_read_tokens_cost: 0.0,
@@ -94,7 +115,43 @@ impl Conversation {
             total_tokens_cost: 0.0,
         }
     }
+
 }
+
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ConversationUpdateRequest {
+    pub title: Option<String>,
+    pub system_prompt: Option<String>,
+    pub history_mode: Option<HistoryMode>,  // only valid if strategy=stateful
+    pub max_turns: Option<u32>,             // only valid if history_mode=trimmed
+}
+
+impl Conversation {
+    pub fn apply_update(&mut self, request: ConversationUpdateRequest) -> Result<()> {
+        if let Some(title) = request.title {
+            self.title = title;
+        }
+        if let Some(system_prompt) = request.system_prompt {
+            self.system_prompt = Some(system_prompt);
+        }
+        if let Some(history_mode) = request.history_mode {
+            if self.strategy != ConversationStrategy::Stateful {
+                return Err(anyhow::anyhow!("history_mode only valid for stateful conversations"));
+            }
+            self.history_mode = Some(history_mode);
+        }
+        if let Some(max_turns) = request.max_turns {
+            if self.history_mode != Some(HistoryMode::Trimmed) {
+                return Err(anyhow::anyhow!("max_turns only valid for trimmed history mode"));
+            }
+            self.max_turns = Some(max_turns);
+        }
+        self.last_updated_at = Utc::now();
+        Ok(())
+    }
+}
+
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Turn {

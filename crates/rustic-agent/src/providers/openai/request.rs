@@ -54,6 +54,8 @@ impl OpenAICompletionRequest {
         let mut id: Option<String> = None;
 
         let mut inputs = Vec::new();
+        let mut user_input: Option<OpenAICompletionRequestMessage> = None;
+
         for message in request.messages {
             match message {
                 Message::Thought { content: _ } => {}
@@ -61,20 +63,27 @@ impl OpenAICompletionRequest {
                     content,
                     response_id: _,
                 } => {
-                    inputs.push(OpenAICompletionRequestMessage::Content {
+
+                    user_input =  Some(OpenAICompletionRequestMessage::Content {
                         role: "user".to_string(),
                         content,
                     });
+                    // inputs.push(OpenAICompletionRequestMessage::Content {
+                    //     role: "user".to_string(),
+                    //     content,
+                    // });
                 }
                 Message::Assistant {
-                    content,
+                    content: _,
                     response_id,
                 } => {
-                    id = response_id;
-                    inputs.push(OpenAICompletionRequestMessage::Content {
-                        role: "assistant".to_string(),
-                        content,
-                    });
+                    if request.store {
+                        id = response_id;
+                    }
+                    // inputs.push(OpenAICompletionRequestMessage::Content {
+                    //     role: "assistant".to_string(),
+                    //     content,
+                    // });
                 }
 
                 Message::ToolCall {
@@ -104,6 +113,11 @@ impl OpenAICompletionRequest {
                     });
                 }
             }
+        }
+
+         // Push user message
+         if let Some(input) = user_input {
+            inputs.push(input);
         }
 
         Ok(Self {

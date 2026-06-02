@@ -12,7 +12,7 @@ use crate::{
     client::{llm::LlmClient, preset::Preset, provider::Provider},
     services::{
         builder::AgentBuilder,
-        config::agent::{AgentConfig, ExecutionType},
+        config::agent::{AgentConfig, ConversationStrategy, ExecutionType},
         registry::{agent::AgentRegistry, provider::ProviderRegistry},
     },
     tools::{mcp::MCPRegistry, tool::ToolRegistry},
@@ -70,7 +70,8 @@ impl AgentService {
         &self,
         llm: &str,
         model: &str,
-        system_prompt: Option<String>,
+        system_prompt: &Option<String>,
+        strategy: &ConversationStrategy,
     ) -> Result<Agent> {
         let provider = self.resolve_provider("", llm, Some(model))?;
 
@@ -78,18 +79,23 @@ impl AgentService {
             Provider::Local { .. } => Preset::Local,
             _ => Preset::Balanced,
         };
-        let system_prompt = system_prompt.unwrap_or_default();
+        let system_prompt = system_prompt.clone().unwrap_or_default();
+        debug!(
+            "Conversation strategy: {:#?} Preset: {:?}",
+            preset, strategy
+        );
         debug!("System Prompt: {}", system_prompt);
-        debug!("Preset: {:?}", preset);
 
         // chat does not have an id
         let id = String::new();
         let agent = self
             .builder(id.as_str())
+            .with_strategy(strategy.clone())
             .with_system_prompt(system_prompt)
             .with_preset(preset)
             .with_provider(provider)
             .await?
+            .with_filtered_mcp(MCPRegistry::new())
             .build()
             .await?;
 
@@ -107,6 +113,7 @@ impl AgentService {
         agent_id: &str,
         llm: &str,
         model: &str,
+        strategy: &ConversationStrategy,
         preset: Option<Preset>,
     ) -> Result<Agent> {
         let agent_config = self.find_agent_config(agent_id).await?;
@@ -176,6 +183,7 @@ impl AgentService {
 
         let agent = self
             .builder(&agent_config.id)
+            .with_strategy(strategy.clone())
             .with_system_prompt(agent_config.system_prompt.clone())
             .with_tools(tool_registry.get_tools())
             .with_filtered_mcp(mcp_registry)
@@ -193,6 +201,7 @@ impl AgentService {
         agent_id: &str,
         llm: &str,
         model: &str,
+        strategy: &ConversationStrategy,
         visited: &mut HashSet<String>,
     ) -> Result<PipeLineRunner> {
         debug!("Agent: {} - Build Pipeline Runner", agent_id);
@@ -201,7 +210,14 @@ impl AgentService {
 
         // orchestrator is a single agent
         let orchestrator_agent = self
-            .build_agent_for_id(None, agent_id, llm, model, agent_config.clone().preset)
+            .build_agent_for_id(
+                None,
+                agent_id,
+                llm,
+                model,
+                strategy,
+                agent_config.clone().preset,
+            )
             .await?;
         let orchestrator = AgentHandle::Single(orchestrator_agent);
 
@@ -215,6 +231,7 @@ impl AgentService {
                         &sub_agent.id,
                         llm,
                         model,
+                        strategy,
                         sub_agent.preset,
                         visited,
                     )
@@ -236,6 +253,7 @@ impl AgentService {
         agent_id: &str,
         llm: &str,
         model: &str,
+        strategy: &ConversationStrategy,
         preset: Option<Preset>,
         visited: &mut HashSet<String>,
     ) -> Result<AgentHandle> {
@@ -255,13 +273,14 @@ impl AgentService {
         match config.execution {
             ExecutionType::SingleAgent | ExecutionType::PipelineAgent => {
                 let agent = self
-                    .build_agent_for_id(parent_agent_id, agent_id, llm, model, preset)
+                    .build_agent_for_id(parent_agent_id, agent_id, llm, model, strategy, preset)
                     .await?;
                 Ok(AgentHandle::Single(agent))
             }
             ExecutionType::Pipeline => {
                 let runner =
-                    Box::pin(self.build_pipeline_runner(agent_id, llm, model, visited)).await?;
+                    Box::pin(self.build_pipeline_runner(agent_id, llm, model, strategy, visited))
+                        .await?;
                 Ok(AgentHandle::Pipeline(Arc::new(runner)))
             }
         }

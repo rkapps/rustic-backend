@@ -12,9 +12,11 @@ use tracing::debug;
 
 use crate::{
     conversation::{
-        domain::{Conversation, ConversationRequest, ConversationType, Turn},
+        domain::{
+            Conversation, ConversationRequest, ConversationType, ConversationUpdateRequest, Turn,
+        },
         dto::{ConversationsQuery, TurnRequest, TurnResponse},
-        helper::{build_completions_message, calculate_turn_cost},
+        helper::{build_completions_messages, calculate_turn_cost},
     },
     storage::manager::BootStorageManager,
 };
@@ -57,6 +59,28 @@ impl ConversationService {
         Ok(())
     }
 
+    pub async fn update_conversation(
+        &self,
+        uid: &str,
+        id: &str,
+        request: ConversationUpdateRequest,
+    ) -> Result<Conversation> {
+        let mut conversation = self
+            .storage_manager
+            .get_conversation(uid, id)
+            .await
+            .map_err(|e| anyhow::anyhow!("Get Conversation error: {}", e))?;
+
+        conversation.apply_update(request)?;
+
+        self.storage_manager
+            .update_conversation(conversation.clone())
+            .await
+            .map_err(|e| anyhow::anyhow!("Update Conversation error: {}", e))?;
+
+        Ok(conversation)
+    }
+
     pub async fn get_conversations(
         &self,
         uid: String,
@@ -66,7 +90,11 @@ impl ConversationService {
             .storage_manager
             .get_conversations(&uid, query)
             .await
-            .map_err(|e| anyhow::anyhow!(format!("Create Conversation error: {}", e)))?;
+            .map_err(|e| {
+                let err = anyhow::anyhow!("Get Conversations error: {}", e);
+                tracing::error!("{}", err);
+                err
+            })?;
 
         debug!("Conversations: {}", conversations.len());
         Ok(conversations)
@@ -77,7 +105,11 @@ impl ConversationService {
             .storage_manager
             .get_conversation(uid, id)
             .await
-            .map_err(|e| anyhow::anyhow!(format!("Get Conversation error: {}", e)))?;
+            .map_err(|e| {
+                let err = anyhow::anyhow!("Get Conversations error: {}", e);
+                tracing::error!("{}", err);
+                err
+            })?;
 
         debug!("Conversations: {}", conversation.id);
 
@@ -170,7 +202,12 @@ impl ConversationService {
             })?;
 
         let turns = self.get_turns(uid, conversation_id).await?;
-        let mut messages = build_completions_message(turns);
+        let mut messages = build_completions_messages(
+            turns,
+            &conversation.strategy,
+            conversation.history_mode.as_ref(),
+            conversation.max_turns,
+        );
         let nmessage = Message::User {
             content: request.prompt.clone(),
             response_id: None,
@@ -178,21 +215,11 @@ impl ConversationService {
         messages.push(nmessage);
 
         let cresponse = self.run_conversation(&conversation, &messages).await?;
-        // let cresponse = agent.complete(&messages).await?;
-
-        // let mut rcontent = String::new();
         let response = cresponse.clone();
         let usage = cresponse.usage;
         let response_id = response.response_id.clone();
 
         let rcontent = response.text_or_default();
-        // for content in response.contents {
-        //     if let CompletionResponseContent::Text(val) = content {
-        //         // println!("The text is: {}", val);
-        //         rcontent = val.to_string();
-        //         // chat.update_assistant_message(val.to_string(), response.response_id.clone());
-        //     }
-        // }
 
         // save turn
         self.save_turn(
@@ -220,7 +247,7 @@ impl ConversationService {
         conversation_id: &str,
         request: TurnRequest,
     ) -> Result<CompletionStreamResponse> {
-        debug!("Turn: {}", conversation_id);
+        debug!("Conversation: {}", conversation_id);
         let conversation = self
             .get_conversation(uid, conversation_id)
             .await
@@ -232,7 +259,12 @@ impl ConversationService {
             })?;
 
         let turns = self.get_turns(uid, conversation_id).await?;
-        let mut messages = build_completions_message(turns);
+        let mut messages = build_completions_messages(
+            turns,
+            &conversation.strategy,
+            conversation.history_mode.as_ref(),
+            conversation.max_turns,
+        );
         let nmessage = Message::User {
             content: request.prompt,
             response_id: None,
@@ -259,7 +291,8 @@ impl ConversationService {
                     .build_chat_agent(
                         &conversation.llm,
                         &conversation.model,
-                        conversation.system_prompt.clone(),
+                        &conversation.system_prompt,
+                        &conversation.strategy,
                     )
                     .await?;
                 let response = agent.complete(messages).await?;
@@ -275,6 +308,7 @@ impl ConversationService {
                             agent_id,
                             &conversation.llm,
                             &conversation.model,
+                            &conversation.strategy,
                             None,
                             &mut visited,
                         )
@@ -301,7 +335,8 @@ impl ConversationService {
                     .build_chat_agent(
                         &conversation.llm,
                         &conversation.model,
-                        conversation.system_prompt.clone(),
+                        &conversation.system_prompt,
+                        &conversation.strategy,
                     )
                     .await?;
                 let stream = agent.complete_with_streaming(messages).await?;
@@ -317,12 +352,17 @@ impl ConversationService {
                             agent_id,
                             &conversation.llm,
                             &conversation.model,
+                            &conversation.strategy,
                             None,
                             &mut visited,
                         )
                         .await?;
 
-                    debug!("Building conversatino agent: {}", agent_id);
+                    debug!(
+                        "Building conversatino agent: {} conversation messages: {}",
+                        agent_id,
+                        messages.len()
+                    );
                     let stream = handle.execute_streaming(messages).await?;
                     Ok(Box::pin(stream))
                 } else {
