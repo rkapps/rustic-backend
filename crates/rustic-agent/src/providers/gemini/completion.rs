@@ -64,6 +64,7 @@ impl GeminiClient {
             .map_err(|_| HttpError::ApiKeyParsingFailed)?;
 
         headers.insert("x-goog-api-key", api_key);
+        headers.insert("Api-Revision", HeaderValue::from_static("2026-05-07"));
 
         let grequest = GeminiInteractionsRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
@@ -147,9 +148,6 @@ impl LlmClient for GeminiClient {
         let url = format!("{}/v1beta/interactions", self.base_url,);
 
         let agent_id = request.id.clone();
-        debug!(target: "agent-gemini", request= %format_args!("{:#?}", request), "Agent Completion");
-        // response= %format_args!("{:#?}", response.text() ),
-
         let mut headers = reqwest::header::HeaderMap::new();
 
         let api_key: HeaderValue = self
