@@ -1,7 +1,10 @@
 use std::{io::Write, path::PathBuf};
 
 use anyhow::Result;
-use google_cloud_storage::{client::{Client, ClientConfig}, http::objects::{download::Range, get::GetObjectRequest}};
+use google_cloud_storage::{
+    client::{Client, ClientConfig},
+    http::objects::{download::Range, get::GetObjectRequest},
+};
 use tempfile::NamedTempFile;
 
 /// Loads raw bytes from a local file path or a GCS path (`gs://bucket/object`).
