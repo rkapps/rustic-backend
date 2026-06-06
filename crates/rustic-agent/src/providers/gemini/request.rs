@@ -118,19 +118,33 @@ impl GeminiInteractionsRequest {
                             content: std::mem::take(&mut model_contents),
                         });
                     }
+                    if request.store {
+                        user_input = Some(GeminiCompletionRequestInput::Content {
+                            role: "user".to_string(),
+                            content,
+                        });
+                    } else {
+                        let user_input = GeminiCompletionRequestInput::Content {
+                            role: "user".to_string(),
+                            content,
+                        };
+                        inputs.push(user_input);
+                    }
 
-                    user_input = Some(GeminiCompletionRequestInput::Content {
-                        role: "user".to_string(),
-                        content,
-                    });
                 }
 
                 Message::Assistant {
-                    content: _,
+                    content,
                     response_id,
                 } => {
                     if request.store {
                         id = response_id;
+                    } else {
+                        let response_input = GeminiCompletionRequestInput::Content {
+                            role: "model".to_string(),
+                            content,
+                        };
+                        inputs.push(response_input);
                     }
                 }
 
@@ -167,8 +181,10 @@ impl GeminiInteractionsRequest {
         }
 
         // Push user message
-        if let Some(input) = user_input {
-            inputs.push(input);
+        if request.store {
+            if let Some(input) = user_input {
+                inputs.push(input);
+            }
         }
 
         // Push model message with thought + function calls combined
