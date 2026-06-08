@@ -81,7 +81,6 @@ pub struct PipelineConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AvailableAgent {
     pub id: String,
-    pub context: MessageContext,
     #[serde(default)]
     pub preset: Option<Preset>,
 }
@@ -117,4 +116,3 @@ pub enum HistoryMode {
     Full,
     Trimmed,
 }
-
