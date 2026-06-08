@@ -1,6 +1,17 @@
+use chrono::{Duration, Utc};
 use rustic_providers::economic::bea::model::BeaParamValue;
 
-pub fn fips_to_census_geo(geo_fips: &str) -> String {
+pub(crate) fn next_refresh(frequency: &str) -> chrono::DateTime<Utc> {
+    let now = Utc::now();
+    match frequency {
+        "m" => now + Duration::days(1),
+        "q" => now + Duration::days(7),
+        "a" => now + Duration::days(30),
+        _ => now + Duration::days(1),
+    }
+}
+
+pub(crate) fn fips_to_census_geo(geo_fips: &str) -> String {
     if geo_fips == "00000" {
         "us:1".to_string()
     } else if geo_fips.ends_with("000") {
@@ -12,7 +23,7 @@ pub fn fips_to_census_geo(geo_fips: &str) -> String {
     }
 }
 
-pub fn geo_type(geo_fip: &BeaParamValue) -> &'static str {
+pub(crate) fn geo_type(geo_fip: &BeaParamValue) -> &'static str {
     let key = geo_fip.key.as_str();
     let name = geo_fip.description.as_str();
 
@@ -31,7 +42,7 @@ pub fn geo_type(geo_fip: &BeaParamValue) -> &'static str {
     }
 }
 
-pub fn resolve_years(year: &str) -> Vec<String> {
+pub(crate) fn resolve_years(year: &str) -> Vec<String> {
     let current_year = 2026; // latest available BEA year
 
     match year {

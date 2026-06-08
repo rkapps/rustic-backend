@@ -1,26 +1,24 @@
-// rustic-economic/src/tools/fred_series.rs
-
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
 use serde_json::{Value, json};
-use tracing::debug;
 use std::sync::Arc;
+use tracing::debug;
 
-use crate::service::EconomicDataService;
+use crate::{core::fred::get_fred_series, storage::mongo::reader::EconomicMongoStorageReader};
 #[derive(Debug, Clone)]
-pub struct FredSeriesTool {
-    service: Arc<EconomicDataService>,
+pub struct FredDataTool {
+    reader: Arc<EconomicMongoStorageReader>,
 }
 
-impl FredSeriesTool {
-    pub fn new(service: Arc<EconomicDataService>) -> Self {
-        Self { service }
+impl FredDataTool {
+    pub fn new(reader: Arc<EconomicMongoStorageReader>) -> Self {
+        Self { reader }
     }
 }
 
 #[async_trait]
-impl Tool for FredSeriesTool {
+impl Tool for FredDataTool {
     fn name(&self) -> String {
         "fred_series".to_string()
     }
@@ -53,8 +51,7 @@ impl Tool for FredSeriesTool {
             .ok_or_else(|| anyhow::anyhow!("series_id required"))?;
 
         let limit = params["limit"].as_u64().map(|n| n as usize);
-
-        let data_points = self.service.get_fred_series(series_id, limit).await?;
+        let data_points = get_fred_series(self.reader.clone(), series_id, limit).await?;
 
         debug!("series_id: {} observations: {:?}", series_id, data_points);
         Ok(json!({

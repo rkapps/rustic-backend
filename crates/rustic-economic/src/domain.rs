@@ -1,5 +1,3 @@
-// rustic-economic/src/domain/mod.rs
-
 use std::str::FromStr;
 
 use chrono::{DateTime, Utc};
@@ -68,7 +66,6 @@ impl FromStr for Frequency {
 }
 
 impl Frequency {
- 
     pub fn as_str(&self) -> &str {
         match self {
             Frequency::Monthly => "m",

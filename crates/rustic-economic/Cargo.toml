@@ -3,15 +3,23 @@ name = "rustic-economic"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["reader"]
+reader = []
+writer = ["reader"]
+full = ["reader", "writer"]
+
+
 [dependencies]
-rustic-core.workspace=true
-rustic-providers.workspace=true
-rustic-storage.workspace=true
+anyhow.workspace=true
 async-trait.workspace=true
 chrono.workspace=true
 serde.workspace=true
 serde_json.workspace=true
 tokio.workspace=true
-anyhow.workspace=true
 tracing.workspace=true
 
+#internal crates
+rustic-core.workspace=true
+rustic-providers.workspace=true
+rustic-storage.workspace=true

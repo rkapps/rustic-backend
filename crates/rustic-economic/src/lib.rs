@@ -1,5 +1,6 @@
+pub mod core;
 pub mod domain;
-pub mod helper;
+#[cfg(feature = "writer")]
 pub mod pipeline;
 pub mod service;
 pub mod storage;

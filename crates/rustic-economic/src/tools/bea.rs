@@ -1,4 +1,7 @@
-use crate::service::EconomicDataService;
+use crate::{
+    core::bea::{get_bea_nipa, get_bea_regional},
+    storage::mongo::reader::EconomicMongoStorageReader,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
@@ -8,12 +11,12 @@ use tracing::{debug, info};
 
 #[derive(Debug)]
 pub struct BeaDataTool {
-    service: Arc<EconomicDataService>,
+    reader: Arc<EconomicMongoStorageReader>,
 }
 
 impl BeaDataTool {
-    pub fn new(service: Arc<EconomicDataService>) -> Self {
-        Self { service }
+    pub fn new(reader: Arc<EconomicMongoStorageReader>) -> Self {
+        Self { reader }
     }
 }
 
@@ -109,7 +112,7 @@ impl Tool for BeaDataTool {
 
         match dataset {
             "nipa" => {
-                let rows = self.service.get_bea_nipa(table_name, year).await?;
+                let rows = get_bea_nipa(self.reader.clone(), table_name, year).await?;
                 Ok(json!({
                     "dataset":    dataset,
                     "table_name": table_name,
@@ -124,17 +127,26 @@ impl Tool for BeaDataTool {
                 let geo_type = params["geo_type"].as_str();
                 let state_prefix = params["state_prefix"].as_str();
 
+                let rows = get_bea_regional(
+                    self.reader.clone(),
+                    table_name,
+                    geo_fips,
+                    geo_type,
+                    state_prefix,
+                    year,
+                )
+                .await?;
 
-                let rows = self
-                    .service
-                    .get_bea_regional(table_name, geo_fips, geo_type, state_prefix, year)
-                    .await?;
+                debug!(
+                    "bea regional table_name: {} geo_fips: {:?} geo_type: {:?} state_prefix: {:?} year: {} - rows: {}",
+                    table_name,
+                    geo_fips,
+                    geo_type,
+                    state_prefix,
+                    year,
+                    rows.len()
+                );
 
-                    debug!(
-                        "bea regional table_name: {} geo_fips: {:?} geo_type: {:?} state_prefix: {:?} year: {} - rows: {}",
-                        table_name, geo_fips, geo_type, state_prefix, year, rows.len()
-                    );
-    
                 Ok(json!({
                     "dataset":    dataset,
                     "table_name": table_name,

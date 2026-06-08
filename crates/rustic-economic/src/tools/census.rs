@@ -4,16 +4,16 @@ use rustic_core::Tool;
 use serde_json::{Value, json};
 use std::sync::Arc;
 
-use crate::service::EconomicDataService;
+use crate::{core::census::get_census_data, storage::mongo::reader::EconomicMongoStorageReader};
 
 #[derive(Debug)]
 pub struct CensusDataTool {
-    service: Arc<EconomicDataService>,
+    reader: Arc<EconomicMongoStorageReader>,
 }
 
 impl CensusDataTool {
-    pub fn new(service: Arc<EconomicDataService>) -> Self {
-        Self { service }
+    pub fn new(reader: Arc<EconomicMongoStorageReader>) -> Self {
+        Self { reader }
     }
 }
 
@@ -103,10 +103,16 @@ impl Tool for CensusDataTool {
         let geo_type = params["geo_type"].as_str();
         let state_prefix = params["state_prefix"].as_str();
 
-        let records = self
-            .service
-            .get_census_data(&variables, dataset, geo_fips, geo_type, state_prefix, year)
-            .await?;
+        let records = get_census_data(
+            self.reader.clone(),
+            &variables,
+            dataset,
+            geo_fips,
+            geo_type,
+            state_prefix,
+            year,
+        )
+        .await?;
 
         // census
         Ok(json!({

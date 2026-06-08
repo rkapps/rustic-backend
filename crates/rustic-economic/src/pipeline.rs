@@ -1,15 +1,17 @@
+#[cfg(feature = "writer")]
 use anyhow::Result;
+use rustic_providers::economic::bea::model::BeaParamValue;
 use std::sync::Arc;
 use tracing::info;
 
-use crate::service::EconomicDataService;
+use crate::service::EconomicService;
 
 pub struct EconomicDataPipeline {
-    service: Arc<EconomicDataService>,
+    service: Arc<EconomicService>,
 }
 
 impl EconomicDataPipeline {
-    pub fn new(service: Arc<EconomicDataService>) -> Self {
+    pub fn new(service: Arc<EconomicService>) -> Self {
         Self { service }
     }
 
@@ -183,7 +185,7 @@ impl EconomicDataPipeline {
         }
 
         // Regional — for all geo-fips
-        let geo_fips = self.service.get_geo_fips().await?;
+        let geo_fips: Vec<BeaParamValue> = self.service.get_geo_fips().await?;
         info!("geo-fips: {}", geo_fips.len());
 
         let tables: Vec<(&str, &str)> = vec![
@@ -214,7 +216,7 @@ impl EconomicDataPipeline {
 
         // let years = vec!["2026", "2025", "2024", "2023", "2022", "2021", "2020"];
         // Regional — for all geo-fips
-        let geo_fips = self.service.get_geo_fips().await?;
+        let geo_fips: Vec<BeaParamValue> = self.service.get_geo_fips().await?;
         info!("geo-fips: {}", geo_fips.len());
 
         let vars: Vec<&str> = variables.to_vec();
