@@ -10,6 +10,7 @@ use std::path::Path;
 use std::{fmt::Debug, path::PathBuf};
 use tracing::{debug, info};
 
+use crate::core::index::IndexDefinition;
 use crate::core::repository::{RepoKey, RepoModel, Repository, Searchable, VectorEmbedding};
 use crate::core::search::SearchCriteria;
 use crate::file::record::{
@@ -120,6 +121,14 @@ where
     async fn bulk_update(&mut self, _models: Vec<M>) -> Result<()> {
         Ok(())
     }
+
+    async fn create_index(&mut self, _index: IndexDefinition) -> Result<()>{
+        Ok(())
+    }
+    async fn create_indexes(&mut self, _indexes: Vec<IndexDefinition>) -> Result<()> {
+        Ok(()) // no-op for file backend
+    }
+
     // insert creates a new json file for the chat id. creates the directory structure too.
     async fn insert(&mut self, model: M) -> Result<()> {
         let offset = write_active_record(&mut self.file, RECORD_TYPE_ACTIVE, &model, false)?;

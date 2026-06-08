@@ -15,7 +15,7 @@ use crate::{
 /// can swap backends without changing application code.  Each collection is
 /// stored in a `repos` entry keyed by collection name; entries are typed-erased
 /// as `Arc<dyn Any>` and downcast on access.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MongoDatabase {
     name: String,
     client: mongodb::Client,

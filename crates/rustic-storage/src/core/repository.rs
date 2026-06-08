@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
 
-use crate::core::search::SearchCriteria;
+use crate::core::{index::IndexDefinition, search::SearchCriteria};
 
 /// Blanket bound that every repository key type must satisfy.
 ///
@@ -59,6 +59,10 @@ pub trait Repository<K, M>: Send + Sync {
 
     /// Upsert multiple models in a single batch operation.
     async fn bulk_update(&mut self, models: Vec<M>) -> Result<()>;
+    /// Create a single index.
+    async fn create_index(&mut self, index: IndexDefinition) -> Result<()>;
+    /// Create multiple indexes in one operation.
+    async fn create_indexes(&mut self, indexes: Vec<IndexDefinition>) -> Result<()>;
     /// Append a tombstone record (file) or issue a delete query (MongoDB).
     async fn delete(&mut self, repo: M) -> Result<()>;
     /// Delete all models matching `criteria`, or every model when `None`.
@@ -93,6 +97,8 @@ pub trait Repository<K, M>: Send + Sync {
     /// Overwrite an existing model.  Both backends use upsert semantics, so
     /// calling `update` on a model that does not yet exist will insert it.
     async fn update(&mut self, repo: M) -> Result<()>;
+
+    
 }
 
 /// A model that carries a dense float vector, used for similarity search.

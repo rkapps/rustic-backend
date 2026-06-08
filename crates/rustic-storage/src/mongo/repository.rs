@@ -5,6 +5,8 @@ use bson::serialize_to_bson;
 use bson::serialize_to_document;
 use futures::StreamExt;
 use futures::TryStreamExt;
+use mongodb::IndexModel;
+use mongodb::options::IndexOptions;
 use mongodb::{
     bson::doc,
     options::{ReplaceOneModel, WriteModel},
@@ -15,6 +17,7 @@ use serde_json::Value;
 use std::marker::PhantomData;
 use tracing::{error, trace};
 
+use crate::core::index::IndexDefinition;
 use crate::core::repository::RepoKey;
 use crate::core::repository::RepoModel;
 use crate::core::repository::Repository;
@@ -110,6 +113,35 @@ where
             .collect();
 
         self.collection.client().bulk_write(operations).await?;
+        Ok(())
+    }
+
+    async fn create_index(&mut self, index: IndexDefinition) -> Result<()> {
+        self.create_indexes(vec![index]).await
+    }
+
+    async fn create_indexes(&mut self, indexes: Vec<IndexDefinition>) -> Result<()> {
+
+        let index_models: Vec<IndexModel> = indexes
+            .into_iter()
+            .map(|idx| {
+                let mut keys = Document::new();
+                for (field, direction) in idx.fields {
+                    keys.insert(field, direction);
+                }
+
+                let mut options = IndexOptions::builder().build();
+                options.unique = Some(idx.unique);
+                options.sparse = Some(idx.sparse);
+                if let Some(name) = idx.name {
+                    options.name = Some(name);
+                }
+
+                IndexModel::builder().keys(keys).options(options).build()
+            })
+            .collect();
+
+        self.collection.create_indexes(index_models).await?;
         Ok(())
     }
 
