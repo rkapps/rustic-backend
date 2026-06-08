@@ -130,7 +130,6 @@ impl GeminiInteractionsRequest {
                         };
                         inputs.push(user_input);
                     }
-
                 }
 
                 Message::Assistant {

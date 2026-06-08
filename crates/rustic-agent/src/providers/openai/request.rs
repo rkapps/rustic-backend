@@ -63,8 +63,7 @@ impl OpenAICompletionRequest {
                     content,
                     response_id: _,
                 } => {
-
-                    user_input =  Some(OpenAICompletionRequestMessage::Content {
+                    user_input = Some(OpenAICompletionRequestMessage::Content {
                         role: "user".to_string(),
                         content,
                     });
@@ -115,8 +114,8 @@ impl OpenAICompletionRequest {
             }
         }
 
-         // Push user message
-         if let Some(input) = user_input {
+        // Push user message
+        if let Some(input) = user_input {
             inputs.push(input);
         }
 
