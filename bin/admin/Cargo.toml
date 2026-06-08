@@ -1,0 +1,19 @@
+[package]
+name = "rustic-admin"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+calamine.workspace=true
+clap.workspace = true
+tokio.workspace = true
+tracing.workspace=true
+
+# internal crates
+rustic-boot.workspace=true
+rustic-economic.workspace=true
+rustic-finance.workspace=true
+rustic-core.workspace=true
+rustic-storage.workspace = true
+rustic-ml.workspace=true

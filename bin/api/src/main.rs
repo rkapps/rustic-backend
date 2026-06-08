@@ -1,12 +1,7 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
-use bset_backend::{BsetTools, service::BsetDataService};
-use fin_analyse::tools::{
-    TickerIndicatorTool, TickerPeersTool, TickerPriceHistoryTool, TickerScreeningTool,
-    TickerSentimentTool, TickerSnapshotTool, TickerTaxonomyTool,
-};
-use fin_storage::mongo::{MongoStorageManager, MongoStorageService};
+use bset_sales::{service::BsetSalesService, storage::BsetStorageService};
 use rustic_ai_api::state::AppState;
 use rustic_boot::{
     boot,
@@ -16,13 +11,9 @@ use rustic_boot::{
     },
 };
 use rustic_core::{Tool, logger::set_logger};
-use rustic_economic::{
-    service::EconomicDataService,
-    storage::EconomicStorageManager,
-    tools::{bea::BeaDataTool, census::CensusDataTool, fred::FredSeriesTool},
-};
+use rustic_economic::service::EconomicService;
+use rustic_finance::service::FinanceService;
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
-use rustic_providers::{BeaClient, CensusClient, FredClient};
 use tracing::debug;
 
 #[tokio::main]
@@ -34,76 +25,46 @@ async fn main() -> Result<()> {
 
     set_logger(filter);
 
+    // Get Embedding client
+    let openai_api_key: String =
+        env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
+    let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
+
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
     let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
         .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
-    let openai_api_key: String =
-        env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
-    let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
+
+    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 
     let mongo_db =
         env::var("FINTRACKER_DB_NAME").expect("FINTRACKER_DB_NAME envrionment variable not set");
-    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
-
     debug!("Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
-    let storage_manager = MongoStorageManager::new(&mongo_uri, &mongo_db).await?;
-    let storage_service = Arc::new(MongoStorageService::new(storage_manager));
+    let finance_service =
+        FinanceService::new_reader(&mongo_uri, &mongo_db, embedding_client).await?;
 
     // Find these again for rusticai
     let mongo_db =
         env::var("RUSTIC_AI_DB_NAME").expect("RUSTIC_AI_DB_NAME envrionment variable not set");
-    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 
-    let fred_api_key = env::var("FRED_API_KEY").expect("FRED_API_KEY environment variable not set");
-    let fred_client = Arc::new(FredClient::new(fred_api_key)?);
-
-    let census_api_key =
-        env::var("CENSUS_API_KEY").expect("CENSUS_API_KEY environment variable not set");
-    let census_client = Arc::new(CensusClient::new(census_api_key)?);
-
-    let bea_api_key = env::var("BEA_API_KEY").expect("BEA_API_KEY environment variable not set");
-    let bea_client = Arc::new(BeaClient::new(bea_api_key)?);
-    let economic_storage_manager = EconomicStorageManager::new(&mongo_uri, &mongo_db).await?;
-    let economic_data_service = EconomicDataService::new(
-        Arc::new(economic_storage_manager),
-        fred_client,
-        bea_client,
-        census_client,
-    );
-
-    let mut tools: Vec<Arc<dyn Tool>> = vec![
-        Arc::new(TickerScreeningTool::new(
-            storage_service.clone(),
-            embedding_client.clone(),
-        )),
-        Arc::new(TickerTaxonomyTool::new(storage_service.clone())),
-        Arc::new(TickerSentimentTool::new(
-            embedding_client.clone(),
-            storage_service.clone(),
-        )),
-        Arc::new(TickerSnapshotTool::new(storage_service.clone())),
-        Arc::new(TickerPriceHistoryTool::new(storage_service.clone())),
-        Arc::new(TickerIndicatorTool::new(storage_service.clone())),
-        Arc::new(TickerPeersTool::new(storage_service.clone())),
-        Arc::new(FredSeriesTool::new(Arc::new(economic_data_service.clone()))),
-        Arc::new(CensusDataTool::new(Arc::new(economic_data_service.clone()))),
-        Arc::new(BeaDataTool::new(Arc::new(economic_data_service.clone()))),
-    ];
+    let economic_service = EconomicService::new_reader(&mongo_uri, &mongo_db).await?;
 
     //bset specific
     let bset_data_path = env::var("RUSTIC_AI_BSET_DATA_PATH")
         .expect("RUSTIC_AI_BSET_DATA_PATH environment variable is not set.");
 
-    let bset_data_service = BsetDataService::new()
+    let bset_storage_service = BsetStorageService::new()
         .add_file(&bset_data_path, "bset_q2_2025.xlsx", 2025, 2)
         .await?
         .add_file(&bset_data_path, "bset_q2_2026.xlsx", 2026, 2)
         .await?;
+    let bset_sales_service = BsetSalesService::new(Arc::new(bset_storage_service));
 
-    let bset_tools = BsetTools::new(bset_data_service);
-    tools.extend(bset_tools.tools());
+    let mut tools: Vec<Arc<dyn Tool>> = vec![];
+    tools.extend(economic_service.tools());
+    tools.extend(finance_service.tools());
+    tools.extend(bset_sales_service.tools());
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);

@@ -8,6 +8,6 @@ anyhow.workspace = true
 tokio.workspace = true
 
 rustic-core.workspace=true
-rustic-economic.workspace = true
+rustic-economic = { workspace = true, features = ["writer"] }
 rustic-providers.workspace=true
 rustic-storage.workspace = true

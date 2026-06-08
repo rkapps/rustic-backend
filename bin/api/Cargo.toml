@@ -29,12 +29,10 @@ rustic-core.workspace=true
 rustic-ml.workspace=true
 rustic-providers.workspace=true
 rustic-storage.workspace = true
-rustic-economic.workspace = true
-
-#fin-tracker packages
-fin-analyse.workspace = true
-fin-storage.workspace = true
+rustic-economic = { workspace = true, features = ["reader"] }
+rustic-finance.workspace=true
 
 
-# for bset
-bset-backend = { git = "https://github.com/rkapps/bset-backend.git ",  branch = "main"}
+# external
+#bset-backend = { git = "https://github.com/rkapps/bset-backend.git ",  branch = "main"}
+bset-sales   = { path = "../../../bset-backend/crates/bset-sales" }
