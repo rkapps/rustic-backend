@@ -139,8 +139,8 @@ impl EconomicService {
     #[cfg(feature = "writer")]
     pub async fn update_bea_regional(
         &self,
-        tables: Vec<(&str, &str)>,
-        geo_fips: &[BeaParamValue],
+        tables: &[(&str, &str)],
+        geo_fips: &str,
         years: &[&str],
     ) -> Result<()> {
         use crate::core::bea::update_bea_regional;
@@ -157,7 +157,6 @@ impl EconomicService {
         dataset: &str,
         variables: &[&str],
         years: Vec<&str>,
-        geo_fips: Vec<BeaParamValue>,
     ) -> Result<()> {
         let writer = self.writer.as_ref().expect("writer not initialized");
         let census = self.census.as_ref().expect("census client not initialized");
@@ -168,7 +167,6 @@ impl EconomicService {
             dataset,
             variables,
             years,
-            geo_fips,
         )
         .await
     }

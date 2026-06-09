@@ -1,7 +1,6 @@
 #[cfg(feature = "writer")]
 use anyhow::Result;
-use rustic_providers::economic::bea::model::BeaParamValue;
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 use tracing::info;
 
 use crate::service::EconomicService;
@@ -176,30 +175,44 @@ impl EconomicDataPipeline {
     }
 
     async fn update_bea(&self) -> Result<()> {
-        // let years = "2026,2025,2024,2023,2022,2021,2020";
-        let years = vec!["2024"];
+        let years = "2026,2025,2024,2023,2022,2021,2020";
+        // let years = vec!["2026", "2025", "2024", "2023", "2022", "2021", "2020"];
 
+        let tables: Vec<&str> = vec!["T20100", "T20305", "T20600"];
         // NIPA
-        for year in years.clone() {
-            self.service.update_bea_nipa("T20100", "A", year).await?;
+        for table in &tables {
+            match self.service.update_bea_nipa(table, "A,Q", years).await {
+                Ok(c) => c,
+                Err(e) => {
+                    tracing::warn!(
+                        "BEA NIPA for year: {} table: {} failed: {}",
+                        years,
+                        table,
+                        e
+                    );
+                    continue;
+                }
+            };
         }
 
-        // Regional — for all geo-fips
-        let geo_fips: Vec<BeaParamValue> = self.service.get_geo_fips().await?;
-        info!("geo-fips: {}", geo_fips.len());
-
+        let years = vec!["LAST5"];
         let tables: Vec<(&str, &str)> = vec![
             ("CAINC1", "1"),
             ("CAINC4", "10"),
             ("CAINC5N", "10"),
-            ("CAINC5S", "10"),
-            ("SASUMMARY", "1"),
             ("CAGDP1", "1"),
         ];
 
         self.service
-            .update_bea_regional(tables, &geo_fips, &years)
+            .update_bea_regional(&tables, "STATE", &years)
             .await?;
+        tokio::time::sleep(Duration::from_millis(700)).await;
+
+        self.service
+            .update_bea_regional(&tables, "COUNTY", &years)
+            .await?;
+        tokio::time::sleep(Duration::from_millis(700)).await;
+
         Ok(())
     }
 
@@ -214,17 +227,10 @@ impl EconomicDataPipeline {
             "B23025_005E", // unemployed
         ];
 
-        // let years = vec!["2026", "2025", "2024", "2023", "2022", "2021", "2020"];
-        // Regional — for all geo-fips
-        let geo_fips: Vec<BeaParamValue> = self.service.get_geo_fips().await?;
-        info!("geo-fips: {}", geo_fips.len());
-
         let vars: Vec<&str> = variables.to_vec();
-        let years = vec!["2024"];
+        let years = vec!["2025","2024","2023","2022", "2021", "2020"];
 
-        self.service
-            .update_census("acs5", &vars, years, geo_fips)
-            .await?;
+        self.service.update_census("acs5", &vars, years).await?;
 
         Ok(())
     }

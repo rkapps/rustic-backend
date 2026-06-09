@@ -6,7 +6,7 @@ use rustic_providers::{BeaClient, economic::bea::model::BeaParamValue};
 use tracing::{error, info};
 
 use crate::{
-    core::helper::{geo_type, next_refresh, resolve_years},
+    core::helper::{next_refresh, resolve_years},
     domain::{BeaNipaData, BeaRegionalData},
     storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
@@ -112,71 +112,49 @@ pub async fn update_bea_nipa(
 pub async fn update_bea_regional(
     writer: Arc<EconomicMongoStorageWriter>,
     bea: Arc<BeaClient>,
-    tables: Vec<(&str, &str)>,
-    geo_fips: &[BeaParamValue],
+    tables: &[(&str, &str)],
+    geo_fips: &str,
     years: &[&str],
 ) -> Result<()> {
     // loop through the years
     for year in years {
         // loop through the tables
-        for table in &tables {
+        for table in tables {
             let mut all_rows = Vec::new();
 
-            // loop through the geo-fips
-            for (i, geo_fip) in geo_fips.iter().enumerate() {
-                let rows = match bea.get_regional(table.0, table.1, &geo_fip.key, year).await {
-                    Ok(c) => c,
-                    Err(e) => {
-                        tracing::warn!(
-                            "BEA Regional for year: {} table: {} geo_flip {:?} failed: {}",
-                            year,
-                            table.0,
-                            geo_fip.key,
-                            e
-                        );
-                        tokio::time::sleep(tokio::time::Duration::from_millis(10000)).await;
-
-                        match bea.get_regional(table.0, table.1, &geo_fip.key, year).await {
-                            Ok(c) => c,
-                            Err(e) => {
-                                tracing::warn!(
-                                    "BEA Regional for year: {} table: {} geo_flip {:?} failed: {}",
-                                    year,
-                                    table.0,
-                                    geo_fip.key,
-                                    e
-                                );
-                                Vec::new()
-                            }
-                        }
-                    }
-                };
-
-                for row in rows {
-                    let id = format!(
-                        "bea_regional_{}_{}_{}",
-                        table.0, row.geo_fips, row.time_period
+            let rows = match bea.get_regional(table.0, table.1, &geo_fips, year).await {
+                Ok(c) => c,
+                Err(e) => {
+                    tracing::warn!(
+                        "BEA Regional for year: {} table: {} geo_flip {:?} failed: {}",
+                        year,
+                        table.0,
+                        geo_fips,
+                        e
                     );
-                    let new_row = BeaRegionalData {
-                        id,
-                        code: row.code.clone(),
-                        geo_fips: row.geo_fips.clone(),
-                        geo_name: row.geo_name.clone(),
-                        geo_type: geo_type(geo_fip).to_owned(),
-                        time_period: row.time_period.clone(),
-                        data_value: row.data_value.clone(),
-                        cl_unit: row.cl_unit.clone(),
-                        unit_mult: row.unit_mult.clone(),
-                        last_refreshed: Utc::now(),
-                        next_refresh: next_refresh("a"),
-                    };
-                    all_rows.push(new_row);
+                    continue;
                 }
+            };
 
-                if i % 20 == 0 {
-                    info!("i: {} geo_fip: {}", i, geo_fip.key);
-                    tokio::time::sleep(tokio::time::Duration::from_millis(10000)).await;
-                }
+            for row in rows {
+                let id = format!(
+                    "bea_regional_{}_{}_{}",
+                    table.0, row.geo_fips, row.time_period
+                );
+                let new_row = BeaRegionalData {
+                    id,
+                    code: row.code.clone(),
+                    geo_fips: row.geo_fips.clone(),
+                    geo_name: row.geo_name.clone(),
+                    geo_type: geo_fips.to_string(),
+                    time_period: row.time_period.clone(),
+                    data_value: row.data_value.clone(),
+                    cl_unit: row.cl_unit.clone(),
+                    unit_mult: row.unit_mult.clone(),
+                    last_refreshed: Utc::now(),
+                    next_refresh: next_refresh("a"),
+                };
+                all_rows.push(new_row);
             }
 
             info!(
@@ -190,7 +168,11 @@ pub async fn update_bea_regional(
                 Ok(c) => c,
                 Err(e) => error!("Update census_bulk error: {}", e),
             };
+
         }
+
+      
+
     }
 
     Ok(())
