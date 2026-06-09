@@ -6,9 +6,9 @@ use tracing::info;
 
 use crate::schema::create_indexes_safe;
 
-pub async fn update_rustic_main(mongo_uri: &str) -> Result<()> {
+pub async fn update_rustic_platform(mongo_uri: &str) -> Result<()> {
     let mongo_db =
-        env::var("RUSTIC_AI_DB_NAME").expect("RUSTIC_AI_DB_NAME envrionment variable not set");
+        env::var("RUSTIC_PLATFORM_DB_NAME").expect("RUSTIC_PLATFORM_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
     let manager = BootStorageManager::new(&mongo_uri, &mongo_db).await?;
 

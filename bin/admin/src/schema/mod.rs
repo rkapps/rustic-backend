@@ -7,7 +7,7 @@ use tracing::{info, warn};
 
 pub mod rustic_economic;
 pub mod rustic_finance;
-pub mod rustic_main;
+pub mod rustic_platform;
 
 
 pub async fn create_indexes_safe<K, M, R>(

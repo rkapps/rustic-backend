@@ -2,7 +2,7 @@ use anyhow::Result;
 use rustic_admin::{
     schema::{
         rustic_economic::update_economic_db, rustic_finance::update_finance_db,
-        rustic_main::update_rustic_main,
+        rustic_platform::update_rustic_platform,
     }, tickers::load::load_tickers,
 };
 use rustic_core::set_logger;
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
             info!("Load Tickers PipeLine done.");
         }
         AdminCommands::UpdateSchema => {
-            update_rustic_main(&mongo_uri).await?;
+            update_rustic_platform(&mongo_uri).await?;
             update_economic_db(&mongo_uri).await?;
             update_finance_db(&mongo_uri).await?;
         }
