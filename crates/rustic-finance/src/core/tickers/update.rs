@@ -162,13 +162,14 @@ pub async fn update_ticker(
     match update_ticker_history(provider_service.clone(), tc, ticker).await {
         Ok((all_histories, new_histories)) => {
             if !new_histories.is_empty() {
-                tc.last_history_sync_at = Some(Utc::now());
                 info!(
                     "Ticker new History for {}: {} ",
                     ticker.symbol,
                     new_histories.len()
                 );
                 if update && should_sync_history(tc) {
+                    
+                    tc.last_history_sync_at = Some(Utc::now());
                     writer.save_ticker_control(tc.clone()).await?;
                     writer
                         .save_ticker_history(&ticker.symbol, new_histories)

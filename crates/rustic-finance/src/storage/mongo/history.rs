@@ -2,6 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use rustic_storage::{Repository, core::search::SearchCriteria};
+use tracing::{debug, error};
 
 use crate::{
     domain::TickerHistory,
@@ -28,16 +29,19 @@ impl TickerHistoryStorageReader for FinanceMongoStorageReader {
 impl TickerHistoryStorageWriter for FinanceMongoStorageWriter {
 
     async fn save_ticker_history(&self, symbol: &str, hist: Vec<TickerHistory>) -> Result<()> {
+        debug!("history: {}", hist.len());
         match self.manager.ticker_history().await {
             Ok(repo) => {
                 let mut repo = repo.lock().await;
                 repo.insert_many(hist).await
             }
             Err(e) => {
-                return Err(anyhow::anyhow!(format!(
+                let mesg = format!(
                     "Error saving TickerHistory for {}: {}",
                     symbol, e
-                )));
+                );
+                error!(mesg);
+                return Err(anyhow::anyhow!(mesg));
             }
         }
     }
