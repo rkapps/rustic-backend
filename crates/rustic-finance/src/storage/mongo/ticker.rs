@@ -42,6 +42,11 @@ impl TickerStorageReader for FinanceMongoStorageReader {
         }
     }
 
+    async fn get_tickers_by_total_assets(&self) -> Result<Vec<Ticker>> {
+        let criteria = SearchCriteria::new().sort_desc("total_assets");
+        self.manager.get_ticker_by_criteria(&criteria).await
+    }
+
     async fn get_tickers_by_symbols(&self, symbols: Vec<String>) -> Result<Vec<Ticker>> {
         let criteria = SearchCriteria::new()
             .in_values("symbol", symbols)

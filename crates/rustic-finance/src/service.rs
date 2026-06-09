@@ -90,7 +90,8 @@ impl FinanceService {
     // pipeline methods only available with writer
     #[cfg(feature = "writer")]
     pub async fn load_tickers(&self, ticker_seeds: &[TickerSeed], update: bool) -> Result<()> {
-        use crate::core::load::load_tickers;
+        use crate::core::pipeline::load_tickers;
+
         let reader = self.reader.as_ref().expect("reader not initialized");
         let writer = self.writer.as_ref().expect("writer not initialized");
         let provider_service = self
@@ -107,14 +108,27 @@ impl FinanceService {
             update,
         )
         .await
-        // Ok(())
     }
 
     #[cfg(feature = "writer")]
-    pub async fn update_tickers_eod(&self, symbols: &str, update: bool) -> Result<()> {
-        // self.writer.update_tickers().await
-        let _ = self.writer.as_ref().expect("writer not initialized");
-        Ok(())
+    pub async fn update_eod_tickers(&self, symbols: &str, update: bool) -> Result<()> {
+        use crate::core::pipeline::update_eod_tickers_pipeline;
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        let writer = self.writer.as_ref().expect("writer not initialized");
+        let provider_service = self
+            .provider_service
+            .as_ref()
+            .expect("provider service not initialized");
+
+        update_eod_tickers_pipeline(
+            reader.clone(),
+            writer.clone(),
+            provider_service.clone(),
+            self.embedding_client.clone(),
+            symbols,
+            update,
+        )
+        .await
     }
 
     #[cfg(feature = "writer")]
@@ -124,11 +138,42 @@ impl FinanceService {
 
     #[cfg(feature = "writer")]
     pub async fn update_realtime_stocks_etfs(&self, symbols: &str, update: bool) -> Result<()> {
-        Ok(())
+        use crate::core::pipeline::update_realtime_stocks_etfs_pipeline;
+
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        let writer = self.writer.as_ref().expect("writer not initialized");
+        let provider_service = self
+            .provider_service
+            .as_ref()
+            .expect("provider service not initialized");
+
+        update_realtime_stocks_etfs_pipeline(
+            reader.clone(),
+            writer.clone(),
+            provider_service.clone(),
+            symbols,
+            update,
+        )
+        .await
     }
 
     #[cfg(feature = "writer")]
     pub async fn update_realtime_cryptos(&self, symbols: &str, update: bool) -> Result<()> {
-        Ok(())
+        use crate::core::pipeline::update_realtime_cryptos_pipeline;
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        let writer = self.writer.as_ref().expect("writer not initialized");
+        let provider_service = self
+            .provider_service
+            .as_ref()
+            .expect("provider service not initialized");
+
+        update_realtime_cryptos_pipeline(
+            reader.clone(),
+            writer.clone(),
+            provider_service.clone(),
+            symbols,
+            update,
+        )
+        .await        
     }
 }

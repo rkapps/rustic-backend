@@ -228,7 +228,6 @@ pub async fn update_ticker(
     }
 
     // update technical indicators
-    // tc.last_indicator_sync_at = None;
     if !update || should_sync_indicators(tc) {
         match update_stock_indicators(tc, ticker, &histories).await {
             Ok(new_indicators) => {
@@ -725,3 +724,101 @@ pub(crate) async fn update_stock_indicators(
 
     Ok(new_indicators)
 }
+
+
+pub async fn update_stocks_etfs_realtime(
+    writer: Arc<FinanceMongoStorageWriter>,
+    provider_service: Arc<ProviderService>,
+    all_tickers: Vec<Ticker>,
+    update: bool,
+) -> Result<()> {
+    let mut updated_tickers = Vec::new();
+    let length = all_tickers.len();
+
+    // rate limit constraints
+    for (i, mut ticker) in all_tickers.into_iter().enumerate() {
+        if i % 20 == 0 {
+            info!(
+                "Updating Ticker Realtime: {} {}/{}",
+                ticker.symbol,
+                i + 1,
+                length
+            );
+        }
+        match provider_service
+            .get_stock_etf_realtime(&ticker.symbol)
+            .await
+        {
+            Ok(raw) => {
+                ticker.update_stock_etf_price_realtime(raw)?;
+                debug!("Price: {} prev: {}", ticker.pr_last, ticker.pr_prev);
+                updated_tickers.push(ticker);
+            }
+            Err(e) => error!("Ticker Realtime error {}: {}", ticker.symbol, e),
+        };
+    }
+
+    info!(
+        "Stocks and Etfs Realtime update complete: {}/{} updated",
+        updated_tickers.len(),
+        length
+    );
+
+    // bulk write at the end
+    if update && !updated_tickers.is_empty() {
+        writer.save_tickers(updated_tickers).await?;
+    }
+
+    Ok(())
+}
+
+pub async fn update_cryptos_realtime(
+    writer: Arc<FinanceMongoStorageWriter>,
+    provider_service: Arc<ProviderService>,
+    all_tickers: Vec<Ticker>,
+    update: bool,
+) -> Result<()> {
+    let mut updated_tickers = Vec::new();
+    let length = all_tickers.len();
+
+    let mut all_tickers_map: HashMap<String, Ticker> = all_tickers
+        .iter()
+        .map(|t| (t.symbol.clone(), t.clone()))
+        .collect();
+    let symbols: Vec<String> = all_tickers.iter().map(|t| t.symbol.clone()).collect();
+
+    let raw = match provider_service.get_crypto(symbols).await {
+        Ok(raw) => raw,
+        Err(e) => {
+            return Err(anyhow::anyhow!(format!("Cryptos Realtime error: {}", e)));
+        }
+    };
+    for data in raw.data {
+        if let Some(ticker) = all_tickers_map.get_mut(&data.0)
+            && !data.1.is_empty()
+            && let Some(cdata) = data.1.first()
+            && let Some(quote) = cdata.quote.get("USD")
+        {
+            match ticker.update_crypto_realtime(cdata.last_updated, quote.clone()) {
+                Ok(_) => {
+                    debug!("Data: {} Price: {}", data.0, ticker.pr_last);
+                    updated_tickers.push(ticker.clone())
+                }
+                Err(e) => error!("Ticker Realtime error {}: {}", ticker.symbol, e),
+            };
+        }
+    }
+    info!(
+        "Cryptos Realtime update complete: {}/{} updated",
+        updated_tickers.len(),
+        length
+    );
+
+    // bulk write at the end
+    if update && !updated_tickers.is_empty() {
+        writer.save_tickers(updated_tickers).await?;
+    }
+
+    Ok(())
+}
+

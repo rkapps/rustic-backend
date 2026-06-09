@@ -9,6 +9,19 @@ use crate::{
 
 #[async_trait]
 impl TickerControlStorageReader for FinanceMongoStorageReader {
+
+    async fn get_ticker_control(&self, symbol: &str) -> Result<TickerControl> {
+        match self.manager.ticker_controls().await {
+            Ok(repo) => {
+                let mut repo = repo.lock().await;
+                repo.find_by_id(symbol.to_string()).await
+            }
+            Err(e) => {
+                return Err(anyhow::anyhow!("Error getting TickerControl: {}", e));
+            }
+        }
+    }
+    
     async fn get_ticker_controls(&self) -> Result<Vec<TickerControl>> {
         match self.manager.ticker_controls().await {
             Ok(repo) => {

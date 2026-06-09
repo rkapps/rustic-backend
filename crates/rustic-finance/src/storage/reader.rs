@@ -28,7 +28,7 @@ pub trait StorageReader:
 #[async_trait]
 pub trait TickerControlStorageReader: Send + Sync + Debug {
     async fn get_ticker_controls(&self) -> Result<Vec<TickerControl>>;
-    // async fn get_ticker_control(&self, symbol: &str) -> Result<TickerControl>;
+    async fn get_ticker_control(&self, symbol: &str) -> Result<TickerControl>;
 }
 
 #[async_trait]
@@ -39,6 +39,8 @@ pub trait TickerStorageReader: Send + Sync + Debug {
         symbols: Vec<String>,
         limit: usize,
     ) -> Result<Vec<TickerPeer>>;
+
+    async fn get_tickers_by_total_assets(&self) -> Result<Vec<Ticker>>;
     async fn get_tickers_by_symbols(&self, symbols: Vec<String>) -> Result<Vec<Ticker>>;
     async fn search_tickers(&self, param: TickerFilter) -> Result<Vec<Ticker>>;
 }
