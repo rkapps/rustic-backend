@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::domain::dto::ticker_search_param::TickerSearchParam;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TickerFilter {
     // search
@@ -16,4 +18,21 @@ pub struct TickerFilter {
 
     // pagination
     pub limit: Option<usize>,
+}
+
+
+impl From<TickerSearchParam> for TickerFilter {
+    fn from(param: TickerSearchParam) -> TickerFilter {
+        TickerFilter {
+            asset_type: param.asset_type,
+            query: param.query,
+            signals: param.signals,
+            industry: param.industry,
+            assets_cap_range: param.assets_cap_range,
+            r#yield: param.r#yield,
+            sort_by: param.sort_by,
+            sort_dir: param.sort_dir,
+            limit: param.limit,
+        }
+    }
 }

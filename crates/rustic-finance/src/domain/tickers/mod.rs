@@ -9,6 +9,7 @@ pub mod sentiment;
 pub mod ticker;
 pub mod ticker_peer;
 pub mod control;
+pub mod news;
 
 pub const TICKER_COLLECTION_NAME: &str = "ticker";
 pub const TICKER_CONTROL_COLLECTION_NAME: &str = "ticker_control";

@@ -3,6 +3,7 @@ pub mod embedding;
 pub mod history;
 pub mod indicator;
 pub mod manager;
+pub mod news;
 pub mod reader;
 pub mod sentiment;
 pub mod ticker;

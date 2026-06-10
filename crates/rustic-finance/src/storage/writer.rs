@@ -3,11 +3,9 @@ use std::fmt::Debug;
 
 use async_trait::async_trait;
 
-use crate::{
-    domain::{
-        Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerSentiment,
-    },
-};
+use crate::domain::{
+        Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews, TickerSentiment
+    };
 
 #[async_trait]
 pub trait StorageWriter:
@@ -17,6 +15,7 @@ pub trait StorageWriter:
     + TickerIndicatorStorageWriter
     + TickerSentimentStorageWriter
     + TickerEmbeddingStorageWriter
+    + TickerNewsStorageWriter
     + Send
     + Sync
     + Debug
@@ -70,4 +69,11 @@ pub trait TickerEmbeddingStorageWriter: Send + Sync + Debug {
         symbol: &str,
         sentiments: Vec<TickerEmbedding>,
     ) -> Result<()>;
+}
+
+
+#[async_trait]
+pub trait TickerNewsStorageWriter: Send + Sync + Debug {
+    // async fn delete_ticker_news_before(&self, date: DateTime<Utc>) -> Result<()>;
+    async fn save_ticker_news(&self, symbol: &str, news: Vec<TickerNews>) -> Result<()>;
 }

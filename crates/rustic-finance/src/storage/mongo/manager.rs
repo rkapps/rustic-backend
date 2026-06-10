@@ -7,12 +7,9 @@ use rustic_storage::{
 use tokio::sync::Mutex;
 
 use crate::domain::{
-    Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerSentiment,
-    tickers::{
-        TICKER_COLLECTION_NAME, TICKER_CONTROL_COLLECTION_NAME, TICKER_EMBEDDING_COLLECTION_NAME,
-        TICKER_HISTORY_COLLECTION_NAME, TICKER_INDICATOR_COLLECTION_NAME,
-        TICKER_SENTIMENT_COLLECTION_NAME,
-    },
+    Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews, TickerSentiment, tickers::{
+        TICKER_COLLECTION_NAME, TICKER_CONTROL_COLLECTION_NAME, TICKER_EMBEDDING_COLLECTION_NAME, TICKER_HISTORY_COLLECTION_NAME, TICKER_INDICATOR_COLLECTION_NAME, TICKER_NEWS_COLLECTION_NAME, TICKER_SENTIMENT_COLLECTION_NAME
+    }
 };
 
 #[derive(Debug, Clone)]
@@ -96,6 +93,12 @@ impl FinanceMongoStorageManager {
             .await
     }
 
+    pub async fn ticker_news(&self) -> Result<Arc<Mutex<MongoRepository<String, TickerNews>>>> {
+        self.db
+            .collection::<String, TickerNews>(TICKER_NEWS_COLLECTION_NAME.to_string())
+            .await
+    }
+    
     pub async fn get_ticker_by_criteria(&self, criteria: &SearchCriteria) -> Result<Vec<Ticker>> {
         match self.tickers().await {
             Ok(repo) => {
@@ -118,4 +121,17 @@ impl FinanceMongoStorageManager {
             Err(e) => Err(anyhow::anyhow!("Error getting TickerHistory: {}", e)),
         }
     }
+
+    pub async fn get_ticker_indicators_by_criteria(
+        &self,
+        criteria: &SearchCriteria,
+    ) -> Result<Vec<TickerIndicator>> {
+        match self.ticker_indicators().await {
+            Ok(repo) => {
+                let mut repo = repo.lock().await;
+                repo.find(Some(criteria.clone())).await
+            }
+            Err(e) => Err(anyhow::anyhow!("Error getting TickerIndicator: {}", e)),
+        }
+    }    
 }

@@ -4,11 +4,16 @@ use rustic_ml::EmbeddingClient;
 use rustic_providers::finance::service::ProviderService;
 use std::sync::Arc;
 
-#[cfg(feature = "reader")]
-use crate::storage::mongo::reader::FinanceMongoStorageReader;
 #[cfg(feature = "writer")]
 use crate::{
     domain::dto::ticker_seed::TickerSeed, storage::mongo::writer::FinanceMongoStorageWriter,
+};
+#[cfg(feature = "reader")]
+use crate::{
+    domain::{
+        TickerEntity, TickerGroup, TickerNewsEntity, dto::{ticker_chart_entity::TickerChartEntity, ticker_search_param::TickerSearchParam}
+    },
+    storage::mongo::reader::FinanceMongoStorageReader,
 };
 
 use crate::{
@@ -85,6 +90,38 @@ impl FinanceService {
             )),
             Arc::new(TickerPriceHistoryTool::new(reader.clone())),
         ]
+    }
+
+    #[cfg(feature = "reader")]
+    pub async fn get_ticker_groups(&self) -> Result<Vec<TickerGroup>> {
+        use crate::storage::TickerStorageReader;
+
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        reader
+            .get_ticker_groups()
+            .await
+            .map_err(|e| anyhow::anyhow!(format!("Get Ticker Groups error: {}", e)))
+    }
+
+    #[cfg(feature = "reader")]
+    pub async fn get_ticker_charts(&self, symbol: &str) -> Result<Vec<TickerChartEntity>> {
+        use crate::core::tickers::charts::get_ticker_charts;
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        get_ticker_charts(reader.clone(), symbol).await
+    }
+
+    #[cfg(feature = "reader")]
+    pub async fn get_ticker_news(&self, symbol: &str) -> Result<Vec<TickerNewsEntity>> {
+        use crate::core::tickers::news::get_ticker_news;
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        get_ticker_news(reader.clone(), symbol).await
+    }
+    #[cfg(feature = "reader")]
+    pub async fn search_tickers(&self, param: TickerSearchParam) -> Result<Vec<TickerEntity>> {
+        use crate::core::tickers::search::search_tickers;
+
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        search_tickers(reader.clone(), self.embedding_client.clone(), param).await
     }
 
     // pipeline methods only available with writer
@@ -174,6 +211,6 @@ impl FinanceService {
             symbols,
             update,
         )
-        .await        
+        .await
     }
 }

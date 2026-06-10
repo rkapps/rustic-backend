@@ -11,6 +11,12 @@ use crate::{
 
 #[async_trait]
 impl TickerHistoryStorageReader for FinanceMongoStorageReader {
+
+    async fn get_ticker_history(&self, symbol: &str) -> Result<Vec<TickerHistory>> {
+        let criteria = SearchCriteria::new().eq("metadata.symbol", symbol.to_uppercase());
+        self.manager.get_ticker_history_by_criteria(&criteria).await
+    }
+
     async fn get_ticker_history_by_date(
         &self,
         symbol: &str,

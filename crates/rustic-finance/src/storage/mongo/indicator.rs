@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use rustic_storage::core::repository::Repository;
+use rustic_storage::{SearchCriteria, core::repository::Repository};
 use serde_json::json;
 use tracing::{debug, warn};
 
@@ -12,6 +12,15 @@ use crate::{
 
 #[async_trait]
 impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
+
+
+    async fn get_ticker_indicators(&self, symbol: &str) -> Result<Vec<TickerIndicator>> {
+        let criteria = SearchCriteria::new()
+            .eq("symbol", symbol.to_uppercase())
+            .sort_asc("date");
+        self.manager.get_ticker_indicators_by_criteria(&criteria).await
+    }    
+    
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,

@@ -1,7 +1,9 @@
 use crate::storage::{
     mongo::manager::FinanceMongoStorageManager,
     reader::{
-        StorageReader, TickerControlStorageReader, TickerEmbeddingStorageReader, TickerHistoryStorageReader, TickerIndicatorStorageReader, TickerSentimentStorageReader, TickerStorageReader
+        StorageReader, TickerControlStorageReader, TickerEmbeddingStorageReader,
+        TickerHistoryStorageReader, TickerIndicatorStorageReader, TickerNewsStorageReader,
+        TickerSentimentStorageReader, TickerStorageReader,
     },
 };
 use std::fmt::Debug;
@@ -24,6 +26,7 @@ impl<T> StorageReader for T where
         + TickerIndicatorStorageReader
         + TickerSentimentStorageReader
         + TickerEmbeddingStorageReader
+        + TickerNewsStorageReader
         + Send
         + Sync
         + Debug

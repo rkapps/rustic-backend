@@ -20,7 +20,7 @@ use crate::{
 // "debt credit rating financial health"
 // "product launch market share competition"
 pub async fn search_ticker_sentiments(
-    storage_service: Arc<dyn StorageReader>,
+    reader: Arc<dyn StorageReader>,
     embedding_client: Arc<dyn EmbeddingClient>,
     symbols: Vec<String>,
     query: String,
@@ -32,7 +32,7 @@ pub async fn search_ticker_sentiments(
         query,
         query_embeddings.len()
     );
-    let embeddings = storage_service.get_ticker_embeddings(symbols).await?;
+    let embeddings = reader.get_ticker_embeddings(symbols).await?;
     debug!("Screened stocks from initial search: {}", embeddings.len());
 
     //build the candidates from the embeddings for apple stock
@@ -58,7 +58,7 @@ pub async fn search_ticker_sentiments(
 
         debug!("sentiment Ids: {:?}", sentiment_ids);
 
-        let sentiments = storage_service
+        let sentiments = reader
             .get_ticker_sentiments_by_ids(sentiment_ids)
             .await?;
         debug!("sentiment: {:?}", sentiments.len());

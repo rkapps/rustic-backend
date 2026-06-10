@@ -55,6 +55,46 @@ impl TickerStorageReader for FinanceMongoStorageReader {
         self.manager.get_ticker_by_criteria(&criteria).await
     }
 
+    async fn get_tickers_by_top_gainers(&self, asset_type: Option<String>) -> Result<Vec<Ticker>> {
+        let mut criteria = SearchCriteria::new().sort_desc("pr_diff_perc").limit(20);
+        if let Some(asset_type) = asset_type {
+            criteria = criteria.eq("asset_type", asset_type.to_uppercase());
+        }
+        self.manager.get_ticker_by_criteria(&criteria).await
+    }
+    async fn get_tickers_by_top_gainers_ytd(
+        &self,
+        asset_type: Option<String>,
+    ) -> Result<Vec<Ticker>> {
+        let mut criteria = SearchCriteria::new()
+            .sort_desc("performance_search.Ytd.perc")
+            .limit(20);
+        if let Some(asset_type) = asset_type {
+            criteria = criteria.eq("asset_type", asset_type.to_uppercase());
+        }
+        self.manager.get_ticker_by_criteria(&criteria).await
+    }
+
+    async fn get_tickers_by_top_losers(&self, asset_type: Option<String>) -> Result<Vec<Ticker>> {
+        let mut criteria = SearchCriteria::new().sort_asc("pr_diff_perc").limit(20);
+        if let Some(asset_type) = asset_type {
+            criteria = criteria.eq("asset_type", asset_type.to_uppercase());
+        }
+        self.manager.get_ticker_by_criteria(&criteria).await
+    }
+    async fn get_tickers_by_top_losers_ytd(
+        &self,
+        asset_type: Option<String>,
+    ) -> Result<Vec<Ticker>> {
+        let mut criteria = SearchCriteria::new()
+            .sort_asc("performance_search.Ytd.perc")
+            .limit(20);
+        if let Some(asset_type) = asset_type {
+            criteria = criteria.eq("asset_type", asset_type.to_uppercase());
+        }
+        self.manager.get_ticker_by_criteria(&criteria).await
+    }
+
     async fn get_ticker_peers_by_symbols(
         &self,
         symbols: Vec<String>,
