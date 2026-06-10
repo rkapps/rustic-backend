@@ -48,8 +48,8 @@ pub async fn update_all_tickers(
         .collect();
 
     let total = all_tickers.len();
-    let semaphore = Arc::new(Semaphore::new(3));
-    let delay = Duration::from_millis(1000);
+    let semaphore = Arc::new(Semaphore::new(2));
+    let delay = Duration::from_millis(5000);
 
     info!("Processing {} tickers with 3 concurrent workers", total);
 
