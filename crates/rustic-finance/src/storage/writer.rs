@@ -4,8 +4,9 @@ use std::fmt::Debug;
 use async_trait::async_trait;
 
 use crate::domain::{
-        Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews, TickerSentiment
-    };
+    Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews,
+    TickerSentiment,
+};
 
 #[async_trait]
 pub trait StorageWriter:
@@ -70,7 +71,6 @@ pub trait TickerEmbeddingStorageWriter: Send + Sync + Debug {
         sentiments: Vec<TickerEmbedding>,
     ) -> Result<()>;
 }
-
 
 #[async_trait]
 pub trait TickerNewsStorageWriter: Send + Sync + Debug {

@@ -62,7 +62,10 @@ impl CensusClient {
         match self.http_client.get_request(url, None).await {
             Ok(raw) => Ok(self.parse_response(raw, variables)),
             Err(e) if e.to_string().contains("404") => {
-                warn!("Census ACS not available for year: {} dataset: {}", year, dataset);
+                warn!(
+                    "Census ACS not available for year: {} dataset: {}",
+                    year, dataset
+                );
                 Ok(vec![])
             }
             Err(e) => Err(e),

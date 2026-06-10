@@ -10,7 +10,7 @@
 //! | [`helper`] | Pure functions for building messages, merging responses, and parsing decisions |
 
 pub mod agent;
-pub mod helper;
 pub mod domain;
+pub mod helper;
 pub mod runner;
 pub use agent::Agent;

@@ -161,13 +161,6 @@ impl EconomicService {
         let writer = self.writer.as_ref().expect("writer not initialized");
         let census = self.census.as_ref().expect("census client not initialized");
 
-        update_census(
-            writer.clone(),
-            census.clone(),
-            dataset,
-            variables,
-            years,
-        )
-        .await
+        update_census(writer.clone(), census.clone(), dataset, variables, years).await
     }
 }

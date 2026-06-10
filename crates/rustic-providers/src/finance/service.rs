@@ -2,7 +2,17 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use rustic_core::HttpClient;
 
-use crate::finance::{alpha::{api::{get_etf, get_stock, get_stock_sentiments}, model::{AlphaEtf, AlphaTicker, AlphaTickerSentimentFeed}}, cmc::{api::get_crypto, model::CmcCryptoData}, tiingo::{api::{get_crypto_history, get_stock_etf_realtime, get_stock_history, get_ticker_news}, model::{TiingoTickerHistory, TiingoTickerNews, TiingoTickerRealtime}}};
+use crate::finance::{
+    alpha::{
+        api::{get_etf, get_stock, get_stock_sentiments},
+        model::{AlphaEtf, AlphaTicker, AlphaTickerSentimentFeed},
+    },
+    cmc::{api::get_crypto, model::CmcCryptoData},
+    tiingo::{
+        api::{get_crypto_history, get_stock_etf_realtime, get_stock_history, get_ticker_news},
+        model::{TiingoTickerHistory, TiingoTickerNews, TiingoTickerRealtime},
+    },
+};
 
 #[derive(Debug, Clone)]
 pub struct ProviderService {
@@ -14,7 +24,6 @@ pub struct ProviderService {
 
 impl ProviderService {
     pub fn new(alpha_key: &str, tiingo_token: &str, coinmarketcap_key: &str) -> Result<Self> {
-
         let http_client = HttpClient::new()?;
         Ok(ProviderService {
             http_client,
@@ -66,8 +75,7 @@ impl ProviderService {
         symbol: &str,
         start_date: &DateTime<Utc>,
     ) -> Result<Vec<TiingoTickerHistory>> {
-        get_stock_history(&self.http_client, symbol, &self.tiingo_token, start_date)
-            .await
+        get_stock_history(&self.http_client, symbol, &self.tiingo_token, start_date).await
     }
 
     pub async fn get_ticker_sentiment(
@@ -76,15 +84,12 @@ impl ProviderService {
         date_from: &DateTime<Utc>,
     ) -> Result<Vec<AlphaTickerSentimentFeed>> {
         let feeds =
-            get_stock_sentiments(&self.http_client, symbol, &self.alpha_key, date_from)
-                .await?;
+            get_stock_sentiments(&self.http_client, symbol, &self.alpha_key, date_from).await?;
         Ok(feeds)
     }
 
     pub async fn get_ticker_news(&self, symbol: &str) -> Result<Vec<TiingoTickerNews>> {
-        let feeds =
-            get_ticker_news(&self.http_client, symbol, &self.tiingo_token).await?;
+        let feeds = get_ticker_news(&self.http_client, symbol, &self.tiingo_token).await?;
         Ok(feeds)
     }
-
 }

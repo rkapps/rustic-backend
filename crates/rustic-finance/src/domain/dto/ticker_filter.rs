@@ -20,7 +20,6 @@ pub struct TickerFilter {
     pub limit: Option<usize>,
 }
 
-
 impl From<TickerSearchParam> for TickerFilter {
     fn from(param: TickerSearchParam) -> TickerFilter {
         TickerFilter {

@@ -13,7 +13,10 @@ pub struct IndexDefinition {
 impl IndexDefinition {
     pub fn new(fields: Vec<(&str, i32)>) -> Self {
         Self {
-            fields: fields.into_iter().map(|(f, d)| (f.to_string(), d)).collect(),
+            fields: fields
+                .into_iter()
+                .map(|(f, d)| (f.to_string(), d))
+                .collect(),
             unique: false,
             name: None,
             sparse: false,

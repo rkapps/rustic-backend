@@ -62,19 +62,20 @@ pub async fn update_census(
         // One call for all counties nationwide
         let county_records = match census
             .get_acs(year, "acs5", &vars, "county:*&in=state:*")
-            .await {
-                Ok(c) => c,
-                Err(e) => {
-                    tracing::warn!(
-                        "Census for year: {} dataset: {} variables {:?} failed: {}",
-                        year,
-                        "acs5", 
-                        vars,
-                        e
-                    );
-                    continue
-                },
-            };
+            .await
+        {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!(
+                    "Census for year: {} dataset: {} variables {:?} failed: {}",
+                    year,
+                    "acs5",
+                    vars,
+                    e
+                );
+                continue;
+            }
+        };
         process_census_records(&mut all_records, county_records, dataset, year, "county");
 
         tokio::time::sleep(Duration::from_millis(500)).await;

@@ -35,24 +35,29 @@ async fn main() -> Result<()> {
     let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
         .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
-
     let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 
-    let mongo_db =
-        env::var("RUSTIC_FINANCE_DB_NAME").expect("RUSTIC_FINANCE_DB_NAME envrionment variable not set");
+    let mongo_db = env::var("RUSTIC_FINANCE_DB_NAME")
+        .expect("RUSTIC_FINANCE_DB_NAME envrionment variable not set");
     info!("Finance Data Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
     let finance_service =
         FinanceService::new_reader(&mongo_uri, &mongo_db, embedding_client).await?;
 
     // economic data
-    let mongo_db =
-        env::var("RUSTIC_ECONOMIC_DB_NAME").expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
-    info!("Economic data Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
+    let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
+        .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
+    info!(
+        "Economic data Mongo uri: {:?} db: {:?}",
+        mongo_uri, mongo_db
+    );
     let economic_service = EconomicService::new_reader(&mongo_uri, &mongo_db).await?;
 
-    let mongo_db =
-        env::var("RUSTIC_PLATFORM_DB_NAME").expect("RUSTIC_AI_DB_NAME envrionment variable not set");
-    info!("Platform Data Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
+    let mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")
+        .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
+    info!(
+        "Platform Data Mongo uri: {:?} db: {:?}",
+        mongo_uri, mongo_db
+    );
 
     //bset specific
     let bset_data_path = env::var("RUSTIC_AI_BSET_DATA_PATH")

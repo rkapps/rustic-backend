@@ -168,11 +168,7 @@ pub async fn update_bea_regional(
                 Ok(c) => c,
                 Err(e) => error!("Update census_bulk error: {}", e),
             };
-
         }
-
-      
-
     }
 
     Ok(())

@@ -228,7 +228,7 @@ impl EconomicDataPipeline {
         ];
 
         let vars: Vec<&str> = variables.to_vec();
-        let years = vec!["2025","2024","2023","2022", "2021", "2020"];
+        let years = vec!["2025", "2024", "2023", "2022", "2021", "2020"];
 
         self.service.update_census("acs5", &vars, years).await?;
 

@@ -6,12 +6,15 @@ use anyhow::Result;
 
 use crate::{
     domain::TickerSentiment,
-    storage::{mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter}, reader::TickerSentimentStorageReader, writer::TickerSentimentStorageWriter},
+    storage::{
+        mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
+        reader::TickerSentimentStorageReader,
+        writer::TickerSentimentStorageWriter,
+    },
 };
 
 #[async_trait]
 impl TickerSentimentStorageReader for FinanceMongoStorageReader {
-    
     async fn get_ticker_sentiments_by_ids(&self, ids: Vec<String>) -> Result<Vec<TickerSentiment>> {
         let criteria = SearchCriteria::new().in_values("id", ids);
         match self.manager.ticker_sentiments().await {
@@ -24,7 +27,6 @@ impl TickerSentimentStorageReader for FinanceMongoStorageReader {
             }
         }
     }
-
 
     async fn get_ticker_sentiments_with_score(
         &self,
@@ -43,13 +45,11 @@ impl TickerSentimentStorageReader for FinanceMongoStorageReader {
                 return Err(anyhow::anyhow!("Error getting TickerSentiment: {}", e));
             }
         }
-    }    
+    }
 }
-
 
 #[async_trait]
 impl TickerSentimentStorageWriter for FinanceMongoStorageWriter {
-
     async fn save_ticker_sentiments(
         &self,
         symbol: &str,
@@ -68,6 +68,4 @@ impl TickerSentimentStorageWriter for FinanceMongoStorageWriter {
             }
         }
     }
-
-    
 }

@@ -5,7 +5,11 @@ use anyhow::Result;
 
 use crate::{
     domain::TickerEmbedding,
-    storage::{mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter}, reader::TickerEmbeddingStorageReader, writer::TickerEmbeddingStorageWriter},
+    storage::{
+        mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
+        reader::TickerEmbeddingStorageReader,
+        writer::TickerEmbeddingStorageWriter,
+    },
 };
 
 #[async_trait]
@@ -24,10 +28,8 @@ impl TickerEmbeddingStorageReader for FinanceMongoStorageReader {
     }
 }
 
-
 #[async_trait]
 impl TickerEmbeddingStorageWriter for FinanceMongoStorageWriter {
-
     async fn save_ticker_embeddings(
         &self,
         symbol: &str,

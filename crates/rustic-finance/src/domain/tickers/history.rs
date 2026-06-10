@@ -1,7 +1,7 @@
-use anyhow::Result;
 use crate::domain::tickers::decimal_serde;
 use crate::domain::tickers::deserialize_flexible_datetime;
 use crate::domain::tickers::serialize_as_bson_datetime;
+use anyhow::Result;
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use rustic_providers::finance::tiingo::model::TiingoTickerHistory;
@@ -80,7 +80,6 @@ impl RepoModel<String> for TickerHistory {
         TICKER_HISTORY_COLLECTION_NAME
     }
 }
-
 
 impl TickerHistory {
     /// Create from Tiingo provider data

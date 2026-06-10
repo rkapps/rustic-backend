@@ -8,7 +8,7 @@ use rustic_agent::{
         domain::{AgentInput, CompletionTurn},
         runner::Runnable,
     },
-    client::{response::CompletionResponseTokenUsage},
+    client::response::CompletionResponseTokenUsage,
     services::{
         config::agent::{CompletionStrategy, HistoryMode},
         registry::provider::ProviderRegistry,
@@ -21,7 +21,6 @@ pub async fn build_agent_runner(
     agent_service: Arc<AgentService>,
     conversation: &Conversation,
 ) -> Result<Arc<dyn Runnable>> {
-
     let agent_id = conversation.agent_id.clone().context(format!(
         "Conversation {} does not have an agent",
         conversation.id

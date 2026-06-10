@@ -56,7 +56,6 @@ pub(crate) fn resolve_years(year: &str) -> Vec<String> {
     }
 }
 
-
 pub fn process_census_records(
     all_records: &mut Vec<CensusData>,
     records: Vec<CensusRecord>,
@@ -66,10 +65,11 @@ pub fn process_census_records(
 ) {
     for record in records {
         let id = format!(
-            "census_{}_{}_{}_{}", 
+            "census_{}_{}_{}_{}",
             dataset, year, record.variable, record.geo_fips
         );
-        let geo_name = record.geo_name
+        let geo_name = record
+            .geo_name
             .split(',')
             .next()
             .unwrap_or(&record.geo_name)

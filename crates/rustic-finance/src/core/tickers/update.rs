@@ -12,10 +12,12 @@ use rustic_providers::finance::service::ProviderService;
 
 use crate::{
     core::tickers::{
-        BASE_CURRENCY, indicators::IndicatorCalculator, sync::{
+        BASE_CURRENCY,
+        indicators::IndicatorCalculator,
+        sync::{
             should_sync_embeddings, should_sync_history, should_sync_indicators,
             should_sync_sentiments,
-        }
+        },
     },
     domain::{
         Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerSentiment,
@@ -29,7 +31,10 @@ use crate::{
             TickerControlStorageWriter, TickerEmbeddingStorageWriter, TickerHistoryStorageWriter,
             TickerIndicatorStorageWriter, TickerSentimentStorageWriter, TickerStorageWriter,
         },
-    }, util::data_utils::{assets_cap_label, calculate_performance, get_period_close, get_period_start},
+    },
+    util::data_utils::{
+        assets_cap_label, calculate_performance, get_period_close, get_period_start,
+    },
 };
 
 pub async fn update_all_tickers(
@@ -168,7 +173,6 @@ pub async fn update_ticker(
                     new_histories.len()
                 );
                 if update && should_sync_history(tc) {
-                    
                     tc.last_history_sync_at = Some(Utc::now());
                     writer.save_ticker_control(tc.clone()).await?;
                     writer
@@ -361,7 +365,6 @@ pub(crate) async fn update_ticker_history(
     Ok((histories, new_histories))
 }
 
-
 pub(crate) async fn update_ticker_price_history(
     _tc: &mut TickerControl,
     ticker: &mut Ticker,
@@ -426,7 +429,6 @@ pub(crate) async fn update_ticker_performance(
     }
     Ok(())
 }
-
 
 pub(crate) async fn update_ticker_sentiments(
     provider_service: Arc<ProviderService>,
@@ -725,7 +727,6 @@ pub(crate) async fn update_stock_indicators(
     Ok(new_indicators)
 }
 
-
 pub async fn update_stocks_etfs_realtime(
     writer: Arc<FinanceMongoStorageWriter>,
     provider_service: Arc<ProviderService>,
@@ -821,4 +822,3 @@ pub async fn update_cryptos_realtime(
 
     Ok(())
 }
-

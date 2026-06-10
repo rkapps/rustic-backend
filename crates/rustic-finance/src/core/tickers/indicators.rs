@@ -11,7 +11,13 @@ use ta::{
 };
 use tracing::trace;
 
-use crate::domain::{TickerHistory, TickerIndicator, tickers::indicator::indicator_type::{ATR, BB_LOWER, BB_MIDDLE, BB_UPPER, EMA, MACD, MACD_HISTOGRAM, MACD_SIGNAL, RSI, SMA, STOCHASTIC_D, STOCHASTIC_K, VOLUME_RATIO}};
+use crate::domain::{
+    TickerHistory, TickerIndicator,
+    tickers::indicator::indicator_type::{
+        ATR, BB_LOWER, BB_MIDDLE, BB_UPPER, EMA, MACD, MACD_HISTOGRAM, MACD_SIGNAL, RSI, SMA,
+        STOCHASTIC_D, STOCHASTIC_K, VOLUME_RATIO,
+    },
+};
 
 pub struct IndicatorCalculator {}
 

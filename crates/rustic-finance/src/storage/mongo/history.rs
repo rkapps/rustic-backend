@@ -6,12 +6,15 @@ use tracing::{debug, error};
 
 use crate::{
     domain::TickerHistory,
-    storage::{mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter}, reader::TickerHistoryStorageReader, writer::TickerHistoryStorageWriter},
+    storage::{
+        mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
+        reader::TickerHistoryStorageReader,
+        writer::TickerHistoryStorageWriter,
+    },
 };
 
 #[async_trait]
 impl TickerHistoryStorageReader for FinanceMongoStorageReader {
-
     async fn get_ticker_history(&self, symbol: &str) -> Result<Vec<TickerHistory>> {
         let criteria = SearchCriteria::new().eq("metadata.symbol", symbol.to_uppercase());
         self.manager.get_ticker_history_by_criteria(&criteria).await
@@ -29,11 +32,8 @@ impl TickerHistoryStorageReader for FinanceMongoStorageReader {
     }
 }
 
-
-
 #[async_trait]
 impl TickerHistoryStorageWriter for FinanceMongoStorageWriter {
-
     async fn save_ticker_history(&self, symbol: &str, hist: Vec<TickerHistory>) -> Result<()> {
         debug!("history: {}", hist.len());
         match self.manager.ticker_history().await {
@@ -42,14 +42,10 @@ impl TickerHistoryStorageWriter for FinanceMongoStorageWriter {
                 repo.insert_many(hist).await
             }
             Err(e) => {
-                let mesg = format!(
-                    "Error saving TickerHistory for {}: {}",
-                    symbol, e
-                );
+                let mesg = format!("Error saving TickerHistory for {}: {}", symbol, e);
                 error!(mesg);
                 return Err(anyhow::anyhow!(mesg));
             }
         }
     }
-
 }

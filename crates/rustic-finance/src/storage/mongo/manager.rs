@@ -7,9 +7,13 @@ use rustic_storage::{
 use tokio::sync::Mutex;
 
 use crate::domain::{
-    Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews, TickerSentiment, tickers::{
-        TICKER_COLLECTION_NAME, TICKER_CONTROL_COLLECTION_NAME, TICKER_EMBEDDING_COLLECTION_NAME, TICKER_HISTORY_COLLECTION_NAME, TICKER_INDICATOR_COLLECTION_NAME, TICKER_NEWS_COLLECTION_NAME, TICKER_SENTIMENT_COLLECTION_NAME
-    }
+    Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerNews,
+    TickerSentiment,
+    tickers::{
+        TICKER_COLLECTION_NAME, TICKER_CONTROL_COLLECTION_NAME, TICKER_EMBEDDING_COLLECTION_NAME,
+        TICKER_HISTORY_COLLECTION_NAME, TICKER_INDICATOR_COLLECTION_NAME,
+        TICKER_NEWS_COLLECTION_NAME, TICKER_SENTIMENT_COLLECTION_NAME,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -21,7 +25,9 @@ impl FinanceMongoStorageManager {
     pub async fn new(uri: &str, name: &str) -> Result<Self> {
         let mut mdb = MongoDatabase::new(uri, name).await?;
 
-        mdb.register_collection::<String, TickerControl>(TICKER_CONTROL_COLLECTION_NAME.to_string())
+        mdb.register_collection::<String, TickerControl>(
+            TICKER_CONTROL_COLLECTION_NAME.to_string(),
+        )
         .await?;
 
         mdb.register_collection::<String, Ticker>(TICKER_COLLECTION_NAME.to_string())
@@ -45,10 +51,8 @@ impl FinanceMongoStorageManager {
         )
         .await?;
 
-        mdb.register_collection::<String, TickerNews>(
-            TICKER_NEWS_COLLECTION_NAME.to_string(),
-        )
-        .await?;
+        mdb.register_collection::<String, TickerNews>(TICKER_NEWS_COLLECTION_NAME.to_string())
+            .await?;
 
         Ok(FinanceMongoStorageManager { db: mdb })
     }
@@ -104,7 +108,7 @@ impl FinanceMongoStorageManager {
             .collection::<String, TickerNews>(TICKER_NEWS_COLLECTION_NAME.to_string())
             .await
     }
-    
+
     pub async fn get_ticker_by_criteria(&self, criteria: &SearchCriteria) -> Result<Vec<Ticker>> {
         match self.tickers().await {
             Ok(repo) => {
@@ -139,5 +143,5 @@ impl FinanceMongoStorageManager {
             }
             Err(e) => Err(anyhow::anyhow!("Error getting TickerIndicator: {}", e)),
         }
-    }    
+    }
 }

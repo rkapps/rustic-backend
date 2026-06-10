@@ -2,7 +2,9 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use rustic_core::HttpClient;
 
-use crate::finance::tiingo::model::{TiingoTickerHistory, TiingoTickerNews, TiingoTickerPriceData, TiingoTickerRealtime};
+use crate::finance::tiingo::model::{
+    TiingoTickerHistory, TiingoTickerNews, TiingoTickerPriceData, TiingoTickerRealtime,
+};
 
 const TIINGO_REALTIME_URL: &str = "https://api.tiingo.com/iex/";
 const TIINGO_EOD_URL: &str = "https://api.tiingo.com/tiingo/daily/";

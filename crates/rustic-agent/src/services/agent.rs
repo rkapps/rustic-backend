@@ -16,9 +16,7 @@ use crate::{
     client::{llm::LlmClient, preset::Preset, provider::Provider},
     services::{
         builder::AgentBuilder,
-        config::agent::{
-            AgentConfig, CompletionStrategy, ExecutionType,
-        },
+        config::agent::{AgentConfig, CompletionStrategy, ExecutionType},
         registry::{agent::AgentRegistry, provider::ProviderRegistry},
     },
     tools::{mcp::MCPRegistry, tool::ToolRegistry},
@@ -145,9 +143,9 @@ impl AgentService {
         let agent_config = self.find_agent_config(agent_id).await?;
 
         let provider = self.resolve_provider(agent_id, llm, Some(model))?;
-        
+
         // default the system prompt from agent config
-        let system_prompt= system_prompt.or(Some(agent_config.system_prompt));
+        let system_prompt = system_prompt.or(Some(agent_config.system_prompt));
 
         let mut dpreset = match &provider {
             Provider::Local { .. } => Preset::Local,
@@ -304,7 +302,7 @@ impl AgentService {
                         input.model.clone(),
                         Some(config.system_prompt),
                         strategy,
-                        sub_agent.preset.clone()
+                        sub_agent.preset.clone(),
                     );
                     let sub_agent = Box::pin(self.build_runnable_agent(&sub_input, visited))
                         .await

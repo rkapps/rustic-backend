@@ -3,8 +3,13 @@ use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
 use tracing::debug;
 
-use crate::{domain::TickerNews, storage::{FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter, reader::TickerNewsStorageReader, writer::TickerNewsStorageWriter}};
-
+use crate::{
+    domain::TickerNews,
+    storage::{
+        FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter,
+        reader::TickerNewsStorageReader, writer::TickerNewsStorageWriter,
+    },
+};
 
 #[async_trait]
 impl TickerNewsStorageReader for FinanceMongoStorageReader {
@@ -26,11 +31,8 @@ impl TickerNewsStorageReader for FinanceMongoStorageReader {
     }
 }
 
-
-
 #[async_trait]
 impl TickerNewsStorageWriter for FinanceMongoStorageWriter {
-
     async fn save_ticker_news(&self, symbol: &str, embeddings: Vec<TickerNews>) -> Result<()> {
         match self.manager.ticker_news().await {
             Ok(repo) => {
@@ -44,5 +46,5 @@ impl TickerNewsStorageWriter for FinanceMongoStorageWriter {
                 )));
             }
         }
-    }    
+    }
 }

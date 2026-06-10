@@ -122,7 +122,7 @@ where
         Ok(())
     }
 
-    async fn create_index(&mut self, _index: IndexDefinition) -> Result<()>{
+    async fn create_index(&mut self, _index: IndexDefinition) -> Result<()> {
         Ok(())
     }
     async fn create_indexes(&mut self, _indexes: Vec<IndexDefinition>) -> Result<()> {

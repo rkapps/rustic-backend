@@ -22,7 +22,13 @@ use tower_http::cors::CorsLayer;
 use tracing::{error, info, warn};
 
 use crate::{
-    auth::firebase::{FirebaseKeyCache, fetch_firebase_keys}, config::{ChatTemplate, load_agents_config, load_chat_templates, load_mcp_config, load_provider_config}, conversation::service::ConversationService, storage::manager::BootStorageManager
+    auth::firebase::{FirebaseKeyCache, fetch_firebase_keys},
+    config::{
+        ChatTemplate, load_agents_config, load_chat_templates, load_mcp_config,
+        load_provider_config,
+    },
+    conversation::service::ConversationService,
+    storage::manager::BootStorageManager,
 };
 
 // agentic-boot

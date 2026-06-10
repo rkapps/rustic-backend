@@ -1,4 +1,3 @@
-
 use anyhow::{Context, Result};
 use rustic_agent::services::config::{
     agent::AgentConfig, mcp::MCPServerConfig, provider::ProviderConfig,

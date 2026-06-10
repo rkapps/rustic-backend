@@ -1,7 +1,9 @@
 use crate::storage::{
     mongo::manager::FinanceMongoStorageManager,
     writer::{
-        StorageWriter, TickerControlStorageWriter, TickerEmbeddingStorageWriter, TickerHistoryStorageWriter, TickerIndicatorStorageWriter, TickerNewsStorageWriter, TickerSentimentStorageWriter, TickerStorageWriter
+        StorageWriter, TickerControlStorageWriter, TickerEmbeddingStorageWriter,
+        TickerHistoryStorageWriter, TickerIndicatorStorageWriter, TickerNewsStorageWriter,
+        TickerSentimentStorageWriter, TickerStorageWriter,
     },
 };
 use std::fmt::Debug;

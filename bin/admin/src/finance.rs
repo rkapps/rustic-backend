@@ -4,10 +4,9 @@ use calamine::{Reader, Xlsx, open_workbook};
 use rustic_core::config::load::download_gcs_to_file;
 use std::path::PathBuf;
 
-use rustic_finance::{domain::dto::ticker_seed::TickerSeed};
+use rustic_finance::domain::dto::ticker_seed::TickerSeed;
 
 pub async fn load_tickers(mongo_uri: &str, file: PathBuf) -> Result<()> {
-
     let file_path = if file.to_str().unwrap_or("").starts_with("gs://") {
         load_ticker_seeds_from_gcs(file.to_str().unwrap()).await?
     } else {
@@ -20,8 +19,6 @@ pub async fn load_tickers(mongo_uri: &str, file: PathBuf) -> Result<()> {
 
     Ok(())
 }
-
-
 
 pub fn load_ticker_seeds_from_file(file: PathBuf) -> Result<Vec<TickerSeed>> {
     let mut workbook: Xlsx<_> =

@@ -7,7 +7,11 @@ use tracing::debug;
 
 use crate::{
     domain::{Ticker, TickerGroup, TickerPeer, dto::ticker_filter::TickerFilter},
-    storage::{mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter}, reader::TickerStorageReader, writer::TickerStorageWriter},
+    storage::{
+        mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
+        reader::TickerStorageReader,
+        writer::TickerStorageWriter,
+    },
     util::data_utils::assets_cap_label_range,
 };
 
@@ -197,11 +201,8 @@ impl TickerStorageReader for FinanceMongoStorageReader {
     }
 }
 
-
-
 #[async_trait]
 impl TickerStorageWriter for FinanceMongoStorageWriter {
-    
     async fn save_tickers(&self, tickers: Vec<Ticker>) -> Result<()> {
         match self.manager.tickers().await {
             Ok(repo) => {

@@ -58,9 +58,7 @@ pub async fn search_ticker_sentiments(
 
         debug!("sentiment Ids: {:?}", sentiment_ids);
 
-        let sentiments = reader
-            .get_ticker_sentiments_by_ids(sentiment_ids)
-            .await?;
+        let sentiments = reader.get_ticker_sentiments_by_ids(sentiment_ids).await?;
         debug!("sentiment: {:?}", sentiments.len());
         let entities = join_sentiment_with_similarity(embedding_results, sentiments);
         return Ok(entities);

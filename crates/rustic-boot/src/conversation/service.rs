@@ -251,7 +251,6 @@ impl ConversationService {
         let runner = build_agent_runner(self.agent_service.clone(), &conversation).await?;
         let stream = runner.execute_streaming(cturns, &request.prompt).await?;
         Ok(Box::pin(stream))
-
     }
 
     // pub async fn run_conversation_new(

@@ -1,13 +1,30 @@
+use crate::{
+    domain::{
+        TickerHistory,
+        dto::ticker_seed::TickerSeed,
+        tickers::{AssetType, decimal_serde, performance_serde},
+    },
+    util::{
+        date_utils::same_date,
+        string_utils::{
+            string_to_decimal, string_to_float, string_to_int32, string_to_int64,
+            string_to_utc_datetime,
+        },
+    },
+};
 use anyhow::Result;
-use rust_decimal_macros::dec;
-use tracing::debug;
-use crate::{domain::{TickerHistory, dto::ticker_seed::TickerSeed, tickers::{AssetType, decimal_serde, performance_serde}}, util::{date_utils::same_date, string_utils::{string_to_decimal, string_to_float, string_to_int32, string_to_int64, string_to_utc_datetime}}};
 use chrono::{DateTime, Utc};
 use rust_decimal::{Decimal, prelude::ToPrimitive};
-use rustic_providers::finance::{alpha::model::{AlphaEtf, AlphaTicker}, cmc::model::{CmcCryptoData, CmcCryptoQuote}, tiingo::model::TiingoTickerRealtime};
+use rust_decimal_macros::dec;
+use rustic_providers::finance::{
+    alpha::model::{AlphaEtf, AlphaTicker},
+    cmc::model::{CmcCryptoData, CmcCryptoQuote},
+    tiingo::model::TiingoTickerRealtime,
+};
 use rustic_storage::core::repository::RepoModel;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use tracing::debug;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct Ticker {
@@ -129,7 +146,6 @@ impl RepoModel<String> for Ticker {
     }
 }
 
-
 impl Ticker {
     pub fn new(seed: TickerSeed) -> Self {
         Ticker {
@@ -146,7 +162,6 @@ impl Ticker {
         }
     }
 }
-
 
 impl Ticker {
     pub fn update_from_alpha(&mut self, value: AlphaTicker) {

@@ -7,20 +7,24 @@ use anyhow::Result;
 
 use crate::{
     domain::{TickerIndicator, dto::ticker_indicator_entity::TickerIndicatorEntity},
-    storage::{mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter}, reader::TickerIndicatorStorageReader, writer::TickerIndicatorStorageWriter},
+    storage::{
+        mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
+        reader::TickerIndicatorStorageReader,
+        writer::TickerIndicatorStorageWriter,
+    },
 };
 
 #[async_trait]
 impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
-
-
     async fn get_ticker_indicators(&self, symbol: &str) -> Result<Vec<TickerIndicator>> {
         let criteria = SearchCriteria::new()
             .eq("symbol", symbol.to_uppercase())
             .sort_asc("date");
-        self.manager.get_ticker_indicators_by_criteria(&criteria).await
-    }    
-    
+        self.manager
+            .get_ticker_indicators_by_criteria(&criteria)
+            .await
+    }
+
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,
@@ -101,9 +105,6 @@ impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
         }
     }
 }
-
-
-
 
 #[async_trait]
 impl TickerIndicatorStorageWriter for FinanceMongoStorageWriter {

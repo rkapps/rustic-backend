@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::{dto::ticker_seed::TickerSeed, tickers::TICKER_CONTROL_COLLECTION_NAME};
 
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TickerControl {
     pub id: String,
@@ -25,8 +24,6 @@ impl RepoModel<String> for TickerControl {
         TICKER_CONTROL_COLLECTION_NAME
     }
 }
-
-
 
 impl TickerControl {
     pub fn new(seed: TickerSeed) -> Self {

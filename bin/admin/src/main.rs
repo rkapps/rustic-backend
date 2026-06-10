@@ -1,9 +1,10 @@
 use anyhow::Result;
 use rustic_admin::{
-    finance::load_tickers, schema::{
+    finance::load_tickers,
+    schema::{
         rustic_economic::update_economic_db, rustic_finance::update_finance_db,
         rustic_platform::update_rustic_platform,
-    }
+    },
 };
 use rustic_core::set_logger;
 use std::{env, path::PathBuf};
@@ -24,7 +25,7 @@ enum AdminCommands {
         #[arg(short, long)]
         file: PathBuf,
     },
-    UpdateSchema, 
+    UpdateSchema,
 }
 
 #[tokio::main]

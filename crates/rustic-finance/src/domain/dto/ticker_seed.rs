@@ -12,4 +12,3 @@ pub struct TickerSeed {
     pub industry: String,
     pub overview: String,
 }
-

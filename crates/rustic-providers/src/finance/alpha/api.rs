@@ -2,7 +2,9 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use rustic_core::HttpClient;
 
-use crate::finance::alpha::model::{AlphaEtf, AlphaTicker, AlphaTickerSentiment, AlphaTickerSentimentFeed};
+use crate::finance::alpha::model::{
+    AlphaEtf, AlphaTicker, AlphaTickerSentiment, AlphaTickerSentimentFeed,
+};
 
 const ALPHA_BASE_URL: &str = "https://www.alphavantage.co/";
 const ALPHA_FUNCTION_NEWS_SENTIMENT: &str = "NEWS_SENTIMENT";
@@ -68,13 +70,12 @@ mod tests {
 
     use anyhow::Result;
     use chrono::Utc;
-use rustic_core::HttpClient;
+    use rustic_core::HttpClient;
     use std::env;
     use tracing::Level;
     use tracing_subscriber::{filter, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::finance::alpha::api::get_stock_sentiments;
-
+    use crate::finance::alpha::api::get_stock_sentiments;
 
     #[tokio::test]
     #[ignore]

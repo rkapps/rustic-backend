@@ -121,7 +121,6 @@ where
     }
 
     async fn create_indexes(&mut self, indexes: Vec<IndexDefinition>) -> Result<()> {
-
         let index_models: Vec<IndexModel> = indexes
             .into_iter()
             .map(|idx| {

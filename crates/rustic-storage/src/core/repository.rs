@@ -97,8 +97,6 @@ pub trait Repository<K, M>: Send + Sync {
     /// Overwrite an existing model.  Both backends use upsert semantics, so
     /// calling `update` on a model that does not yet exist will insert it.
     async fn update(&mut self, repo: M) -> Result<()>;
-
-    
 }
 
 /// A model that carries a dense float vector, used for similarity search.

@@ -6,13 +6,12 @@ use tracing::info;
 
 use crate::schema::create_indexes_safe;
 
-
 pub async fn update_economic_db(mongo_uri: &str) -> Result<()> {
     let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
         .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
 
-    let manager =  EconomicMongoStorageManager::new(&mongo_uri, &mongo_db).await?;
+    let manager = EconomicMongoStorageManager::new(&mongo_uri, &mongo_db).await?;
 
     // fred
     let repo = manager.economic_series().await?;
@@ -37,34 +36,26 @@ pub async fn update_economic_db(mongo_uri: &str) -> Result<()> {
     Ok(())
 }
 
-
-fn get_economic_series_index_definitions() -> Vec<IndexDefinition>{
+fn get_economic_series_index_definitions() -> Vec<IndexDefinition> {
     vec![
         IndexDefinition::new(vec![("id", 1)])
             .unique()
             .named("idx_id"),
-        IndexDefinition::new(vec![
-            ("series_id", 1),
-        ])
-        .named("idx_series_id"),
+        IndexDefinition::new(vec![("series_id", 1)]).named("idx_series_id"),
     ]
 }
 
-
-fn get_economic_bea_nipa_index_definitions() -> Vec<IndexDefinition>{
+fn get_economic_bea_nipa_index_definitions() -> Vec<IndexDefinition> {
     vec![
         IndexDefinition::new(vec![("id", 1)])
             .unique()
             .named("idx_id"),
-        IndexDefinition::new(vec![
-            ("table_name", 1),
-            ("time_period", 1),
-        ])
-        .named("idx_table_name_time_period"),
+        IndexDefinition::new(vec![("table_name", 1), ("time_period", 1)])
+            .named("idx_table_name_time_period"),
     ]
 }
 
-fn get_economic_bea_regional_index_definitions() -> Vec<IndexDefinition>{
+fn get_economic_bea_regional_index_definitions() -> Vec<IndexDefinition> {
     vec![
         IndexDefinition::new(vec![("id", 1)])
             .unique()
@@ -79,8 +70,7 @@ fn get_economic_bea_regional_index_definitions() -> Vec<IndexDefinition>{
     ]
 }
 
-
-fn get_economic_census_index_definitions() -> Vec<IndexDefinition>{
+fn get_economic_census_index_definitions() -> Vec<IndexDefinition> {
     vec![
         IndexDefinition::new(vec![("id", 1)])
             .unique()

@@ -4,12 +4,14 @@ use rustic_storage::Repository;
 
 use crate::{
     domain::TickerControl,
-    storage::{FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter, reader::TickerControlStorageReader, writer::TickerControlStorageWriter},
+    storage::{
+        FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter,
+        reader::TickerControlStorageReader, writer::TickerControlStorageWriter,
+    },
 };
 
 #[async_trait]
 impl TickerControlStorageReader for FinanceMongoStorageReader {
-
     async fn get_ticker_control(&self, symbol: &str) -> Result<TickerControl> {
         match self.manager.ticker_controls().await {
             Ok(repo) => {
@@ -21,7 +23,7 @@ impl TickerControlStorageReader for FinanceMongoStorageReader {
             }
         }
     }
-    
+
     async fn get_ticker_controls(&self) -> Result<Vec<TickerControl>> {
         match self.manager.ticker_controls().await {
             Ok(repo) => {
@@ -37,7 +39,6 @@ impl TickerControlStorageReader for FinanceMongoStorageReader {
 
 #[async_trait]
 impl TickerControlStorageWriter for FinanceMongoStorageWriter {
-    
     async fn save_ticker_control(&self, tc: TickerControl) -> Result<()> {
         match self.manager.ticker_controls().await {
             Ok(repo) => {
@@ -53,7 +54,6 @@ impl TickerControlStorageWriter for FinanceMongoStorageWriter {
         }
     }
 
-    
     async fn save_ticker_controls(&self, tcs: Vec<TickerControl>) -> Result<()> {
         match self.manager.ticker_controls().await {
             Ok(repo) => {
@@ -67,5 +67,5 @@ impl TickerControlStorageWriter for FinanceMongoStorageWriter {
                 )));
             }
         }
-    }    
+    }
 }
