@@ -251,12 +251,11 @@ impl Runnable for PipeLineAgent {
                 };
 
                 // set the last resonse id.
-                last_response_id = response
-                    .response_id
-                    .clone()
-                    .is_empty()
-                    .then(|| None)
-                    .unwrap_or(Some(response.response_id.clone()));
+                last_response_id = if response.response_id.clone().is_empty() {
+                    None
+                } else {
+                    Some(response.response_id.clone())
+                };
 
                 // add the usage
                 let dusage = response.usage;

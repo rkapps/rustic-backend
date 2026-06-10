@@ -35,7 +35,7 @@ pub async fn build_agent_runner(
         None,
     );
 
-    Ok(agent_service.build_runnable(&input).await?)
+    agent_service.build_runnable(&input).await
 }
 
 pub fn build_completion_turns(
@@ -47,7 +47,7 @@ pub fn build_completion_turns(
         conversation.strategy, conversation.history_mode
     );
 
-    let turns = match conversation.strategy {
+    match conversation.strategy {
         CompletionStrategy::Stateless => {
             // no history — current message will be added after
             vec![]
@@ -72,46 +72,10 @@ pub fn build_completion_turns(
             }
             completion_turns
         }
-    };
+    }
 
-    turns
 }
 
-// pub fn build_completions_messages(
-//     turns: Vec<Turn>,
-//     strategy: &CompletionStrategy,
-//     history_mode: Option<&HistoryMode>,
-//     max_turns: Option<u32>,
-// ) -> Vec<Message> {
-//     match strategy {
-//         CompletionStrategy::Stateless => {
-//             // no history — current message will be added after
-//             vec![]
-//         }
-//         CompletionStrategy::Stateful => {
-//             let turns = match (history_mode, max_turns) {
-//                 (Some(HistoryMode::Trimmed), Some(max)) => {
-//                     let skip = turns.len().saturating_sub(max as usize);
-//                     turns.into_iter().skip(skip).collect::<Vec<_>>()
-//                 }
-//                 _ => turns, // full — all turns
-//             };
-
-//             let mut messages = Vec::new();
-//             for turn in turns {
-//                 messages.push(Message::User {
-//                     content: turn.user_prompt,
-//                     response_id: None,
-//                 });
-//                 messages.push(Message::Assistant {
-//                     content: turn.response_content,
-//                     response_id: turn.response_id,
-//                 });
-//             }
-//             messages
-//         }
-//     }
-// }
 
 pub fn calculate_turn_cost(
     llm: &str,

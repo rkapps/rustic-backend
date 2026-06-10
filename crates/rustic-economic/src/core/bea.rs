@@ -122,7 +122,7 @@ pub async fn update_bea_regional(
         for table in tables {
             let mut all_rows = Vec::new();
 
-            let rows = match bea.get_regional(table.0, table.1, &geo_fips, year).await {
+            let rows = match bea.get_regional(table.0, table.1, geo_fips, year).await {
                 Ok(c) => c,
                 Err(e) => {
                     tracing::warn!(

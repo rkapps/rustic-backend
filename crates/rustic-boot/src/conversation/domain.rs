@@ -84,8 +84,8 @@ impl Conversation {
         let title = request.title.unwrap_or_default();
         let now = Utc::now();
 
-        let history_mode = Some(request.history_mode.clone().unwrap_or_default());
-        let max_turns = Some(request.max_turns.clone().unwrap_or_default());
+        let history_mode = Some(request.history_mode.unwrap_or_default());
+        let max_turns = Some(request.max_turns.unwrap_or_default());
 
         Conversation {
             agent_id: request.agent_id,

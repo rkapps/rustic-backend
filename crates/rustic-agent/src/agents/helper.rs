@@ -18,7 +18,7 @@ use crate::{
 /// and their execution mode (e.g. `"⚡ Running: a, b (parallel)"`).
 pub fn build_decision_status(decision: &StageDecision) -> String {
     // after decision is made
-    let status = match decision.stop {
+    match decision.stop {
         true => "🧠 Synthesising...".to_string(),
         false => {
             let agents: Vec<String> = decision.agents.iter().map(|a| a.id.clone()).collect();
@@ -31,8 +31,7 @@ pub fn build_decision_status(decision: &StageDecision) -> String {
                 }
             )
         }
-    };
-    status
+    }
 }
 
 /// Convert a slice of [`CompletionTurn`]s into a `(messages, last_response_id)` pair.

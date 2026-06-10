@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     match cli.command {
         AdminCommands::LoadTickers { file } => {
             info!("Load Tickers PipeLine started...");
-            let _ = load_tickers(&mongo_uri, file).await?;
+            load_tickers(&mongo_uri, file).await?;
             info!("Load Tickers PipeLine done.");
         }
         AdminCommands::UpdateSchema => {

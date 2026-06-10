@@ -180,10 +180,9 @@ impl GeminiInteractionsRequest {
         }
 
         // Push user message
-        if request.store {
-            if let Some(input) = user_input {
+        if request.store 
+            && let Some(input) = user_input {
                 inputs.push(input);
-            }
         }
 
         // Push model message with thought + function calls combined

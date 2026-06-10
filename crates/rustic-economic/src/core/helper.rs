@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use rustic_providers::economic::{bea::model::BeaParamValue, census::model::CensusRecord};
+use rustic_providers::economic::census::model::CensusRecord;
 
 use crate::domain::CensusData;
 

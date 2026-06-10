@@ -15,7 +15,7 @@ pub async fn load_tickers(mongo_uri: &str, file: PathBuf) -> Result<()> {
     let ticker_seeds = load_ticker_seeds_from_file(file_path)?;
 
     let service = get_finance_service(mongo_uri).await?;
-    let _ = service.load_tickers(&ticker_seeds, true).await?;
+    service.load_tickers(&ticker_seeds, true).await?;
 
     Ok(())
 }

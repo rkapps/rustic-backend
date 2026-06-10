@@ -5,7 +5,7 @@ use std::{env, sync::Arc};
 use rustic_finance::service::FinanceService;
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 
-pub async fn get_finance_service(mongo_uri: &str) -> Result<(FinanceService)> {
+pub async fn get_finance_service(mongo_uri: &str) -> Result<FinanceService> {
     let mongo_db = env::var("RUSTIC_FINANCE_DB_NAME")
         .expect("RUSTIC_FINANCE_DB_NAME envrionment variable not set");
     let openai_api_key: String =
@@ -20,7 +20,7 @@ pub async fn get_finance_service(mongo_uri: &str) -> Result<(FinanceService)> {
         .expect("COINMARKETCAP_API_KEY not found in environment variables.");
 
     FinanceService::new(
-        &mongo_uri,
+        mongo_uri,
         &mongo_db,
         embedding_client,
         Some(alpha_key),
@@ -35,7 +35,7 @@ pub async fn get_economic_service(mongo_uri: &str) -> Result<EconomicService> {
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
 
     EconomicService::new(
-        &mongo_uri,
+        mongo_uri,
         &mongo_db,
         env::var("FRED_API_KEY").ok(),
         env::var("BEA_API_KEY").ok(),

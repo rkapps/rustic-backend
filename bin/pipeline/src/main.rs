@@ -15,6 +15,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::enum_variant_names)]
 enum PipelineCommands {
     UpdateEconomicData,
     UpdateTickersEod,

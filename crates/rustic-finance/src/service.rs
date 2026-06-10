@@ -18,7 +18,6 @@ use crate::{
 };
 
 use crate::{
-    core::tickers::news::get_ticker_news,
     storage::mongo::manager::FinanceMongoStorageManager,
     tools::{
         ticker_indicator::TickerIndicatorTool, ticker_peers::TickerPeersTool,
@@ -171,7 +170,7 @@ impl FinanceService {
     }
 
     #[cfg(feature = "writer")]
-    pub async fn update_ticker_eod_prediction_signals(&self, symbols: &str) -> Result<()> {
+    pub async fn update_ticker_eod_prediction_signals(&self, _symbols: &str) -> Result<()> {
         Ok(())
     }
 

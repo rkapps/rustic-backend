@@ -11,27 +11,27 @@ pub async fn update_economic_db(mongo_uri: &str) -> Result<()> {
         .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
 
-    let manager = EconomicMongoStorageManager::new(&mongo_uri, &mongo_db).await?;
+    let manager = EconomicMongoStorageManager::new(mongo_uri, &mongo_db).await?;
 
     // fred
     let repo = manager.economic_series().await?;
     let indexes = get_economic_series_index_definitions();
-    let _ = create_indexes_safe(repo, indexes).await?;
+    create_indexes_safe(repo, indexes).await?;
 
     // bea nipa
     let repo = manager.bea_nipa().await?;
     let indexes = get_economic_bea_nipa_index_definitions();
-    let _ = create_indexes_safe(repo, indexes).await?;
+    create_indexes_safe(repo, indexes).await?;
 
     // bea regional
     let repo = manager.bea_regional().await?;
     let indexes = get_economic_bea_regional_index_definitions();
-    let _ = create_indexes_safe(repo, indexes).await?;
+    create_indexes_safe(repo, indexes).await?;
 
     // census
     let repo = manager.census().await?;
     let indexes = get_economic_census_index_definitions();
-    let _ = create_indexes_safe(repo, indexes).await?;
+    create_indexes_safe(repo, indexes).await?;
 
     Ok(())
 }
