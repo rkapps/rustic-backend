@@ -47,22 +47,24 @@ async fn main() -> Result<()> {
 
             let service = get_finance_service(&mongo_uri).await?;
             match service.update_eod_tickers("", true).await {
-        
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }
         }
         PipelineCommands::UpdateStocksEtfsRealtime => {
             let service = get_finance_service(&mongo_uri).await?;
-            match service.update_eod_tickers("", true).await {
-        
+            match service.update_realtime_stocks_etfs("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }
 
         }
         PipelineCommands::UpdateCryptosRealtime => {
-
+            let service = get_finance_service(&mongo_uri).await?;
+            match service.update_realtime_cryptos("", true).await {
+                Ok(_) => info!("Tickers EOD update completed successfully."),
+                Err(e) => error!("Tickers EOD update failed: {:?}", e),
+            }
         }
     }
 
