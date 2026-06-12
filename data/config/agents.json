@@ -45,14 +45,13 @@
         "pipeline": {
           "type": "dynamic",
           "available_agents": [
-            { "id": "finance-prompt-analyser", "context": "goal", "preset": "thorough"},
-            { "id": "finance-ticker-screener", "context": "last", "preset": "balanced"},
-            { "id": "finance-ticker-peers", "context": "last", "preset": "balanced"},
-            { "id": "finance-ticker-snapshot", "context": "last", "preset": "balanced"},
-            { "id": "finance-ticker-sentiment", "context": "last", "preset": "balanced"},
-            { "id": "finance-ticker-indicator", "context": "last", "preset": "balanced"},
-            { "id": "finance-ticker-taxonomy", "context": "goal", "preset": "balanced"},
-            { "id": "finance-synthesizer", "context": "all", "preset": "precise"}
+            { "id": "finance-ticker-screener", "preset": "balanced"},
+            { "id": "finance-ticker-peers", "preset": "balanced"},
+            { "id": "finance-ticker-snapshot", "preset": "balanced"},
+            { "id": "finance-ticker-sentiment", "preset": "balanced"},
+            { "id": "finance-ticker-indicator", "preset": "balanced"},
+            { "id": "finance-ticker-taxonomy", "preset": "balanced"},
+            { "id": "finance-synthesizer", "preset": "precise"}
             ]
             , 
             "stages" : []
