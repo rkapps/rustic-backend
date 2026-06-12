@@ -22,7 +22,6 @@ use crate::{
         response::{
             GeminiInteractionsChunkResponse, GeminiInteractionsResponse,
             GeminiStepsResponseOutput::{FunctionCall, ModelOutput, Thought, UserInput},
-            GeminiTextContent,
         },
     },
 };
@@ -231,7 +230,7 @@ impl LlmClient for GeminiClient {
                     }
                 };
                 // debug!("event: {:?}", event);
-                debug!(target: "agent-gemini",
+                trace!(target: "agent-gemini",
                 event= ?event
                 );
 
@@ -247,6 +246,9 @@ impl LlmClient for GeminiClient {
                         ))
                     })?;
 
+                debug!(target: "agent-gemini",
+                    event_type= ?&chunk.event_type
+                );
 
                 match chunk.event_type.as_str() {
                     "content.delta" | "step.delta" => {
