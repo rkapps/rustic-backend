@@ -225,7 +225,7 @@ impl GeminiInteractionsRequest {
                             r#type: "model_output".to_string(),
                             content: vec![content],
                         };
-                        // inputs.push(user_input);
+                        inputs.push(user_input);
 
                         // let response_input = GeminiCompletionRequestInput::Content {
                         //     role: "model".to_string(),
