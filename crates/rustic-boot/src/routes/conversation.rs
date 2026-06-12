@@ -229,9 +229,16 @@ pub async fn send_turn_streaming_handler(
                     // ✅ Save only on the final chunk
                     if chunk.is_final {
                         let fc = final_content.lock().await;
-                        // info!("final_content: {:?}", *fc);
-                        let unescaped: serde_json::Value = serde_json::from_str(&fc).unwrap();
-                        info!("Final Content {}", unescaped);
+                        info!("final_content: {:?}", *fc);
+                        // let unescaped: serde_json::Value = serde_json::from_str(&fc);
+                        match serde_json::from_str(&fc) {
+                            Ok(c) => {
+                                let unescaped: serde_json::Value = serde_json::from_str(c).unwrap();
+                                info!("Final Content {}", unescaped);
+                            },
+                            Err(_) => {},
+                        }
+                        
                         // info!("Final Content {}", serde_json::to_string_pretty(&unescaped).unwrap());
 
                         // // ✅ .await now works inside .then()
