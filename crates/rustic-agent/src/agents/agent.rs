@@ -189,10 +189,13 @@ impl Agent {
                         }
                     };
                     if let Some(call) = chunk.tool_call {
-                        debug!(target: "agent-tool", agent= %agent_id, tool_call= ?call, "Tool Call");
+                        debug!(agent= %agent_id, tool_call= ?call, "Tool Call");
                         tool_calls.push(call);
                     } else {
-                        debug!(target: "agent-tool", agent= %agent_id, chunk= ?chunk, "Chunk");
+                        debug!(
+                            chunk= ?chunk, 
+                            "Agent: {}", agent_id
+                        );
 
                         if chunk.is_final {
                             usage += chunk.usage.unwrap();
@@ -377,8 +380,8 @@ impl Agent {
         loop {
             iteration += 1;
             info!(
-                "Agent: {} Iteration: {}/{}",
-                agent_id, iteration, MAX_ITERATIONS
+                "Agent: {} Iteration: {}/{} messages: {:?}", 
+                agent_id, iteration, MAX_ITERATIONS, nrequest.messages.len()
             );
             if iteration > 5 {
                 sleep(delay).await;
@@ -472,8 +475,8 @@ impl Agent {
             for result in results {
                 match result {
                     Ok((tool_call, tool_output)) => {
-                        debug!(target: "agent-tool", tool_call= ?tool_call, "Agent: {} - ", agent_id);
-                        debug!(target: "agent-tool", tool_output= ?tool_output, "Agent: {} - ", agent_id );
+                        info!(target: "agent-tool", tool_call= ?tool_call, "Agent: {} - ", agent_id);
+                        info!(target: "agent-tool", tool_output= ?tool_output, "Agent: {} - ", agent_id );
                         nmessages.push(tool_call);
                         nmessages.push(tool_output);
                     }
@@ -482,7 +485,7 @@ impl Agent {
                     }
                 };
             }
-            debug!("Agent: {} New messages: {:?}", agent_id, nmessages.len());
+            info!("Agent: {} New messages: {:?}", agent_id, nmessages.len());
 
             if !nmessages.is_empty() {
                 nrequest.messages.extend(nmessages);
