@@ -185,6 +185,10 @@ impl Tool for TickerScreeningTool {
             symbols.len(),
             elapsed.as_secs_f32()
         );
-        Ok(json!({ "symbols": symbols }))
+        Ok(if symbols.is_empty() {
+            json!({ "symbols": null })
+        } else {
+            json!({ "symbols": symbols })
+        })
     }
 }
