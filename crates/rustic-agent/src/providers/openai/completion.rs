@@ -66,12 +66,11 @@ impl LlmClient for OpenAIClient {
         let orequest = OpenAICompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
 
-        debug!(target: "agent-openai", 
+        debug!(target: "agent-openai",
             store= ?orequest.store,
             response_id = ?orequest.previous_response_id,
             "OpenAICompletionRequest: {:#?}", orequest.input.len()
         );
-        
 
         let body = serde_json::json!(orequest);
         // debug!("Body: {:#?}", body);
@@ -187,7 +186,7 @@ impl LlmClient for OpenAIClient {
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
 
         debug!(
-            target: "agent-openai", 
+            target: "agent-openai",
             "OpenAI Request: {:#?}", request
         );
 

@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
-use tracing::{debug, info, trace};
+use tracing::{info, trace};
 
 use crate::client::{
     message::Message,
@@ -98,12 +98,12 @@ impl OpenAICompletionRequest {
                     name,
                 } => {
                     // if !request.store {
-                        inputs.push(OpenAICompletionRequestMessage::FunctionCall {
-                            r#type: "function_call".to_string(),
-                            arguments,
-                            call_id,
-                            name,
-                        });
+                    inputs.push(OpenAICompletionRequestMessage::FunctionCall {
+                        r#type: "function_call".to_string(),
+                        arguments,
+                        call_id,
+                        name,
+                    });
                     // }
                 }
                 Message::ToolOutput {
@@ -112,18 +112,18 @@ impl OpenAICompletionRequest {
                     name: _,
                 } => {
                     // if !request.store {
-                        let arg_string = serde_json::to_string(&output)
-                            .context("Failed to serialize arguments for OpenAI")?;
+                    let arg_string = serde_json::to_string(&output)
+                        .context("Failed to serialize arguments for OpenAI")?;
 
-                        info!(
-                            target: "agent-openai",
-                            "Tooloutput----------------------------------------: {:?}", arg_string
-                        );
-                        inputs.push(OpenAICompletionRequestMessage::FunctionCallOutput {
-                            r#type: "function_call_output".to_string(),
-                            call_id,
-                            output: arg_string,
-                        });
+                    info!(
+                        target: "agent-openai",
+                        "Tooloutput----------------------------------------: {:?}", arg_string
+                    );
+                    inputs.push(OpenAICompletionRequestMessage::FunctionCallOutput {
+                        r#type: "function_call_output".to_string(),
+                        call_id,
+                        output: arg_string,
+                    });
                     // }
                 }
             }

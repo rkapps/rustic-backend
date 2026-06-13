@@ -57,9 +57,9 @@ pub struct GeminiDelta {
     pub index: Option<usize>,
     pub r#type: String,
     pub arguments: Option<String>,
-    pub content: Option<GeminiDeltaContent>,    // for thought_summary
-    pub text: Option<String>,                   // for text
-    pub signature: Option<String>               // for signature
+    pub content: Option<GeminiDeltaContent>, // for thought_summary
+    pub text: Option<String>,                // for text
+    pub signature: Option<String>,           // for signature
 }
 
 #[derive(Debug, Deserialize)]

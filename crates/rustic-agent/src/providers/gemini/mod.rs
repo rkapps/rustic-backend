@@ -1,10 +1,10 @@
 //! Google Gemini provider: request mapping to the Interactions API, streaming SSE parsing, and response normalisation.
 
+pub mod chunk;
 pub mod completion;
 pub mod helper;
 pub mod request;
 pub mod response;
-pub mod chunk;
 
 /// Provider identifier returned by [`models`] callers for display or routing.
 pub const LLM: &str = "Gemini";

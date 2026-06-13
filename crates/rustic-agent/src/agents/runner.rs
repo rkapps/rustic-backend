@@ -272,8 +272,6 @@ impl Runnable for PipeLineAgent {
                     .send(Ok(CompletionChunkResponse::status(status.clone())))
                     .await;
 
-              
-
                 if decision.stop {
                     let start = std::time::Instant::now();
 

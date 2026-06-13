@@ -63,7 +63,6 @@ pub struct GeminiInteractionsResponseTokenUsage {
     pub total_output_tokens: i32,
 }
 
-
 impl std::ops::AddAssign for GeminiInteractionsResponseTokenUsage {
     fn add_assign(&mut self, rhs: Self) {
         self.total_cached_tokens += rhs.total_cached_tokens;

@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::Serialize;
 use serde_json::Value;
 use tracing::{debug, info, trace};
@@ -28,7 +28,6 @@ pub struct GeminiInteractionsRequest {
     generation_config: GeminiCompletionRequestConfig,
     pub tools: Vec<ToolDefinition>,
 }
-
 
 impl GeminiInteractionsRequest {
     pub fn log_info(&self) {
@@ -64,7 +63,6 @@ impl GeminiInteractionsRequest {
         );
     }
 }
-
 
 /// A single input item in the Gemini request, serialized without an enum tag.
 #[derive(Serialize, Debug)]
@@ -102,7 +100,7 @@ pub enum GeminiStepRequestInput {
         call_id: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         // result: Option<Vec<GeminiTextContent>>,
-        result: Option<Value>,        
+        result: Option<Value>,
         #[serde(skip_serializing_if = "Option::is_none")]
         arguments: Option<Value>,
         name: String,
@@ -249,8 +247,7 @@ impl GeminiInteractionsRequest {
                     arguments: _,
                     call_id: _,
                     name: _,
-                } => {
-                }
+                } => {}
 
                 Message::ToolOutput {
                     call_id,
@@ -265,8 +262,8 @@ impl GeminiInteractionsRequest {
                         id: None,
                         name,
                         // result: Some(vec![content]),
-                        result: Some(output),                        
-                        arguments: None
+                        result: Some(output),
+                        arguments: None,
                     });
                 }
             }

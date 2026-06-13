@@ -403,7 +403,7 @@ impl Agent {
             // At the start of each iteration (not after tool calls)
             if agent.store && !last_response_id.is_empty() {
                 if let Some(Message::User {
-                    content,
+                    content: _,
                     response_id,
                 }) = nrequest
                     .messages
@@ -412,7 +412,6 @@ impl Agent {
                 {
                     *response_id = Some(last_response_id.clone());
                 }
-
             }
 
             // Call the llm with the request

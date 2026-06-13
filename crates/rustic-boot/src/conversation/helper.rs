@@ -73,9 +73,7 @@ pub fn build_completion_turns(
             completion_turns
         }
     }
-
 }
-
 
 pub fn calculate_turn_cost(
     llm: &str,

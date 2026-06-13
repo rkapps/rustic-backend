@@ -299,9 +299,9 @@ impl LlmClient for GeminiClient {
                                     debug!(
                                         target: "gemini-chunk",
                                         delta= ?&delta.r#type
-        
+
                                     );
-       
+
                                 }
                             }
                         }

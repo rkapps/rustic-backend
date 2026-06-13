@@ -235,10 +235,10 @@ pub async fn send_turn_streaming_handler(
                             Ok(c) => {
                                 let unescaped: serde_json::Value = serde_json::from_str(c).unwrap();
                                 info!("Final Content {}", unescaped);
-                            },
-                            Err(_) => {},
+                            }
+                            Err(_) => {}
                         }
-                        
+
                         // info!("Final Content {}", serde_json::to_string_pretty(&unescaped).unwrap());
 
                         // // ✅ .await now works inside .then()
