@@ -193,18 +193,13 @@ pub async fn send_turn_streaming_handler(
     debug!("User sub: {:?} conversation id: {}", user.sub, id);
 
     let service = boot_state.conversation_service()?; // ← one line
+    let start = std::time::Instant::now();  
 
     let stream = service
         .send_turn_streaming(&user.sub, &id, request.clone())
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-    // {
-    //     Ok(stream) => stream,
-    //     Err(e) => {
-    //         error!("{:?}", e);
-    //         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-    //     }
-    // };
+
     let cservice = service.clone(); // ← clone Arc
     let final_content = Arc::new(Mutex::new(String::new()));
     let request = request.clone();
@@ -238,10 +233,9 @@ pub async fn send_turn_streaming_handler(
                             }
                             Err(_) => {}
                         }
-
                         // info!("Final Content {}", serde_json::to_string_pretty(&unescaped).unwrap());
-
-                        // // ✅ .await now works inside .then()
+                        // elapsed time
+                        let elapsed = start.elapsed();
                         match conversation_service
                             .save_turn(
                                 &uid,
@@ -250,6 +244,7 @@ pub async fn send_turn_streaming_handler(
                                 fc.clone(),
                                 Some(chunk.response_id.clone()),
                                 chunk.usage.clone(),
+                                Some(elapsed.as_millis() as u64),  
                             )
                             .await
                         {

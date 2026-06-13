@@ -129,6 +129,7 @@ impl ConversationService {
         response_content: String,
         response_id: Option<String>,
         usage: Option<CompletionResponseTokenUsage>,
+        execution_time_ms: Option<u64>
     ) -> Result<Turn> {
         let conversation = self
             .get_conversation(uid, conversation_id)
@@ -162,6 +163,7 @@ impl ConversationService {
             cached_write_tokens_cost: 0.0,
             output_tokens_cost: 0.0,
             total_tokens_cost: 0.0,
+            execution_time_ms
         };
 
         // update turn cost.
@@ -200,7 +202,11 @@ impl ConversationService {
         let cturns = build_completion_turns(&conversation, turns);
 
         let runner = build_agent_runner(self.agent_service.clone(), &conversation).await?;
+
+        //capture the start time
+        let start = std::time::Instant::now();
         let cresponse = runner.execute(cturns, &request.prompt).await?;
+        let elapsed = start.elapsed();
 
         let response = cresponse.clone();
         let usage = cresponse.usage;
@@ -216,6 +222,7 @@ impl ConversationService {
             rcontent.clone(),
             Some(response_id.clone()),
             Some(usage.clone()),
+            Some(elapsed.as_millis() as u64),  // ← add to save_turn
         )
         .await?;
 
