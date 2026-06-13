@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
+use tracing::{debug, info, trace};
 
 use crate::client::{
     message::Message,
@@ -13,12 +14,12 @@ pub struct OpenAICompletionRequest {
     model: String,
     /// Maps to the OpenAI `instructions` field (system prompt).
     instructions: String,
-    input: Vec<OpenAICompletionRequestMessage>,
-    store: bool,
+    pub input: Vec<OpenAICompletionRequestMessage>,
+    pub store: bool,
     stream: bool,
     /// Links this request to a prior response for conversation threading.
     #[serde(skip_serializing_if = "Option::is_none")]
-    previous_response_id: Option<String>,
+    pub previous_response_id: Option<String>,
     max_output_tokens: i32,
     reasoning: OpenAICompletionRequestReasoning,
     pub tools: Vec<ToolDefinition>,
@@ -56,33 +57,39 @@ impl OpenAICompletionRequest {
         let mut inputs = Vec::new();
         let mut user_input: Option<OpenAICompletionRequestMessage> = None;
 
+        trace!("messaes: {:#?}", request.messages);
         for message in request.messages {
             match message {
                 Message::Thought { content: _ } => {}
                 Message::User {
                     content,
-                    response_id: _,
-                } => {
-                    user_input = Some(OpenAICompletionRequestMessage::Content {
-                        role: "user".to_string(),
-                        content,
-                    });
-                    // inputs.push(OpenAICompletionRequestMessage::Content {
-                    //     role: "user".to_string(),
-                    //     content,
-                    // });
-                }
-                Message::Assistant {
-                    content: _,
                     response_id,
                 } => {
                     if request.store {
                         id = response_id;
+                        user_input = Some(OpenAICompletionRequestMessage::Content {
+                            role: "user".to_string(),
+                            content,
+                        });
+                    } else {
+                        inputs.push(OpenAICompletionRequestMessage::Content {
+                            role: "user".to_string(),
+                            content,
+                        });
                     }
-                    // inputs.push(OpenAICompletionRequestMessage::Content {
-                    //     role: "assistant".to_string(),
-                    //     content,
-                    // });
+                }
+                Message::Assistant {
+                    content,
+                    response_id: _,
+                } => {
+                    if request.store {
+                        // id = response_id;
+                    } else {
+                        inputs.push(OpenAICompletionRequestMessage::Content {
+                            role: "assistant".to_string(),
+                            content,
+                        });
+                    }
                 }
 
                 Message::ToolCall {
@@ -90,32 +97,45 @@ impl OpenAICompletionRequest {
                     call_id,
                     name,
                 } => {
-                    inputs.push(OpenAICompletionRequestMessage::FunctionCall {
-                        r#type: "function_call".to_string(),
-                        arguments,
-                        call_id,
-                        name,
-                    });
+                    // if !request.store {
+                        inputs.push(OpenAICompletionRequestMessage::FunctionCall {
+                            r#type: "function_call".to_string(),
+                            arguments,
+                            call_id,
+                            name,
+                        });
+                    // }
                 }
                 Message::ToolOutput {
                     call_id,
                     output,
                     name: _,
                 } => {
-                    let arg_string = serde_json::to_string(&output)
-                        .context("Failed to serialize arguments for OpenAI")?;
+                    // if !request.store {
+                        let arg_string = serde_json::to_string(&output)
+                            .context("Failed to serialize arguments for OpenAI")?;
 
-                    inputs.push(OpenAICompletionRequestMessage::FunctionCallOutput {
-                        r#type: "function_call_output".to_string(),
-                        call_id,
-                        output: arg_string,
-                    });
+                        info!(
+                            target: "agent-openai",
+                            "Tooloutput----------------------------------------: {:?}", arg_string
+                        );
+                        inputs.push(OpenAICompletionRequestMessage::FunctionCallOutput {
+                            r#type: "function_call_output".to_string(),
+                            call_id,
+                            output: arg_string,
+                        });
+                    // }
                 }
             }
         }
 
+        if !request.store {
+            id = None;
+        }
         // Push user message
-        if let Some(input) = user_input {
+        if request.store
+            && let Some(input) = user_input
+        {
             inputs.push(input);
         }
 

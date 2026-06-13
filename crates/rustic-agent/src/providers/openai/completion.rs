@@ -66,7 +66,13 @@ impl LlmClient for OpenAIClient {
         let orequest = OpenAICompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
 
-        debug!("OpenAICompletionRequest: {:#?}", orequest);
+        debug!(target: "agent-openai", 
+            store= ?orequest.store,
+            response_id = ?orequest.previous_response_id,
+            "OpenAICompletionRequest: {:#?}", orequest.input.len()
+        );
+        
+
         let body = serde_json::json!(orequest);
         // debug!("Body: {:#?}", body);
         let oresponse = self
@@ -74,7 +80,10 @@ impl LlmClient for OpenAIClient {
             .post_request::<OpenAICompletionResponse>(url, Some(headers), body)
             .await?;
 
-        debug!("OpenAICompletionResponse: {:#?}", oresponse);
+        debug!(
+            target: "agent-openai",
+            "OpenAICompletionResponse: {:#?}", oresponse
+        );
 
         let mut rcontents: Vec<CompletionResponseContent> = Vec::new();
         let id = oresponse.id;
@@ -177,7 +186,10 @@ impl LlmClient for OpenAIClient {
         let request = OpenAICompletionRequest::new(request)
             .map_err(|e| HttpError::CompletionRequestError(e.to_string()))?;
 
-        debug!("OpenAI Request: {:#?}", request);
+        debug!(
+            target: "agent-openai", 
+            "OpenAI Request: {:#?}", request
+        );
 
         let body = serde_json::json!(request);
         let response = self
@@ -219,12 +231,12 @@ impl LlmClient for OpenAIClient {
                              e, &event.data
                          ))
                      })?;
-                trace!("delta: {:?}", event.event.as_str());
-                trace!("Chunk: {:?}", chunk);
+                trace!(target: "agent-openai", "delta: {:?}", event.event.as_str());
+                trace!(target: "agent-openai", "Chunk: {:?}", chunk);
 
                 match event.event.as_str() {
                      "response.output_text.delta" => {
-                        trace!("Chunk: {:?}", chunk);
+                        trace!(target: "agent-openai", "Chunk: {:?}", chunk);
                         if let Some(delta) = chunk.delta {
                              yield Ok(CompletionChunkResponse::content(agent_id.clone(), delta, String::new()))
                          }
@@ -232,7 +244,7 @@ impl LlmClient for OpenAIClient {
                      "response.function_call_arguments.delta" => {
                          if let Some(item_id) = chunk.item_id
                             && let Some(args) = chunk.delta {
-                                debug!("Arguments: {}", args);
+                                debug!(target: "agent-openai", "Arguments: {}", args);
                                 if let Some(value) = tool_values.get_mut(&item_id) {
                                     value.push_str(&args);
                                 }
@@ -260,7 +272,7 @@ impl LlmClient for OpenAIClient {
                      "response.output_item.added" => {
                          if let Some(item) = chunk.item
                              && item.r#type == "function_call" {
-                                 trace!("item: {:?}", item);
+                                 trace!(target: "agent-openai", "item: {:?}", item);
 
                                  tool_buffers.insert(
                                      item.id.clone(),
@@ -281,7 +293,7 @@ impl LlmClient for OpenAIClient {
 
                          if let Some(response) = chunk.response {
                              let cusage = response.usage.unwrap();
-                            debug!("chunk token: {:#?}", cusage);
+                            debug!(target: "agent-openai", "chunk token: {:#?}", cusage);
 
                              let usage = CompletionResponseTokenUsage {
                                 input_tokens: cusage.input_tokens,
@@ -293,7 +305,7 @@ impl LlmClient for OpenAIClient {
                                  total_tokens: cusage.total_tokens,
                              };
 
-                              debug!("Response stats - model: {:#?} response_id: {} usage: {:#?}",
+                              debug!(target: "agent-openai", "Response stats - model: {:#?} response_id: {} usage: {:#?}",
                                 response.model, response.id, usage );
 
                              yield Ok(CompletionChunkResponse::stop(
