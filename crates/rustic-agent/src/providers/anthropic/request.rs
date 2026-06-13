@@ -5,7 +5,7 @@ use crate::client::{
 use anyhow::{Context, Result};
 use serde::Serialize;
 use serde_json::Value;
-use tracing::debug;
+use tracing::{debug, info, trace};
 
 /// Serialized body sent to `POST /v1/messages`.
 #[derive(Debug, Serialize)]
@@ -20,6 +20,42 @@ pub struct AnthropicCompletionRequest {
     stream: bool,
     pub tools: Vec<AnthropicToolDefinition>,
 }
+
+
+impl AnthropicCompletionRequest {
+    pub fn log_info(&self) {
+        info!(
+            target: "agent-anthropic",
+            model = %self.model,
+            messages = self.messages.len(),
+            last_message = %format!("{:#?}", self.messages.last()),
+            tools = self.tools.len(),
+            "Anthropic request"
+        );
+    }
+
+    pub fn log_debug(&self) {
+        debug!(
+            target: "agent-anthropic",
+            model = %self.model,
+            temperature = %format!("{:.1}", self.temperature),
+            thinking_level = ?self.thinking,
+            max_tokens = self.max_tokens,
+            messages = %format!("{:#?}", self.messages),
+            tools = self.tools.len(),
+            "Anthropic request"
+        );
+    }
+
+    pub fn log_trace(&self) {
+        trace!(
+            target: "agent-anthropic",
+            request = ?self,
+            "Anthropic full request"
+        );
+    }
+}
+
 
 /// System-prompt block (currently unused in favour of a plain string field).
 #[derive(Debug, Serialize)]

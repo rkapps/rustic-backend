@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
-use tracing::{info, trace};
+use tracing::{debug, info, trace};
 
 use crate::client::{
     message::Message,
@@ -24,6 +24,43 @@ pub struct OpenAICompletionRequest {
     reasoning: OpenAICompletionRequestReasoning,
     pub tools: Vec<ToolDefinition>,
 }
+
+
+impl OpenAICompletionRequest {
+    pub fn log_info(&self) {
+        info!(
+            target: "agent-openai",
+            model = %self.model,
+            store = self.store,
+            messages = self.input.len(),
+            last_message = %format!("{:#?}", self.input.last()),
+            last_response_id = self.previous_response_id,
+            tools = self.tools.len(),
+            "Openai request"
+        );
+    }
+
+    pub fn log_debug(&self) {
+        debug!(
+            target: "agent-openai",
+            model = %self.model,
+            store = self.store,
+            max_tokens = self.max_output_tokens,
+            messages = %format!("{:#?}", self.input),
+            tools = self.tools.len(),
+            "Openai request"
+        );
+    }
+
+    pub fn log_trace(&self) {
+        trace!(
+            target: "agent-openai",
+            request = %format!("{:#?}", self),
+            "Openai full request"
+        );
+    }
+}
+
 
 /// A single input item in the OpenAI request, serialized without an enum tag.
 #[derive(Serialize, Debug)]
@@ -52,8 +89,7 @@ impl OpenAICompletionRequest {
     /// The `response_id` from the last `Assistant` message is extracted and sent as
     /// `previous_response_id` so the API can thread conversation context server-side.
     pub fn new(request: CompletionRequest) -> Result<Self> {
-        let mut id: Option<String> = None;
-
+        // let mut id: Option<String> = None;
         let mut inputs = Vec::new();
         let mut user_input: Option<OpenAICompletionRequestMessage> = None;
 
@@ -63,10 +99,10 @@ impl OpenAICompletionRequest {
                 Message::Thought { content: _ } => {}
                 Message::User {
                     content,
-                    response_id,
+                    response_id: _,
                 } => {
                     if request.store {
-                        id = response_id;
+                        // id = response_id;
                         user_input = Some(OpenAICompletionRequestMessage::Content {
                             role: "user".to_string(),
                             content,
@@ -115,10 +151,6 @@ impl OpenAICompletionRequest {
                     let arg_string = serde_json::to_string(&output)
                         .context("Failed to serialize arguments for OpenAI")?;
 
-                    info!(
-                        target: "agent-openai",
-                        "Tooloutput----------------------------------------: {:?}", arg_string
-                    );
                     inputs.push(OpenAICompletionRequestMessage::FunctionCallOutput {
                         r#type: "function_call_output".to_string(),
                         call_id,
@@ -129,9 +161,6 @@ impl OpenAICompletionRequest {
             }
         }
 
-        if !request.store {
-            id = None;
-        }
         // Push user message
         if request.store
             && let Some(input) = user_input
@@ -143,9 +172,9 @@ impl OpenAICompletionRequest {
             model: request.model,
             instructions: request.system.unwrap_or_default(),
             input: inputs,
-            store: true,
+            store: request.store,
             stream: request.stream,
-            previous_response_id: id,
+            previous_response_id: request.last_response_id.filter(|id| !id.is_empty()),        
             max_output_tokens: request.max_tokens,
             reasoning: OpenAICompletionRequestReasoning::new(request.reasoning_effort),
             tools: request.definitions,

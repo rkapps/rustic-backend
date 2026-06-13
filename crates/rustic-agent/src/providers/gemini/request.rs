@@ -36,6 +36,8 @@ impl GeminiInteractionsRequest {
             model = %self.model,
             store = self.store,
             messages = self.input.len(),
+            last_message = %format!("{:#?}", self.input.last()),
+            last_response_id = self.previous_interaction_id,
             tools = self.tools.len(),
             "Gemini request"
         );
@@ -58,7 +60,7 @@ impl GeminiInteractionsRequest {
     pub fn log_trace(&self) {
         trace!(
             target: "agent-gemini",
-            request = ?self,
+            request = %format!("{:#?}", self),
             "Gemini full request"
         );
     }
@@ -175,7 +177,6 @@ impl GeminiInteractionsRequest {
         let mut inputs: Vec<GeminiStepRequestInput> = Vec::new();
         let mut function_result_contents: Vec<GeminiStepRequestInput> = Vec::new();
         let model_contents: Vec<GeminiStepRequestInput> = Vec::new();
-        let mut id: Option<String> = None;
         let mut user_input: Option<GeminiStepRequestInput> = None;
 
         let crequest = request.clone();
@@ -226,10 +227,9 @@ impl GeminiInteractionsRequest {
 
                 Message::Assistant {
                     content,
-                    response_id,
+                    response_id: _,
                 } => {
                     if request.store {
-                        id = response_id;
                     } else {
                         let content = GeminiTextContent {
                             r#type: "text".to_string(),
@@ -290,7 +290,7 @@ impl GeminiInteractionsRequest {
             model: MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
             input: inputs,
             system_instruction: request.system.clone().unwrap_or_default(),
-            previous_interaction_id: id,
+            previous_interaction_id: request.last_response_id.filter(|id| !id.is_empty()),
             stream: request.stream,
             store: request.store,
             generation_config: GeminiCompletionRequestConfig::new(&crequest),
