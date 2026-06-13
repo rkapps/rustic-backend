@@ -168,6 +168,7 @@ pub struct Turn {
     pub cached_write_tokens_cost: f64,
     pub output_tokens_cost: f64,
     pub total_tokens_cost: f64,
+    pub execution_time_ms: Option<u64>,
 }
 
 impl RepoModel<String> for Turn {
