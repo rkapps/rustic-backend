@@ -13,8 +13,7 @@ use crate::{
     agents::{
         domain::{AgentGoal, CompletionTurn, ExecutionMode, StageDecision},
         helper::{
-            build_clean_json, build_decision_status, build_messages_from_turns, build_user_message,
-            merge_responses,
+            build_clean_json, build_decision_status, build_messages_from_turns, merge_responses,
         },
     },
     services::config::agent::CompletionStrategy,
@@ -124,8 +123,8 @@ impl Runnable for SingleAgent {
             "Agent {:?} Executing SingleAgent...", self.get_agent_id()
         );
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
-        messages.push(build_user_message(prompt.to_string(), last_response_id));
-        self.agent.complete(&messages).await
+        messages.push(Message::user(prompt.to_string()));
+        self.agent.complete(&messages, last_response_id).await
     }
 
     async fn execute_streaming(
@@ -144,8 +143,10 @@ impl Runnable for SingleAgent {
         );
 
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
-        messages.push(build_user_message(prompt.to_string(), last_response_id));
-        self.agent.complete_with_streaming(&messages).await
+        messages.push(Message::user(prompt.to_string()));
+        self.agent
+            .complete_with_streaming(&messages, last_response_id)
+            .await
     }
 
     fn get_agent_id(&self) -> &String {
@@ -178,8 +179,8 @@ impl Runnable for PipeLineAgent {
         );
 
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
-        messages.push(build_user_message(prompt.to_string(), last_response_id));
-        self.agent.complete(&Vec::new()).await
+        messages.push(Message::user(prompt.to_string()));
+        self.agent.complete(&Vec::new(), last_response_id).await
     }
 
     /// Run the pipeline and stream status + content chunks to the caller.
@@ -211,7 +212,9 @@ impl Runnable for PipeLineAgent {
         let self_clone = Arc::new(self.clone());
         let original_turns = turns.clone();
         let original_prompt = prompt.to_string();
-        let mut last_response_id = None;
+        let (mut messages, last_response_id) = build_messages_from_turns(&turns);
+        let mut last_response_id = last_response_id;
+        let mut store = self.get_agent().store;
 
         tokio::spawn(async move {
             let mut iteration = 0;
@@ -238,7 +241,7 @@ impl Runnable for PipeLineAgent {
                 dturns.extend(pipeline_turns.clone());
 
                 let (response, decision) = match self_clone
-                    .decide(&dturns, &new_prompt, last_response_id.clone())
+                    .decide(&dturns, &new_prompt, last_response_id.clone(), store)
                     .await
                 {
                     Ok(c) => c,
@@ -249,6 +252,9 @@ impl Runnable for PipeLineAgent {
                         break;
                     }
                 };
+
+                // set store to false after the first loop of the orchestrator.
+                store = false;
 
                 info!(
                     stop= %decision.stop,
@@ -473,7 +479,7 @@ impl PipeLineAgent {
         &self,
         turns: &[CompletionTurn],
         prompt: &str,
-        response_id: Option<String>,
+        // response_id: Option<String>,
     ) -> Vec<Message> {
         let agent = self.get_agent();
         info!(
@@ -482,9 +488,8 @@ impl PipeLineAgent {
             "Agent: {}", agent.id
         );
         let (mut messages, last_response_id) = build_messages_from_turns(turns);
-        let nresponse_id = response_id.or(last_response_id);
 
-        messages.push(build_user_message(prompt.to_string(), nresponse_id));
+        messages.push(Message::user(prompt.to_string()));
         messages
     }
 
@@ -495,14 +500,16 @@ impl PipeLineAgent {
         turns: &[CompletionTurn],
         prompt: &str,
         response_id: Option<String>,
+        store: bool,
     ) -> Result<(CompletionResponse, StageDecision)> {
-        let agent = self.get_agent();
-        let messages = self.build_orchesrator_messages(turns, prompt, response_id);
+        let mut agent = self.get_agent().clone();
+        agent.store = store;
+        let messages = self.build_orchesrator_messages(turns, prompt);
         debug!(
             messages= ?messages,
             "Agent: {}", agent.id
         );
-        let response = agent.complete(&messages).await?;
+        let response = agent.complete(&messages, response_id).await?;
         let decision = self.build_decision(&response)?;
         Ok((response, decision))
     }
@@ -573,16 +580,6 @@ impl PipeLineAgent {
 
         Ok(merge_responses(&responses))
     }
-
-    // pub async fn execute_synthesizer(
-    //     &self,
-    //     decision: &StageDecision,
-    //     pipeline_turns: &[CompletionTurn],
-    //     tx: Sender<Result<CompletionChunkResponse, HttpError>>,
-    // ) -> Result<HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>>> {
-    //     // validate single agent for stop
-    //     // Ok(())
-    // }
 
     /// Resolve a list of [`AgentGoal`]s to `(Arc<dyn Runnable>, goal_string)` pairs.
     ///

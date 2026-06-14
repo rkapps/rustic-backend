@@ -174,13 +174,51 @@ impl GeminiInteractionsRequest {
     /// can resume its chain-of-thought across turns. Tool results are collected and emitted as
     /// a single user-role `FunctionCallResult` block.
     pub fn new(request: CompletionRequest) -> Result<Self> {
+        let crequest = request.clone();
         let mut inputs: Vec<GeminiStepRequestInput> = Vec::new();
         let mut function_result_contents: Vec<GeminiStepRequestInput> = Vec::new();
         let model_contents: Vec<GeminiStepRequestInput> = Vec::new();
         let mut user_input: Option<GeminiStepRequestInput> = None;
+        let iterations = request.iterations;
+        let current_key = iterations.keys().max().copied().unwrap_or(0);
+        let current_iteration = iterations.get(&current_key).cloned().unwrap_or_default();
+        let mut sorted_keys: Vec<usize> = iterations.keys().cloned().collect();
+        sorted_keys.sort();
+        
+        let imessages: Vec<Message> = sorted_keys
+            .iter()
+            .flat_map(|k| iterations.get(k).unwrap().clone())
+            .collect();
 
-        let crequest = request.clone();
-        for message in request.messages {
+        debug!(
+            target: "agent-openai",
+            request_messages= ?request.messages.len(),
+            iterations_messages = format_args!("{:#?}", iterations),
+            current_iteration = ?current_iteration
+        );
+        let pmessages = if request.store {
+            if current_iteration.is_empty() {
+                // first run — send only last message (the goal/prompt)
+                request.messages.last().cloned().map(|m| vec![m]).unwrap_or_default()
+            } else {
+                // subsequent iterations — user message + current iteration tool calls
+                imessages
+                // let mut msgs = request.messages.last().cloned()
+                //     .map(|m| vec![m])
+                //     .unwrap_or_default();
+                // msgs.extend(current_iteration);
+                // msgs
+            }
+        } else {
+            // stateless - always send all the iterations messages
+            if imessages.is_empty() {
+                request.messages
+            } else {
+                imessages
+            }
+        };
+
+        for message in pmessages {
             match message {
                 Message::Thought { content } => {
                     let signature = content;
@@ -192,10 +230,7 @@ impl GeminiInteractionsRequest {
                     inputs.push(user_input);
                 }
 
-                Message::User {
-                    content,
-                    response_id: _,
-                } => {
+                Message::User { content } => {
                     // Flush any pending model contents before new user message
                     if !model_contents.is_empty() {
                         // inputs.push(GeminiCompletionRequestInput::ModelContent {
@@ -225,10 +260,7 @@ impl GeminiInteractionsRequest {
                     }
                 }
 
-                Message::Assistant {
-                    content,
-                    response_id: _,
-                } => {
+                Message::Assistant { content } => {
                     if request.store {
                     } else {
                         let content = GeminiTextContent {
@@ -286,11 +318,17 @@ impl GeminiInteractionsRequest {
             inputs.extend(function_result_contents);
         }
 
+        let interaction_id = if request.store {
+            request.last_response_id.filter(|id| !id.is_empty())
+        } else {
+            None
+        };
+
         let grequest = GeminiInteractionsRequest {
             model: MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
             input: inputs,
             system_instruction: request.system.clone().unwrap_or_default(),
-            previous_interaction_id: request.last_response_id.filter(|id| !id.is_empty()),
+            previous_interaction_id: interaction_id,
             stream: request.stream,
             store: request.store,
             generation_config: GeminiCompletionRequestConfig::new(&crequest),

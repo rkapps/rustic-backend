@@ -42,30 +42,11 @@ pub fn build_messages_from_turns(turns: &[CompletionTurn]) -> (Vec<Message>, Opt
     let mut messages = Vec::new();
     let mut response_id = None;
     for turn in turns {
-        messages.push(build_user_message(turn.user_content.clone(), None));
-        messages.push(build_assistant_message(
-            turn.response_content.clone(),
-            turn.response_id.clone(),
-        ));
+        messages.push(Message::user(turn.user_content.clone()));
+        messages.push(Message::assistant(turn.response_content.clone()));
         response_id = turn.response_id.clone();
     }
     (messages, response_id)
-}
-
-/// Construct a `Message::User` with an optional continuation `response_id`.
-pub fn build_user_message(content: String, response_id: Option<String>) -> Message {
-    Message::User {
-        content,
-        response_id,
-    }
-}
-
-/// Construct a `Message::Assistant` with an optional provider-assigned `response_id`.
-pub fn build_assistant_message(content: String, response_id: Option<String>) -> Message {
-    Message::Assistant {
-        content,
-        response_id,
-    }
 }
 
 /// Extract just the last message from a history slice as the pipeline's initial input.

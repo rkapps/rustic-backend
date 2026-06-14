@@ -21,7 +21,6 @@ pub struct AnthropicCompletionRequest {
     pub tools: Vec<AnthropicToolDefinition>,
 }
 
-
 impl AnthropicCompletionRequest {
     pub fn log_info(&self) {
         info!(
@@ -55,7 +54,6 @@ impl AnthropicCompletionRequest {
         );
     }
 }
-
 
 /// System-prompt block (currently unused in favour of a plain string field).
 #[derive(Debug, Serialize)]
@@ -157,27 +155,43 @@ impl AnthropicCompletionRequest {
     /// (Anthropic requires this).
     pub fn new(request: CompletionRequest) -> Result<AnthropicCompletionRequest> {
         let mut messages: Vec<AnthropicCompletionRequestMessage> = Vec::new();
-
         let mut tool_result_contents = Vec::new();
         let mut tool_use_contents = Vec::new();
         let arequest = request.clone();
-        for message in request.messages {
+        let iterations = request.iterations;
+
+        let mut sorted_keys: Vec<usize> = iterations.keys().cloned().collect();
+        sorted_keys.sort();
+        
+        let imessages: Vec<Message> = sorted_keys
+            .iter()
+            .flat_map(|k| iterations.get(k).unwrap().clone())
+            .collect();
+
+        let pmessages = if request.store {
+            // if stateful alway send all the messages
+            let mut nmessages = request.messages.clone();
+            nmessages.extend(imessages);
+            nmessages
+        } else {
+            if imessages.is_empty() {
+                request.messages
+            } else {
+                imessages
+            }
+        };
+
+        for message in pmessages {
             match message {
                 Message::Thought { content: _ } => {}
-                Message::User {
-                    content,
-                    response_id: _,
-                } => {
+                Message::User { content } => {
                     messages.push(AnthropicCompletionRequestMessage::Content {
                         role: "user".to_string(),
                         content,
                     });
                     // messages.push(amessage);
                 }
-                Message::Assistant {
-                    content,
-                    response_id: _,
-                } => {
+                Message::Assistant { content } => {
                     messages.push(AnthropicCompletionRequestMessage::Content {
                         role: "assistant".to_string(),
                         content,

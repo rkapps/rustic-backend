@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use rustic_core::{HttpError, HttpResult};
 use tokio::{
@@ -76,6 +76,7 @@ impl Agent {
     pub async fn complete_with_streaming(
         &self,
         messages: &[Message],
+        last_response_id: Option<String>,
     ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
         let (tx, rx) = mpsc::channel::<Result<CompletionChunkResponse, HttpError>>(100);
 
@@ -106,22 +107,19 @@ impl Agent {
 
         // Clone Arcs and Data for the background task
         let agent = self.clone();
-        let mut current_messages = messages.to_owned();
         let system_prompt = self.system_prompt.clone();
         let new_definitions = definitions.clone();
         let agent_id = self.id.clone();
-        let mut last_response_id = current_messages.iter().rev().find_map(|m| {
-            if let Message::User { response_id, .. } = m {
-                response_id.clone()
-            } else {
-                None
-            }
-        });
+        let messages = messages.clone().to_vec();
+        let mut last_response_id = last_response_id.clone();
+        let mut iterations = HashMap::new();
+
         info!(  model= %agent.model,
                 temperature= %agent.temperature,
                 reasoning= ?&agent.reasoning_effort,
                 maxtokens= %agent.max_tokens,
                 store= %agent.store,
+                last_messages= ?messages.len(),
                 last_response_id= ?last_response_id,
                 "Agent: {} - Completion Start", agent_id
         );
@@ -130,11 +128,10 @@ impl Agent {
             let mut iteration = 0;
             const MAX_ITERATIONS: usize = 10;
 
-          
             let mut usage = crate::client::response::CompletionResponseTokenUsage::default();
 
             debug!(target: "agent-messages",
-                "Agent: {} - Current messages: {:#?}", agent_id, current_messages
+                "Agent: {} - Current messages: {:#?}", agent_id, messages
             );
 
             loop {
@@ -144,7 +141,7 @@ impl Agent {
                 }
 
                 info!(iteration= %iteration,
-                    messages= ?current_messages.len(),
+                    messages= ?iterations.get(&iteration),
                     last_response_id = ?last_response_id,
                     "Agent: {} - ", agent_id
                 );
@@ -153,7 +150,8 @@ impl Agent {
                     id: agent_id.clone(),
                     model: agent.model.clone(),
                     system: system_prompt.clone(),
-                    messages: current_messages.clone(),
+                    messages: messages.clone(),
+                    iterations: iterations.clone(),
                     temperature: agent.temperature,
                     max_tokens: agent.max_tokens,
                     reasoning_effort: agent.reasoning_effort.clone(),
@@ -161,7 +159,7 @@ impl Agent {
                     stream: true,
                     store: agent.store,
                     definitions: new_definitions.clone(),
-                    last_response_id: last_response_id.clone()
+                    last_response_id: last_response_id.clone(),
                 };
 
                 let mut llm_stream = match agent.client.complete_with_stream(request).await {
@@ -205,7 +203,7 @@ impl Agent {
                                 chunk= ?chunk,
                                 "Agent: {}", agent_id
                             );
-    
+
                             usage += chunk.usage.unwrap();
                             last_response_id = Some(chunk.response_id);
                             model = chunk.model;
@@ -296,20 +294,7 @@ impl Agent {
                         nmessages= ?nmessages.len(),
                         "Agent: {} - ", agent_id
                     );
-
-                    if agent.store && let Some(response_id) = last_response_id.clone() {
-                        // keep only the original user message, clear tool calls/results from previous iteration
-                        // current_messages.retain(|m| matches!(m, Message::User { .. }));
-                        // inject last response_id into the user message
-                        if let Some(Message::User { content, .. }) = current_messages.first_mut() {
-                            let last_response_id = Some(response_id);
-                            *current_messages.first_mut().unwrap() = Message::User {
-                                content: content.clone(),
-                                response_id: last_response_id, // ← inject response_id
-                            };
-                        }
-                    }
-                    current_messages.extend(nmessages);
+                    iterations.insert(iteration, nmessages);
                 }
             }
         });
@@ -326,7 +311,11 @@ impl Agent {
     ///
     /// Returns [`HttpError::MaxIterationsExceeded`] if the model keeps requesting
     /// tools beyond the iteration cap.
-    pub async fn complete(&self, messages: &[Message]) -> HttpResult<CompletionResponse> {
+    pub async fn complete(
+        &self,
+        messages: &[Message],
+        last_response_id: Option<String>,
+    ) -> HttpResult<CompletionResponse> {
         let agent_id = &self.id;
         let agent = self.clone();
 
@@ -357,28 +346,24 @@ impl Agent {
             .iter()
             .for_each(|e| definitions.push(e.1.clone()));
 
-        let mut last_response_id = messages.iter().rev().find_map(|m| {
-            if let Message::User { response_id, .. } = m {
-                response_id.clone()
-            } else {
-                None
-            }
-        });  
+        let mut last_response_id = last_response_id.clone();
+        let mut iterations = HashMap::new();
+        
 
         info!(  model= %agent.model,
             temperature= %agent.temperature,
             reasoning= ?&agent.reasoning_effort,
             maxtokens= %agent.max_tokens,
-            last_response_id= ?last_response_id,           
+            last_response_id= ?last_response_id,
             "Agent: {} - Completion Start", agent_id
         );
-
 
         let request = CompletionRequest {
             id: self.id.clone(),
             model: self.model.clone(),
             system: self.system_prompt.clone(),
             messages: messages.to_vec(),
+            iterations: iterations.clone(),
             temperature: self.temperature,
             max_tokens: self.max_tokens,
             stream: false,
@@ -386,7 +371,7 @@ impl Agent {
             reasoning_effort: self.reasoning_effort.clone(),
             enable_cache: self.enable_cache,
             definitions,
-            last_response_id: None
+            last_response_id: None,
         };
 
         const MAX_ITERATIONS: usize = 10;
@@ -420,6 +405,7 @@ impl Agent {
 
             // Call the llm with the request
             nrequest.last_response_id = last_response_id.clone();
+            nrequest.iterations = iterations.clone();
             let response = self.client.complete(nrequest.clone()).await?;
             last_response_id = Some(response.response_id.clone());
 
@@ -516,19 +502,8 @@ impl Agent {
             );
 
             if !nmessages.is_empty() {
-                if agent.store && let Some(response_id) = last_response_id.clone() {
-                    // keep only the original user message, clear tool calls/results from previous iteration
-                    // nmessages.retain(|m| matches!(m, Message::User { .. }));
-                    // inject last response_id into the user message
-                    if let Some(Message::User { content, .. }) = nmessages.first_mut() {
-                        let last_response_id = Some(response_id);
-                        *nmessages.first_mut().unwrap() = Message::User {
-                            content: content.clone(),
-                            response_id: last_response_id, // ← inject response_id
-                        };
-                    }
-                }
-                nrequest.messages.extend(nmessages);
+                iterations.insert(iteration, nmessages);
+                // nrequest.messages.extend(nmessages);
             }
         }
     }

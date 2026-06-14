@@ -33,7 +33,7 @@ impl OpenAICompletionRequest {
             model = %self.model,
             store = self.store,
             messages = self.input.len(),
-            last_message = %format!("{:#?}", self.input.last()),
+            iterations = %format!("{:#?}", self.input.last()),
             last_response_id = self.previous_response_id,
             tools = self.tools.len(),
             "Openai request"
@@ -92,14 +92,44 @@ impl OpenAICompletionRequest {
         // let mut id: Option<String> = None;
         let mut inputs = Vec::new();
         let mut user_input: Option<OpenAICompletionRequestMessage> = None;
+        let iterations = request.iterations;
+        let mut sorted_keys: Vec<usize> = iterations.keys().cloned().collect();
+        sorted_keys.sort();
+        let current_key = iterations.keys().max().copied().unwrap_or(0);
+        let current_iteration = iterations.get(&current_key).cloned().unwrap_or_default();
+     
+        let imessages: Vec<Message> = sorted_keys
+            .iter()
+            .flat_map(|k| iterations.get(k).unwrap().clone())
+            .collect();
 
-        trace!("messaes: {:#?}", request.messages);
-        for message in request.messages {
+        debug!(
+            target: "agent-openai", 
+            request_messages= ?request.messages.len(),
+            iterations_messages = format_args!("{:#?}", imessages)
+        );
+    
+        let pmessages = if request.store {
+            // stateful — last user message + current iteration tool calls
+            let mut msgs = request.messages.last().cloned()
+                .map(|m| vec![m])
+                .unwrap_or_default();
+            msgs.extend(current_iteration);
+            msgs
+        } else {
+            // stateless — all iterations or original messages
+            if imessages.is_empty() {
+                request.messages
+            } else {
+                imessages
+            }
+        };        
+
+        for message in pmessages {
             match message {
                 Message::Thought { content: _ } => {}
                 Message::User {
                     content,
-                    response_id: _,
                 } => {
                     if request.store {
                         // id = response_id;
@@ -116,7 +146,6 @@ impl OpenAICompletionRequest {
                 }
                 Message::Assistant {
                     content,
-                    response_id: _,
                 } => {
                     if request.store {
                         // id = response_id;
@@ -168,13 +197,18 @@ impl OpenAICompletionRequest {
             inputs.push(input);
         }
 
+        let response_id = if request.store {
+            request.last_response_id.filter(|id| !id.is_empty())
+        } else {
+            None
+        };
         Ok(Self {
             model: request.model,
             instructions: request.system.unwrap_or_default(),
             input: inputs,
             store: request.store,
             stream: request.stream,
-            previous_response_id: request.last_response_id.filter(|id| !id.is_empty()),        
+            previous_response_id: response_id,        
             max_output_tokens: request.max_tokens,
             reasoning: OpenAICompletionRequestReasoning::new(request.reasoning_effort),
             tools: request.definitions,

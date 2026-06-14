@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::client::{message::Message, tools::ToolDefinition};
 
 /// All parameters needed to issue a completion request to an LLM backend.
@@ -13,6 +15,8 @@ pub struct CompletionRequest {
     pub system: Option<String>,
     /// Ordered conversation history including user turns, assistant replies, and tool exchanges.
     pub messages: Vec<Message>,
+    /// order iterations messages
+    pub iterations: HashMap<usize, Vec<Message>>,
     /// Sampling temperature; higher values increase output randomness.
     pub temperature: f32,
     /// Hard cap on the number of tokens the model may generate.
