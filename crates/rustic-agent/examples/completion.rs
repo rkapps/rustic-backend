@@ -24,10 +24,7 @@ async fn main() -> Result<()> {
     let mut messages = vec![];
     let system_prompt = Some("You are an elementary quiz coordinator. Design a multiple choise quiz after asking them about the grade, subject and difficult level. Provide 20 questions and rate them at the end.".to_string());
     let content = "Start the quiz";
-    let mut message = Message::User {
-        content: content.to_string(),
-        response_id: None,
-    };
+    let mut message = Message::user(content.to_string());
     messages.push(message);
 
     let api_key = env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY envrionment variable not set");
@@ -50,28 +47,23 @@ async fn main() -> Result<()> {
         tool_registry: Arc::new(ToolRegistry::new()),
     };
 
+    let mut last_response_id = None;
     // Turn 1: ask Gemini to start the quiz
-    let response = agent.complete(&messages).await?;
-    let response_id = response.response_id;
+    let response = agent.complete(&messages, last_response_id).await?;
+    last_response_id = Some(response.response_id);
     let content = response.contents.get(0).unwrap();
     if let CompletionResponseContent::Text(val) = content {
-        message = Message::Assistant {
-            content: val.to_string(),
-            response_id: Some(response_id.clone()),
-        };
+        message = Message::assistant(val.to_string());
         messages.push(message);
     }
 
     // Turn 2: supply grade level, threading the same response_id so Gemini
     // continues the existing interaction rather than starting a new one.
-    message = Message::User {
-        content: "1st Grade".to_string(),
-        response_id: Some(response_id),
-    };
+    message = Message::user("1st Grade".to_string());
     messages.push(message);
 
     println!("complete start---");
-    let response = agent.complete(&messages).await?;
+    let response = agent.complete(&messages, last_response_id).await?;
     println!("Response: {:#?}", response);
 
     Ok(())

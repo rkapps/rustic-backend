@@ -56,12 +56,9 @@ async fn main() -> Result<()> {
     };
 
     let content = "what is the weather in paris and San Fransicso".to_string();
-    let message = Message::User {
-        content: content.clone(),
-        response_id: None,
-    };
+    let message = Message::user(content.clone());
     println!("completion start---");
-    let response = agent.complete(&vec![message]).await?;
+    let response = agent.complete(&vec![message], None).await?;
     println!("Response: {:#?}", response);
 
     Ok(())

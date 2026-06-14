@@ -75,11 +75,8 @@ async fn main() -> Result<()> {
         .await?;
 
     let content = "What are the top-rated sofas on Amazon right now?".to_string();
-    let message = Message::User {
-        content: content.clone(),
-        response_id: None,
-    };
-    let response = agent.complete(&vec![message]).await?;
+    let message = Message::user(content.clone());
+    let response = agent.complete(&vec![message], None).await?;
     println!("Response: {:#?}", response);
 
     Ok(())
