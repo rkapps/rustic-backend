@@ -184,7 +184,7 @@ impl GeminiInteractionsRequest {
         let current_iteration = iterations.get(&current_key).cloned().unwrap_or_default();
         let mut sorted_keys: Vec<usize> = iterations.keys().cloned().collect();
         sorted_keys.sort();
-        
+
         let imessages: Vec<Message> = sorted_keys
             .iter()
             .flat_map(|k| iterations.get(k).unwrap().clone())
@@ -199,23 +199,22 @@ impl GeminiInteractionsRequest {
         let pmessages = if request.store {
             if current_iteration.is_empty() {
                 // first run — send only last message (the goal/prompt)
-                request.messages.last().cloned().map(|m| vec![m]).unwrap_or_default()
+                request
+                    .messages
+                    .last()
+                    .cloned()
+                    .map(|m| vec![m])
+                    .unwrap_or_default()
             } else {
                 // subsequent iterations — user message + current iteration tool calls
                 imessages
-                // let mut msgs = request.messages.last().cloned()
-                //     .map(|m| vec![m])
-                //     .unwrap_or_default();
-                // msgs.extend(current_iteration);
-                // msgs
             }
+        } else
+        // stateless - always send all the iterations messages
+        if imessages.is_empty() {
+            request.messages
         } else {
-            // stateless - always send all the iterations messages
-            if imessages.is_empty() {
-                request.messages
-            } else {
-                imessages
-            }
+            imessages
         };
 
         for message in pmessages {
@@ -225,7 +224,7 @@ impl GeminiInteractionsRequest {
                     let user_input = GeminiStepRequestInput::Thought {
                         r#type: "thought".to_string(),
                         summary: None,
-                        signature: signature,
+                        signature,
                     };
                     inputs.push(user_input);
                 }

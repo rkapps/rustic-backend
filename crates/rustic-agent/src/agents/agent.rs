@@ -110,7 +110,7 @@ impl Agent {
         let system_prompt = self.system_prompt.clone();
         let new_definitions = definitions.clone();
         let agent_id = self.id.clone();
-        let messages = messages.clone().to_vec();
+        let messages = messages.to_vec();
         let mut last_response_id = last_response_id.clone();
         let mut iterations = HashMap::new();
 
@@ -348,7 +348,6 @@ impl Agent {
 
         let mut last_response_id = last_response_id.clone();
         let mut iterations = HashMap::new();
-        
 
         info!(  model= %agent.model,
             temperature= %agent.temperature,

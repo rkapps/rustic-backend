@@ -212,7 +212,7 @@ impl Runnable for PipeLineAgent {
         let self_clone = Arc::new(self.clone());
         let original_turns = turns.clone();
         let original_prompt = prompt.to_string();
-        let (mut messages, last_response_id) = build_messages_from_turns(&turns);
+        let (_, last_response_id) = build_messages_from_turns(&turns);
         let mut last_response_id = last_response_id;
         let mut store = self.get_agent().store;
 
@@ -487,8 +487,7 @@ impl PipeLineAgent {
             prompt= ?prompt,
             "Agent: {}", agent.id
         );
-        let (mut messages, last_response_id) = build_messages_from_turns(turns);
-
+        let (mut messages, _) = build_messages_from_turns(turns);
         messages.push(Message::user(prompt.to_string()));
         messages
     }

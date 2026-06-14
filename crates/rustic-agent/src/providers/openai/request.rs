@@ -25,7 +25,6 @@ pub struct OpenAICompletionRequest {
     pub tools: Vec<ToolDefinition>,
 }
 
-
 impl OpenAICompletionRequest {
     pub fn log_info(&self) {
         info!(
@@ -60,7 +59,6 @@ impl OpenAICompletionRequest {
         );
     }
 }
-
 
 /// A single input item in the OpenAI request, serialized without an enum tag.
 #[derive(Serialize, Debug)]
@@ -97,21 +95,24 @@ impl OpenAICompletionRequest {
         sorted_keys.sort();
         let current_key = iterations.keys().max().copied().unwrap_or(0);
         let current_iteration = iterations.get(&current_key).cloned().unwrap_or_default();
-     
+
         let imessages: Vec<Message> = sorted_keys
             .iter()
             .flat_map(|k| iterations.get(k).unwrap().clone())
             .collect();
 
         debug!(
-            target: "agent-openai", 
+            target: "agent-openai",
             request_messages= ?request.messages.len(),
             iterations_messages = format_args!("{:#?}", imessages)
         );
-    
+
         let pmessages = if request.store {
             // stateful — last user message + current iteration tool calls
-            let mut msgs = request.messages.last().cloned()
+            let mut msgs = request
+                .messages
+                .last()
+                .cloned()
                 .map(|m| vec![m])
                 .unwrap_or_default();
             msgs.extend(current_iteration);
@@ -123,14 +124,12 @@ impl OpenAICompletionRequest {
             } else {
                 imessages
             }
-        };        
+        };
 
         for message in pmessages {
             match message {
                 Message::Thought { content: _ } => {}
-                Message::User {
-                    content,
-                } => {
+                Message::User { content } => {
                     if request.store {
                         // id = response_id;
                         user_input = Some(OpenAICompletionRequestMessage::Content {
@@ -144,9 +143,7 @@ impl OpenAICompletionRequest {
                         });
                     }
                 }
-                Message::Assistant {
-                    content,
-                } => {
+                Message::Assistant { content } => {
                     if request.store {
                         // id = response_id;
                     } else {
@@ -208,7 +205,7 @@ impl OpenAICompletionRequest {
             input: inputs,
             store: request.store,
             stream: request.stream,
-            previous_response_id: response_id,        
+            previous_response_id: response_id,
             max_output_tokens: request.max_tokens,
             reasoning: OpenAICompletionRequestReasoning::new(request.reasoning_effort),
             tools: request.definitions,

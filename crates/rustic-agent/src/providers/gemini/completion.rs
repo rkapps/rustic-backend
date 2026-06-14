@@ -104,7 +104,7 @@ impl GeminiClient {
                     // r#type,
                     signature,
                 } => {
-                    if let Some(summary) = summary {
+                    if let Some(_summary) = summary {
                         // the summary should not be part of thought
                         // let rcontent = &summary[0];
                         // let rtext = CompletionResponseContent::Thought(rcontent.text.clone());

@@ -75,12 +75,11 @@ impl LlmClient for OpenAIClient {
             .http_client
             .post_request::<OpenAICompletionResponse>(url, Some(headers), body)
             .await?;
-        let id = if request.store.clone() {
+        let id = if request.store {
             oresponse.id.clone()
         } else {
             String::new()
         };
-
 
         debug!(
             target: "agent-openai",
@@ -307,12 +306,12 @@ impl LlmClient for OpenAIClient {
                               debug!(target: "agent-openai", "Response stats - model: {:#?} response_id: {} usage: {:#?}",
                                 response.model, response.id, usage );
 
-                                let id = if request.store.clone() {
+                                let id = if request.store {
                                     response.id.clone()
                                 } else {
                                     String::new()
                                 };
-                        
+
                              yield Ok(CompletionChunkResponse::stop(
                                  agent_id.clone(),
                                  response.model,

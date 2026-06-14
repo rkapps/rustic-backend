@@ -193,7 +193,7 @@ pub async fn send_turn_streaming_handler(
     debug!("User sub: {:?} conversation id: {}", user.sub, id);
 
     let service = boot_state.conversation_service()?; // ← one line
-    let start = std::time::Instant::now();  
+    let start = std::time::Instant::now();
 
     let stream = service
         .send_turn_streaming(&user.sub, &id, request.clone())
@@ -226,13 +226,10 @@ pub async fn send_turn_streaming_handler(
                         let fc = final_content.lock().await;
                         info!("final_content: {:?}", *fc);
                         // let unescaped: serde_json::Value = serde_json::from_str(&fc);
-                        match serde_json::from_str(&fc) {
-                            Ok(c) => {
-                                let unescaped: serde_json::Value = serde_json::from_str(c).unwrap();
-                                info!("Final Content {}", unescaped);
-                            }
-                            Err(_) => {}
-                        }
+                        if let Ok(c) = serde_json::from_str(&fc) {
+                            let unescaped: serde_json::Value = serde_json::from_str(c).unwrap();
+                            info!("Final Content {}", unescaped);
+                        };
                         // info!("Final Content {}", serde_json::to_string_pretty(&unescaped).unwrap());
                         // elapsed time
                         let elapsed = start.elapsed();
@@ -244,7 +241,7 @@ pub async fn send_turn_streaming_handler(
                                 fc.clone(),
                                 Some(chunk.response_id.clone()),
                                 chunk.usage.clone(),
-                                Some(elapsed.as_millis() as u64),  
+                                Some(elapsed.as_millis() as u64),
                             )
                             .await
                         {

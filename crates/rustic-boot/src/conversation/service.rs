@@ -129,7 +129,7 @@ impl ConversationService {
         response_content: String,
         response_id: Option<String>,
         usage: Option<CompletionResponseTokenUsage>,
-        execution_time_ms: Option<u64>
+        execution_time_ms: Option<u64>,
     ) -> Result<Turn> {
         let conversation = self
             .get_conversation(uid, conversation_id)
@@ -163,7 +163,7 @@ impl ConversationService {
             cached_write_tokens_cost: 0.0,
             output_tokens_cost: 0.0,
             total_tokens_cost: 0.0,
-            execution_time_ms
+            execution_time_ms,
         };
 
         // update turn cost.
@@ -222,7 +222,7 @@ impl ConversationService {
             rcontent.clone(),
             Some(response_id.clone()),
             Some(usage.clone()),
-            Some(elapsed.as_millis() as u64),  // ← add to save_turn
+            Some(elapsed.as_millis() as u64), // ← add to save_turn
         )
         .await?;
 

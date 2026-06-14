@@ -162,7 +162,7 @@ impl AnthropicCompletionRequest {
 
         let mut sorted_keys: Vec<usize> = iterations.keys().cloned().collect();
         sorted_keys.sort();
-        
+
         let imessages: Vec<Message> = sorted_keys
             .iter()
             .flat_map(|k| iterations.get(k).unwrap().clone())
@@ -173,12 +173,10 @@ impl AnthropicCompletionRequest {
             let mut nmessages = request.messages.clone();
             nmessages.extend(imessages);
             nmessages
+        } else if imessages.is_empty() {
+            request.messages
         } else {
-            if imessages.is_empty() {
-                request.messages
-            } else {
-                imessages
-            }
+            imessages
         };
 
         for message in pmessages {
