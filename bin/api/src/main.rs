@@ -1,7 +1,6 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
-use bset_sales::{service::BsetSalesService, storage::BsetStorageService};
 use rustic_ai_api::state::AppState;
 use rustic_boot::{
     boot,
@@ -58,22 +57,9 @@ async fn main() -> Result<()> {
         "Platform Data Mongo uri: {:?} db: {:?}",
         mongo_uri, mongo_db
     );
-
-    //bset specific
-    let bset_data_path = env::var("RUSTIC_AI_BSET_DATA_PATH")
-        .expect("RUSTIC_AI_BSET_DATA_PATH environment variable is not set.");
-
-    let bset_storage_service = BsetStorageService::new()
-        .add_file(&bset_data_path, "bset_q2_2025.xlsx", 2025, 2)
-        .await?
-        .add_file(&bset_data_path, "bset_q2_2026.xlsx", 2026, 2)
-        .await?;
-    let bset_sales_service = BsetSalesService::new(Arc::new(bset_storage_service));
-
     let mut tools: Vec<Arc<dyn Tool>> = vec![];
     tools.extend(economic_service.tools());
     tools.extend(finance_service.tools());
-    tools.extend(bset_sales_service.tools());
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);

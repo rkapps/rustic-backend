@@ -41,8 +41,3 @@ rustic-storage.workspace = true
 #rustic-providers = { git = "https://github.com/rkapps/rustic-ai-backend-rs.git ", package = "rustic-providers"}
 #rustic-storage = { git = "https://github.com/rkapps/rustic-ai-backend-rs.git ", package = "rustic-storage"}
 
-# external
-bset-sales   = { path = "../../../bset-backend/crates/bset-sales" }
-#bset-sales = { git = "https://github.com/rkapps/bset-backend.git ", package = "bset-sales"}
-
-

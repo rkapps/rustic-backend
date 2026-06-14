@@ -357,28 +357,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bset-domain"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "bset-sales"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "bset-domain",
- "calamine",
- "chrono",
- "rustic-core",
- "serde_json",
- "tracing",
- "uuid",
-]
-
-[[package]]
 name = "bson"
 version = "2.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3595,7 +3573,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
- "bset-sales",
  "futures",
  "jsonwebtoken",
  "reqwest 0.12.28",
