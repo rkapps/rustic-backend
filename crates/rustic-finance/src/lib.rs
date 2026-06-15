@@ -4,3 +4,4 @@ pub mod service;
 pub mod storage;
 pub mod tools;
 pub mod util;
+pub mod schema;

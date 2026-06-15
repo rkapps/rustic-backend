@@ -6,13 +6,18 @@ use bson::serialize_to_document;
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::IndexModel;
+use mongodb::options::CreateCollectionOptions;
 use mongodb::options::IndexOptions;
+use mongodb::options::TimeseriesGranularity;
+use mongodb::options::TimeseriesOptions;
 use mongodb::{
     bson::doc,
     options::{ReplaceOneModel, WriteModel},
 };
 use rustic_ml::search::similarity::search;
 use serde_json::Value;
+use tracing::info;
+use tracing::warn;
 
 use std::marker::PhantomData;
 use tracing::{error, trace};
@@ -116,6 +121,11 @@ where
         Ok(())
     }
 
+    /// Return collection name
+    fn collection_name(&self) -> &str {
+        self.collection.name()
+    }
+
     async fn create_index(&mut self, index: IndexDefinition) -> Result<()> {
         self.create_indexes(vec![index]).await
     }
@@ -142,6 +152,55 @@ where
 
         self.collection.create_indexes(index_models).await?;
         Ok(())
+    }
+
+    /// Create time series
+    async fn create_time_series_collection(
+        &mut self,
+        time_field: &str,
+        meta_field: &str,
+        granularity: &str,
+    ) -> Result<()> {
+        let granularity = match granularity {
+            "seconds" => TimeseriesGranularity::Seconds,
+            "minutes" => TimeseriesGranularity::Minutes,
+            "hours" => TimeseriesGranularity::Hours,
+            _ => TimeseriesGranularity::Seconds,
+        };
+
+        let options = CreateCollectionOptions::builder()
+            .timeseries(
+                TimeseriesOptions::builder()
+                    .time_field(time_field.to_string())
+                    .meta_field(Some(meta_field.to_string()))
+                    .granularity(Some(granularity))
+                    .build(),
+            )
+            .build();
+
+        let db = self
+            .collection
+            .client()
+            .database(&self.collection.namespace().db);
+
+        match db
+            .create_collection(self.collection.name())
+            .with_options(options)
+            .await
+        {
+            Ok(_) => {
+                info!(
+                    "Time series collection '{}' created",
+                    self.collection.name()
+                );
+                Ok(())
+            }
+            Err(e) if e.to_string().contains("already exists") => {
+                warn!("Time series collection already exists, skipping");
+                Ok(())
+            }
+            Err(e) => Err(anyhow::anyhow!(e)),
+        }
     }
 
     async fn insert(&mut self, model: M) -> Result<()> {

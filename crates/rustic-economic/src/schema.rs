@@ -1,14 +1,12 @@
 use anyhow::Result;
-use rustic_economic::storage::mongo::manager::EconomicMongoStorageManager;
-use rustic_storage::core::index::IndexDefinition;
-use std::env;
+use rustic_storage::{core::index::IndexDefinition, mongo::create_indexes_safe};
 use tracing::info;
 
-use crate::schema::create_indexes_safe;
+use crate::storage::mongo::manager::EconomicMongoStorageManager;
 
-pub async fn update_economic_db(mongo_uri: &str) -> Result<()> {
-    let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
-        .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
+pub async fn update_economic_db(mongo_uri: &str, mongo_db: &str) -> Result<()> {
+    // let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
+    //     .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
 
     let manager = EconomicMongoStorageManager::new(mongo_uri, &mongo_db).await?;

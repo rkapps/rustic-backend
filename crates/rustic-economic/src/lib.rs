@@ -5,3 +5,4 @@ pub mod pipeline;
 pub mod service;
 pub mod storage;
 pub mod tools;
+pub mod schema;
