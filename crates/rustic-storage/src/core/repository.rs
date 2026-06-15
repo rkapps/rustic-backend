@@ -59,10 +59,23 @@ pub trait Repository<K, M>: Send + Sync {
 
     /// Upsert multiple models in a single batch operation.
     async fn bulk_update(&mut self, models: Vec<M>) -> Result<()>;
+
+    /// Return collection name
+    fn collection_name(&self) -> &str;
+
     /// Create a single index.
     async fn create_index(&mut self, index: IndexDefinition) -> Result<()>;
     /// Create multiple indexes in one operation.
     async fn create_indexes(&mut self, indexes: Vec<IndexDefinition>) -> Result<()>;
+
+    /// Create time series 
+    async fn create_time_series_collection(
+        &mut self,
+        time_field: &str,
+        meta_field: &str,
+        granularity: &str,
+    ) -> Result<()>;
+
     /// Append a tombstone record (file) or issue a delete query (MongoDB).
     async fn delete(&mut self, repo: M) -> Result<()>;
     /// Delete all models matching `criteria`, or every model when `None`.

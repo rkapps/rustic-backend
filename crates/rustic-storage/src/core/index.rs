@@ -1,4 +1,5 @@
 /// Index definition — backend-agnostic.
+#[derive(Debug, Clone)]
 pub struct IndexDefinition {
     /// Fields to index and their direction (1 = asc, -1 = desc).
     pub fields: Vec<(String, i32)>,

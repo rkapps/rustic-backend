@@ -122,6 +122,11 @@ where
         Ok(())
     }
 
+     /// Return collection name
+    fn collection_name(&self) -> &str {
+        ""
+    }
+
     async fn create_index(&mut self, _index: IndexDefinition) -> Result<()> {
         Ok(())
     }
@@ -129,6 +134,15 @@ where
         Ok(()) // no-op for file backend
     }
 
+    /// Create time series
+    async fn create_time_series_collection(
+        &mut self,
+        _time_field: &str,
+        _meta_field: &str,
+        _granularity: &str,
+    ) -> Result<()> {
+        Ok(())
+    }
     // insert creates a new json file for the chat id. creates the directory structure too.
     async fn insert(&mut self, model: M) -> Result<()> {
         let offset = write_active_record(&mut self.file, RECORD_TYPE_ACTIVE, &model, false)?;
