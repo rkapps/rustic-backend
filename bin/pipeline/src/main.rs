@@ -19,6 +19,7 @@ struct Cli {
 enum PipelineCommands {
     UpdateEconomicData,
     UpdateTickersEod,
+    UpdateTickersSentimentsEmbeddings,
     UpdateStocksEtfsRealtime,
     UpdateCryptosRealtime,
     UpdateTickersNews,
@@ -28,7 +29,7 @@ enum PipelineCommands {
 
 async fn main() -> Result<()> {
     let filter = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "rustic_core=info,rustic_economic=info".to_string());
+        .unwrap_or_else(|_| "rustic_core=info,rustic_economic=info,rustic_finance=info".to_string());
 
     set_logger(filter);
     let cli = Cli::parse();
@@ -49,6 +50,15 @@ async fn main() -> Result<()> {
 
             let service = get_finance_service(&mongo_uri).await?;
             match service.update_eod_tickers("", true).await {
+                Ok(_) => info!("Tickers EOD update completed successfully."),
+                Err(e) => error!("Tickers EOD update failed: {:?}", e),
+            }
+        }
+        PipelineCommands::UpdateTickersSentimentsEmbeddings => {
+            info!("Tickers EOD PipeLine started...");
+
+            let service = get_finance_service(&mongo_uri).await?;
+            match service.update_eod_tickers_sentiments_embeddings("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }

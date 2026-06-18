@@ -162,6 +162,27 @@ impl FinanceService {
             reader.clone(),
             writer.clone(),
             provider_service.clone(),
+            symbols,
+            update,
+        )
+        .await
+    }
+
+    #[cfg(feature = "writer")]
+    pub async fn update_eod_tickers_sentiments_embeddings(&self, symbols: &str, update: bool) -> Result<()> {
+        use crate::core::pipeline::update_eod_tickers_sentiments_embeddings_pipeline;
+
+        let reader = self.reader.as_ref().expect("reader not initialized");
+        let writer = self.writer.as_ref().expect("writer not initialized");
+        let provider_service = self
+            .provider_service
+            .as_ref()
+            .expect("provider service not initialized");
+
+        update_eod_tickers_sentiments_embeddings_pipeline(
+            reader.clone(),
+            writer.clone(),
+            provider_service.clone(),
             self.embedding_client.clone(),
             symbols,
             update,

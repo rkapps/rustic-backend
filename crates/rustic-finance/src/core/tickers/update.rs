@@ -38,10 +38,8 @@ use crate::{
 };
 
 pub async fn update_all_tickers(
-    reader: Arc<FinanceMongoStorageReader>,
     writer: Arc<FinanceMongoStorageWriter>,
     provider_service: Arc<ProviderService>,
-    embedding_client: Arc<dyn EmbeddingClient>,
     all_controls: Vec<TickerControl>,
     all_tickers: Vec<Ticker>,
     update: bool,
@@ -71,10 +69,8 @@ pub async fn update_all_tickers(
             };
 
             let sem = semaphore.clone();
-            let reader = reader.clone();
             let writer = writer.clone();
             let provider_service = provider_service.clone();
-            let embedding_client = embedding_client.clone();
 
             Some(tokio::spawn(async move {
                 let _permit = sem.acquire().await.unwrap();
@@ -86,10 +82,8 @@ pub async fn update_all_tickers(
                 }
 
                 let result = update_ticker(
-                    reader,
                     writer,
                     provider_service,
-                    embedding_client,
                     &mut tc,
                     &mut ticker,
                     update,
@@ -142,10 +136,8 @@ pub async fn update_all_tickers(
 }
 
 pub async fn update_ticker(
-    reader: Arc<FinanceMongoStorageReader>,
     writer: Arc<FinanceMongoStorageWriter>,
     provider_service: Arc<ProviderService>,
-    embedding_client: Arc<dyn EmbeddingClient>,
     tc: &mut TickerControl,
     ticker: &mut Ticker,
     update: bool,
@@ -184,51 +176,6 @@ pub async fn update_ticker(
         }
         Err(e) => error!("History update failed for {}: {}", ticker.symbol, e),
         // }
-    }
-
-    // update sentiments
-    if !update || should_sync_sentiments(tc) {
-        match update_ticker_sentiments(provider_service, tc, ticker).await {
-            Ok(new_sentiments) => {
-                if !new_sentiments.is_empty() {
-                    debug!(
-                        "Ticker {} New Sentiments: {}",
-                        ticker.symbol,
-                        new_sentiments.len()
-                    );
-                    tc.last_sentiment_sync_at = Some(Utc::now());
-                    if update {
-                        writer.save_ticker_control(tc.clone()).await?;
-                        writer
-                            .save_ticker_sentiments(&ticker.symbol, new_sentiments)
-                            .await?;
-                    }
-                }
-            }
-            Err(e) => error!("Sentiments update failed for {}: {}", ticker.symbol, e),
-        }
-    }
-
-    if !update || should_sync_embeddings(tc) {
-        match update_ticker_sentiment_embeddings(reader, embedding_client, tc, ticker).await {
-            Ok(new_embeddings) => {
-                if !new_embeddings.is_empty() {
-                    debug!(
-                        "Ticker {} New Embeddings: {}",
-                        ticker.symbol,
-                        new_embeddings.len()
-                    );
-                    tc.last_embedding_sync_at = Some(Utc::now());
-                    if update {
-                        // storage_service.save_ticker_control(tc.clone()).await?;
-                        writer
-                            .save_ticker_embeddings(&ticker.symbol, new_embeddings)
-                            .await?;
-                    }
-                }
-            }
-            Err(e) => error!("Embeddings update failed for {}: {}", ticker.symbol, e),
-        }
     }
 
     // update technical indicators
@@ -430,10 +377,142 @@ pub(crate) async fn update_ticker_performance(
     Ok(())
 }
 
+pub async fn update_all_ticker_sentiments_embeddings(
+    reader: Arc<FinanceMongoStorageReader>,
+    writer: Arc<FinanceMongoStorageWriter>,
+    provider_service: Arc<ProviderService>,
+    embedding_client: Arc<dyn EmbeddingClient>,
+    all_controls: Vec<TickerControl>,
+    all_tickers: Vec<Ticker>,
+    update: bool,
+) -> Result<()> {
+    let mut control_map: HashMap<String, TickerControl> = all_controls
+        .into_iter()
+        .map(|c| (c.symbol.clone(), c))
+        .collect();
+
+    let total = all_tickers.len();
+    let semaphore = Arc::new(Semaphore::new(2));
+    let delay = Duration::from_millis(5000);
+
+    info!("Processing {} tickers with 3 concurrent workers", total);
+
+    let tasks: Vec<_> = all_tickers
+        .into_iter()
+        .enumerate()
+        .filter_map(|(i, ticker)| {
+            let tc = match control_map.remove(&ticker.symbol) {
+                Some(tc) => tc,
+                None => {
+                    warn!("No control record for {}, skipping", ticker.symbol);
+                    return None;
+                }
+            };
+
+            let sem = semaphore.clone();
+            let reader = reader.clone();
+            let writer = writer.clone();
+            let provider_service = provider_service.clone();
+            let embedding_client = embedding_client.clone();
+            let update = update.clone();
+
+            Some(tokio::spawn(async move {
+                let _permit = sem.acquire().await.unwrap();
+                let ticker = ticker;
+                let mut tc = tc;
+
+                if i % 20 == 0 {
+                    info!("Updating Ticker sentiments and embeddings: {} {}/{}", ticker.symbol, i + 1, total);
+                }
+                match update_ticker_sentiments_embeddings(
+                    reader,
+                    writer,
+                    provider_service,
+                    embedding_client,
+                    &mut tc,
+                    &ticker,
+                    update,
+                ).await
+                {
+                    Ok(c) => c,
+                    Err(e) => {
+                        error!("Ticker {} sentiments and embeddings error: {:?}", ticker.symbol, e);
+                    },
+                }
+
+                sleep(delay).await;
+            }))
+        })
+        .collect();
+
+    // collect results
+    let _ = futures::future::join_all(tasks).await;
+
+    Ok(())
+}
+
+pub async fn update_ticker_sentiments_embeddings(
+    reader: Arc<FinanceMongoStorageReader>,
+    writer: Arc<FinanceMongoStorageWriter>,
+    provider_service: Arc<ProviderService>,
+    embedding_client: Arc<dyn EmbeddingClient>,
+    tc: &mut TickerControl,
+    ticker: &Ticker,
+    update: bool,
+) -> Result<()> {
+
+    // update sentiments
+    if !update || should_sync_sentiments(tc) {
+        match update_ticker_sentiments(provider_service, &tc, &ticker).await {
+            Ok(new_sentiments) => {
+                if !new_sentiments.is_empty() {
+                    debug!(
+                        "Ticker {} New Sentiments: {}",
+                        ticker.symbol,
+                        new_sentiments.len()
+                    );
+                    tc.last_sentiment_sync_at = Some(Utc::now());
+                    if update {
+                        writer.save_ticker_control(tc.clone()).await?;
+                        writer
+                            .save_ticker_sentiments(&ticker.symbol, new_sentiments)
+                            .await?;
+                    }
+                }
+            }
+            Err(e) => error!("Sentiments update failed for {}: {}", ticker.symbol, e),
+        }
+    }
+
+    if !update || should_sync_embeddings(&tc) {
+        match update_ticker_embeddings(reader, embedding_client, &tc, &ticker).await {
+            Ok(new_embeddings) => {
+                if !new_embeddings.is_empty() {
+                    debug!(
+                        "Ticker {} New Embeddings: {}",
+                        ticker.symbol,
+                        new_embeddings.len()
+                    );
+                    tc.last_embedding_sync_at = Some(Utc::now());
+                    if update {
+                        // storage_service.save_ticker_control(tc.clone()).await?;
+                        writer
+                            .save_ticker_embeddings(&ticker.symbol, new_embeddings)
+                            .await?;
+                    }
+                }
+            }
+            Err(e) => error!("Embeddings update failed for {}: {}", ticker.symbol, e),
+        }
+    }
+
+    Ok(())
+}
+
 pub(crate) async fn update_ticker_sentiments(
     provider_service: Arc<ProviderService>,
-    tc: &mut TickerControl,
-    ticker: &mut Ticker,
+    tc: &TickerControl,
+    ticker: &Ticker,
 ) -> Result<Vec<TickerSentiment>> {
     let mut new_sentiments = Vec::new();
 
@@ -472,11 +551,11 @@ pub(crate) async fn update_ticker_sentiments(
     Ok(new_sentiments)
 }
 
-pub(crate) async fn update_ticker_sentiment_embeddings(
+pub(crate) async fn update_ticker_embeddings(
     reader: Arc<FinanceMongoStorageReader>,
     embedding_client: Arc<dyn EmbeddingClient>,
-    tc: &mut TickerControl,
-    ticker: &mut Ticker,
+    tc: &TickerControl,
+    ticker: &Ticker,
 ) -> Result<Vec<TickerEmbedding>> {
     let mut new_embeddings = Vec::new();
     let cmp_score = dec!(0.8);
