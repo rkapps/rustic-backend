@@ -13,7 +13,7 @@ pub struct FinanceMongoStorageReader {
     pub(crate) manager: FinanceMongoStorageManager,
 }
 impl FinanceMongoStorageReader {
-    pub(crate) fn new(manager: FinanceMongoStorageManager) -> Self {
+    pub fn new(manager: FinanceMongoStorageManager) -> Self {
         Self { manager }
     }
 }

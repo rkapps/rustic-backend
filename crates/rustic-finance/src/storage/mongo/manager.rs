@@ -17,7 +17,7 @@ use crate::domain::{
 };
 
 #[derive(Debug, Clone)]
-pub(crate) struct FinanceMongoStorageManager {
+pub struct FinanceMongoStorageManager {
     db: MongoDatabase,
 }
 

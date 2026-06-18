@@ -1,4 +1,4 @@
-pub(crate) mod mongo;
+pub mod mongo;
 pub mod reader;
 pub mod writer;
 
