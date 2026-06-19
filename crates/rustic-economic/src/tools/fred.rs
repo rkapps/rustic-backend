@@ -53,10 +53,14 @@ impl Tool for FredDataTool {
         let limit = params["limit"].as_u64().map(|n| n as usize);
         let data_points = get_fred_series(self.reader.clone(), series_id, limit).await?;
 
-        debug!("series_id: {} observations: {:?}", series_id, data_points);
+        debug!(
+            target: "economic-tool",
+            "Fred series_id: {} observations: {:?}", series_id, data_points
+        );
+
         Ok(json!({
             "series_id": series_id,
-            "observations": data_points
+            "observations": if data_points.is_empty() {Value::Null} else {json!(data_points)}
         }))
     }
 }

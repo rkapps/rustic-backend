@@ -2,6 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
 use serde_json::{Value, json};
+use tracing::debug;
 use std::sync::Arc;
 
 use crate::{core::census::get_census_data, storage::mongo::reader::EconomicMongoStorageReader};
@@ -113,13 +114,16 @@ impl Tool for CensusDataTool {
             year,
         )
         .await?;
-
+        debug!(
+            target: "economic-tool",
+            "Census data - dataset: {} year: {:?} geo_fips: {:?}", dataset, year, geo_fips
+        );
         // census
         Ok(json!({
             "dataset": dataset,
             "geo": geo_fips,
             "year": year,
-            "records": records
+            "records": if records.is_empty() {Value::Null} else {json!(records)}
         }))
     }
 }

@@ -17,6 +17,7 @@ struct Cli {
 #[derive(Subcommand)]
 #[allow(clippy::enum_variant_names)]
 enum PipelineCommands {
+    CheckEnv,
     UpdateEconomicData,
     UpdateTickersEod,
     UpdateTickersSentimentsEmbeddings,
@@ -36,8 +37,10 @@ async fn main() -> Result<()> {
 
     // uri is the same for all
     let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
+    info!("Mongo uri: {}", mongo_uri);
 
     match cli.command {
+        PipelineCommands::CheckEnv => {}
         PipelineCommands::UpdateEconomicData => {
             let economic_service = get_economic_service(&mongo_uri).await?;
             let pipeline = EconomicDataPipeline::new(Arc::new(economic_service));

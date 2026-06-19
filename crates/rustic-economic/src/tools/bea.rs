@@ -106,6 +106,7 @@ impl Tool for BeaDataTool {
         let year = params["year"].as_str().unwrap_or("LAST5");
 
         info!(
+            target: "economic-tool",
             "Dataset: {:?} Table Name: {:?} year: {:?}",
             dataset, table_name, year
         );
@@ -138,6 +139,7 @@ impl Tool for BeaDataTool {
                 .await?;
 
                 debug!(
+                    target: "economic-tool",
                     "bea regional table_name: {} geo_fips: {:?} geo_type: {:?} state_prefix: {:?} year: {} - rows: {}",
                     table_name,
                     geo_fips,
@@ -153,7 +155,7 @@ impl Tool for BeaDataTool {
                     "line_code":  line_code,
                     "geo_fips":   geo_fips,
                     "year":       year,
-                    "data":       rows,
+                    "data":       if rows.is_empty() {Value::Null} else {json!(rows)},
                     "unit":       "Thousands of dollars",
                     "provider":   "bea",
                     "note":       "UNIT_MULT=3 means thousands of dollars"
