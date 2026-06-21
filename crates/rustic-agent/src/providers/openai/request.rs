@@ -21,7 +21,7 @@ pub struct OpenAICompletionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub previous_response_id: Option<String>,
     max_output_tokens: i32,
-    reasoning: OpenAICompletionRequestReasoning,
+    reasoning: Option<OpenAICompletionRequestReasoning>,
     pub tools: Vec<ToolDefinition>,
 }
 
@@ -221,13 +221,13 @@ pub struct OpenAICompletionRequestReasoning {
 
 impl OpenAICompletionRequestReasoning {
     /// Build from a [`ReasoningEffort`] level: `None` → `"none"`, …, `High` → `"high"`.
-    pub fn new(reasoning_effort: ReasoningEffort) -> Self {
+    pub fn new(reasoning_effort: ReasoningEffort) -> Option<Self> {
         let effort = match reasoning_effort {
-            ReasoningEffort::None => "none".to_string(),
+            ReasoningEffort::None => return None,
             ReasoningEffort::Low => "low".to_string(),
             ReasoningEffort::Medium => "medium".to_string(),
             ReasoningEffort::High => "high".to_string(),
         };
-        OpenAICompletionRequestReasoning { effort }
+        Some(OpenAICompletionRequestReasoning { effort })
     }
 }

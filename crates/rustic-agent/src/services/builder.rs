@@ -13,6 +13,7 @@ use crate::{
     providers::{
         anthropic::{self, completion::AnthropicClient},
         gemini::{self, completion::GeminiClient},
+        groq::{self, completion::GroqClient},
         local::completion::LocalClient,
         openai::{self, completion::OpenAIClient},
     },
@@ -91,6 +92,7 @@ impl<'a> AgentBuilder<'a> {
             Provider::OpenAI { api_key, model } => self.with_openai(&api_key, &model).await,
             Provider::Gemini { api_key, model } => self.with_gemini(&api_key, &model).await,
             Provider::Anthropic { api_key, model } => self.with_anthropic(&api_key, &model).await,
+            Provider::Groq { api_key, model } => self.with_groq(&api_key, &model).await,
             Provider::Local { model, base_url } => {
                 self.with_local("local", &model, &base_url).await
             }
@@ -132,6 +134,19 @@ impl<'a> AgentBuilder<'a> {
         let client = clients
             .entry(client_key)
             .or_insert(self.gemini_client(api_key)?);
+        self.client = Some(client.clone());
+        Ok(self)
+    }
+
+    /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
+    pub async fn with_groq(mut self, api_key: &str, model: &str) -> Result<Self> {
+        let mut clients = self.service.clients.write().await;
+        self.llm = Some(groq::LLM.to_string());
+        self.model = Some(model.to_string());
+        let client_key = format! {"{}:{}", groq::LLM, model};
+        let client = clients
+            .entry(client_key)
+            .or_insert(self.groq_client(api_key)?);
         self.client = Some(client.clone());
         Ok(self)
     }
@@ -263,6 +278,12 @@ impl<'a> AgentBuilder<'a> {
     fn gemini_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
         let client = GeminiClient::new(api_key.to_string())
             .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
+        Ok(Arc::new(client))
+    }
+
+    fn groq_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
+        let client = GroqClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Groq client"))?;
         Ok(Arc::new(client))
     }
 

@@ -48,6 +48,16 @@ impl OpenAIClient {
             http_client: HttpClient::new()?,
         })
     }
+
+    /// Create a openai compatible client like Groq
+    pub fn new_with_base_url(base_url: String, api_key: String) -> Result<Self> {
+        Ok(Self {
+            api_key,
+            base_url,
+            http_client: HttpClient::new()?,
+        })
+    }
+
 }
 
 #[async_trait]
