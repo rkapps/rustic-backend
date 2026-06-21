@@ -71,11 +71,18 @@ pub trait TickerHistoryStorageReader: Send + Sync + Debug {
 #[async_trait]
 pub trait TickerIndicatorStorageReader: Send + Sync + Debug {
     async fn get_ticker_indicators(&self, symbol: &str) -> Result<Vec<TickerIndicator>>;
+    async fn get_ticker_indicators_by_symbol(
+        &self,
+        symbol: &str,
+        from_date: DateTime<Utc>,
+    ) -> Result<Vec<TickerIndicator>>;
+        
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,
         n: Option<usize>,
     ) -> Result<Vec<TickerIndicatorEntity>>;
+    
 }
 
 #[async_trait]

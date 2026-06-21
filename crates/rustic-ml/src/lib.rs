@@ -18,6 +18,6 @@
 
 pub mod embeddings;
 pub mod search;
-
+pub mod ml;
 pub use embeddings::client::{BatchResult, Embedding, EmbeddingClient};
 pub use search::similarity::{cosine_similarity, search};

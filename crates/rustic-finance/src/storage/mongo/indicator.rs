@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use rustic_storage::{SearchCriteria, core::repository::Repository};
 use serde_json::json;
 use tracing::{debug, warn};
@@ -25,6 +26,18 @@ impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
             .await
     }
 
+    async fn get_ticker_indicators_by_symbol(
+        &self,
+        symbol: &str,
+        from_date: DateTime<Utc>,
+    ) -> Result<Vec<TickerIndicator>> {
+        let criteria = SearchCriteria::new()
+            .eq("symbol", symbol.to_uppercase())
+            .gte("date", from_date)
+            .sort_asc("date");
+        self.manager.get_ticker_indicators_by_criteria(&criteria).await
+    }
+        
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,

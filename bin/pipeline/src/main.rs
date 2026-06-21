@@ -17,6 +17,10 @@ struct Cli {
 #[derive(Subcommand)]
 #[allow(clippy::enum_variant_names)]
 enum PipelineCommands {
+    BuildTickersPredictionModels  {
+        #[arg(short, long)]
+        symbols: Option<String>,
+    },
     CheckEnv,
     UpdateEconomicData,
     UpdateTickersEod,
@@ -40,6 +44,14 @@ async fn main() -> Result<()> {
     info!("Mongo uri: {}", mongo_uri);
 
     match cli.command {
+        PipelineCommands::BuildTickersPredictionModels { symbols }=> {
+            let service = get_finance_service(&mongo_uri).await?;
+            let symbols_str = symbols.as_deref().unwrap_or("");
+            match service.build_ticker_prediction_models(symbols_str).await {
+                Ok(_) => info!("Tickers Build Prediction Models completed successfully."),
+                Err(e) => error!("Tickers Build Prediction Models  failed: {:?}", e),
+            }
+        }
         PipelineCommands::CheckEnv => {}
         PipelineCommands::UpdateEconomicData => {
             let economic_service = get_economic_service(&mongo_uri).await?;

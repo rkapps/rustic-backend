@@ -1,10 +1,11 @@
 use crate::{
-    core::tickers::update::{
-        update_all_ticker_overview_embeddings, update_all_ticker_sentiments_embeddings, update_all_tickers, update_cryptos_realtime, update_stocks_etfs_realtime
-    },
+    core::{helper::get_tickers_for_symbols, tickers::update::{
+        update_all_ticker_overview_embeddings, update_all_ticker_sentiments_embeddings,
+        update_all_tickers, update_cryptos_realtime, update_stocks_etfs_realtime,
+    }},
     domain::{Ticker, TickerControl, dto::ticker_seed::TickerSeed, tickers::AssetType},
     storage::{
-        FinanceMongoStorageReader, TickerStorageReader, mongo::writer::FinanceMongoStorageWriter,
+        FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter,
         reader::TickerControlStorageReader,
     },
 };
@@ -13,21 +14,6 @@ use rustic_ml::EmbeddingClient;
 use rustic_providers::finance::service::ProviderService;
 use std::{collections::HashMap, sync::Arc};
 use tracing::{error, info};
-
-async fn get_tickers_for_symbols(
-    reader: &Arc<FinanceMongoStorageReader>,
-    symbols: &str,
-) -> Result<Vec<Ticker>> {
-    if !symbols.is_empty() {
-        use tracing::debug;
-
-        let list: Vec<String> = symbols.split(',').map(|s| s.to_string()).collect();
-        debug!("List: {:?}", list);
-        reader.get_tickers_by_symbols(list).await
-    } else {
-        reader.get_tickers_by_total_assets().await
-    }
-}
 
 pub async fn load_tickers(
     reader: Arc<FinanceMongoStorageReader>,
@@ -148,8 +134,6 @@ pub async fn update_realtime_cryptos_pipeline(
     symbols: &str,
     update: bool,
 ) -> Result<()> {
-    
-
     let mut all_tickers = get_tickers_for_symbols(&reader, symbols).await?;
     all_tickers.retain(|t| t.asset_type == AssetType::Crypto);
 

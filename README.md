@@ -1,4 +1,4 @@
-# rustic-ai-backend-rs
+# rustic-backend
 
 Backend service for multi-provider LLM agents with persistent storage, MCP tool integration, and a REST API.
 
@@ -8,12 +8,12 @@ A Rust workspace that provides a production-ready agentic AI backend. It exposes
 
 ## Workspace
 
-| Crate | Description |
-|---|---|
-| `bin/api` | Axum HTTP server — entry point for all REST endpoints |
+| Crate                 | Description                                                          |
+| --------------------- | -------------------------------------------------------------------- |
+| `bin/api`             | Axum HTTP server — entry point for all REST endpoints                |
 | `crates/rustic-agent` | Multi-provider LLM client library (Anthropic, OpenAI, Gemini, Local) |
-| `crates/rustic-core` | Shared HTTP client, error types, and utilities |
-| `crates/rustic-boot` | Application bootstrap: config loading, routing, startup |
+| `crates/rustic-core`  | Shared HTTP client, error types, and utilities                       |
+| `crates/rustic-boot`  | Application bootstrap: config loading, routing, startup              |
 
 ## Features
 
@@ -46,18 +46,18 @@ cargo build --release
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | For Claude | Anthropic API key |
-| `OPENAI_API_KEY` | For OpenAI + embeddings | OpenAI API key |
-| `GEMINI_API_KEY` | For Gemini | Google AI API key |
-| `MONGO_URI` | Yes | MongoDB connection string |
-| `RUSTIC_AI_DB_NAME` | Yes | MongoDB database name for the AI backend |
-| `FINTRACKER_DB_NAME` | Yes | MongoDB database name for financial data |
-| `RUSTIC_AI_CONFIG_PATH` | Yes | Path to the config directory |
-| `RUSTIC_AI_PROJECT_ID` | Yes | Firebase project ID |
-| `PORT` | No | HTTP port (default: `8080`) |
-| `RUST_LOG` | No | Log filter (default: `rustic_ai_api=debug,...`) |
+| Variable                | Required                | Description                                     |
+| ----------------------- | ----------------------- | ----------------------------------------------- |
+| `ANTHROPIC_API_KEY`     | For Claude              | Anthropic API key                               |
+| `OPENAI_API_KEY`        | For OpenAI + embeddings | OpenAI API key                                  |
+| `GEMINI_API_KEY`        | For Gemini              | Google AI API key                               |
+| `MONGO_URI`             | Yes                     | MongoDB connection string                       |
+| `RUSTIC_AI_DB_NAME`     | Yes                     | MongoDB database name for the AI backend        |
+| `FINTRACKER_DB_NAME`    | Yes                     | MongoDB database name for financial data        |
+| `RUSTIC_AI_CONFIG_PATH` | Yes                     | Path to the config directory                    |
+| `RUSTIC_AI_PROJECT_ID`  | Yes                     | Firebase project ID                             |
+| `PORT`                  | No                      | HTTP port (default: `8080`)                     |
+| `RUST_LOG`              | No                      | Log filter (default: `rustic_ai_api=debug,...`) |
 
 ### Run
 
@@ -75,12 +75,12 @@ cargo run --bin api
 
 The server reads JSON config files from `RUSTIC_AI_CONFIG_PATH` at startup:
 
-| File | Purpose |
-|---|---|
-| `providers.json` | LLM provider definitions (model, API key references) |
-| `agents.json` | Agent configurations (system prompt, model, tool bindings) |
-| `chat_templates.json` | Reusable conversation templates |
-| `mcp_servers_config.json` | MCP server connection details |
+| File                      | Purpose                                                    |
+| ------------------------- | ---------------------------------------------------------- |
+| `providers.json`          | LLM provider definitions (model, API key references)       |
+| `agents.json`             | Agent configurations (system prompt, model, tool bindings) |
+| `chat_templates.json`     | Reusable conversation templates                            |
+| `mcp_servers_config.json` | MCP server connection details                              |
 
 ## rustic-agent
 
@@ -134,12 +134,12 @@ let response = agent.complete(&messages).await?;
 
 ### Completion Methods
 
-| Method | Tools | Streaming |
-|---|---|---|
-| `complete(&messages)` | No | No |
-| `complete_with_stream(&messages)` | No | Yes |
-| `complete_with_tools(&messages)` | Yes | No |
-| `complete_with_tools_streaming(&messages)` | Yes | Yes |
+| Method                                     | Tools | Streaming |
+| ------------------------------------------ | ----- | --------- |
+| `complete(&messages)`                      | No    | No        |
+| `complete_with_stream(&messages)`          | No    | Yes       |
+| `complete_with_tools(&messages)`           | Yes   | No        |
+| `complete_with_tools_streaming(&messages)` | Yes   | Yes       |
 
 ### Custom Tools
 
@@ -210,11 +210,11 @@ while let Some(chunk) = stream.next().await {
 
 ### Examples
 
-| Example | Provider | Description |
-|---|---|---|
-| `completion` | Gemini | Multi-turn chat with `response_id` threading |
-| `completion_with_tools` | Gemini | Custom local tool (`GetWeatherTool`) |
-| `completion_with_mcp` | OpenAI | Remote MCP server (Apify) via `AgentService` |
+| Example                 | Provider | Description                                  |
+| ----------------------- | -------- | -------------------------------------------- |
+| `completion`            | Gemini   | Multi-turn chat with `response_id` threading |
+| `completion_with_tools` | Gemini   | Custom local tool (`GetWeatherTool`)         |
+| `completion_with_mcp`   | OpenAI   | Remote MCP server (Apify) via `AgentService` |
 
 ```bash
 cd crates/rustic-agent
@@ -227,30 +227,30 @@ OPENAI_API_KEY=<key> APIFY_API_KEY=<key> cargo run --example completion_with_mcp
 
 ### Anthropic
 
-| Constant | Model |
-|---|---|
+| Constant                  | Model               |
+| ------------------------- | ------------------- |
 | `MODEL_CLAUDE_SONNET_4_6` | `claude-sonnet-4-6` |
 | `MODEL_CLAUDE_SONNET_4_5` | `claude-sonnet-4-5` |
-| `MODEL_CLAUDE_HAIKU_4_5` | `claude-haiku-4-5` |
-| `MODEL_CLAUDE_OPUS_4_6` | `claude-opus-4-6` |
+| `MODEL_CLAUDE_HAIKU_4_5`  | `claude-haiku-4-5`  |
+| `MODEL_CLAUDE_OPUS_4_6`   | `claude-opus-4-6`   |
 
 ### OpenAI
 
-| Constant | Model |
-|---|---|
-| `MODEL_GPT_5_4` | `gpt-5.4` |
-| `MODEL_GPT_5_4_MINI` | `gpt-5.4-mini` |
-| `MODEL_GPT_5_4_NANO` | `gpt-5.4-nano` |
+| Constant                       | Model                    |
+| ------------------------------ | ------------------------ |
+| `MODEL_GPT_5_4`                | `gpt-5.4`                |
+| `MODEL_GPT_5_4_MINI`           | `gpt-5.4-mini`           |
+| `MODEL_GPT_5_4_NANO`           | `gpt-5.4-nano`           |
 | `MODEL_TEXT_EMBEDDING_3_SMALL` | `text-embedding-3-small` |
 
 ### Google Gemini
 
-| Constant | Model |
-|---|---|
-| `MODEL_GEMINI_3_FLASH_PREVIEW` | `gemini-3-flash-preview` |
+| Constant                              | Model                           |
+| ------------------------------------- | ------------------------------- |
+| `MODEL_GEMINI_3_FLASH_PREVIEW`        | `gemini-3-flash-preview`        |
 | `MODEL_GEMINI_3_1_FLASH_LITE_PREVIEW` | `gemini-3.1-flash-lite-preview` |
-| `MODEL_GEMINI_3_1_PRO_PREVIEW` | `gemini-3.1-pro-preview` |
-| `MODEL_GEMINI_EMBEDDING_001` | `gemini-embedding-001` |
+| `MODEL_GEMINI_3_1_PRO_PREVIEW`        | `gemini-3.1-pro-preview`        |
+| `MODEL_GEMINI_EMBEDDING_001`          | `gemini-embedding-001`          |
 
 ## License
 
