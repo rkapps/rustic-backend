@@ -1,10 +1,9 @@
 use crate::{
-    client::{
+    ReasoningEffort, client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
         response::CompletionResponse,
-    },
-    providers::{groq::GROQ_BASE_URL, openai::completion::OpenAIClient},
+    }, providers::{groq::GROQ_BASE_URL, openai::completion::OpenAIClient}
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -38,13 +37,6 @@ impl GroqClient {
 impl LlmClient for GroqClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
 
-        info!(
-            target: "agent-groq",
-            model = %request.model,
-            request= ?request.reasoning_effort,
-            "Groq request"
-        );             
-
         self.inner.complete(groq_request(request)).await
     }
 
@@ -53,13 +45,6 @@ impl LlmClient for GroqClient {
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
 
-        info!(
-            target: "agent-groq",
-            model = %request.model,
-            request= ?request.reasoning_effort,
-            "Groq request"
-        );        
-
         self.inner.complete_with_stream(groq_request(request)).await
     }
 }
@@ -67,7 +52,16 @@ impl LlmClient for GroqClient {
 
 pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
 
-    let max_tokens = if request.max_tokens > 32768 { 32768 } else {request.max_tokens};
+    let max_tokens = get_max_tokens(&request.model, &request.reasoning_effort);
+    info!(
+        target: "agent-groq",
+        model = %request.model,
+        request= ?request.reasoning_effort,
+        max_tokens= ?max_tokens,
+        "Groq request"
+    );        
+
+
     CompletionRequest {
         id: request.id.clone(),
         model: request.model.clone(),
@@ -78,10 +72,31 @@ pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
         max_tokens: max_tokens,
         reasoning_effort: crate::ReasoningEffort::None,
         enable_cache: request.enable_cache,
-        stream: true,
+        stream: request.stream,
         store: false,
         definitions: request.definitions.clone(),
         last_response_id: None,
     }
 
+}
+
+
+fn get_max_tokens(model: &str, effort: &ReasoningEffort) -> i32 {
+    let tpm_budget = match model {
+        m if m.contains("qwen3.6") => 8_000,
+        m if m.contains("llama-3.1-8b") => 30_000,
+        m if m.contains("llama-3.3") => 12_000,
+        m if m.contains("llama-4") => 30_000,
+        _ => 8_000, // conservative default
+    };
+
+    let effort_ratio = match effort {
+        ReasoningEffort::None => 0.15,
+        ReasoningEffort::Low => 0.25,
+        ReasoningEffort::Medium => 0.40,
+        ReasoningEffort::High => 0.60,
+    };
+
+    // Leave room for the input tokens (system prompt etc.)
+    ((tpm_budget as f32 * effort_ratio) as u32).min(8000) as i32
 }

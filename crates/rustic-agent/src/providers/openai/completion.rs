@@ -80,7 +80,10 @@ impl LlmClient for OpenAIClient {
         orequest.log_trace();
 
         let body = serde_json::json!(orequest);
-        // debug!("Body: {:#?}", body);
+        trace!(
+            target: "agent-openai",
+            "Body: {:#?}", body
+        );
         let oresponse = self
             .http_client
             .post_request::<OpenAICompletionResponse>(url, Some(headers), body)
@@ -206,6 +209,12 @@ impl LlmClient for OpenAIClient {
             .post_stream_request(url, Some(headers), body)
             .await?;
         // debug!("✅ Got response: {:?}", response.error_for_status());
+        trace!(
+            target: "agent-openai",
+            response = %format!("{:#?}", response),
+            "Openai Response"
+        );
+
         if response.status() == 400 {
             let error_body = response
                 .text()
