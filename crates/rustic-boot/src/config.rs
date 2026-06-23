@@ -4,7 +4,7 @@ use rustic_agent::services::config::{
 };
 use rustic_core::load_content;
 use serde::{Deserialize, Serialize};
-use tracing::trace;
+use tracing::{debug, trace};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatTemplate {
@@ -64,7 +64,9 @@ pub async fn load_agents_config(
     for agent in &mut agents {
 
         // load description from .md if available — falls back to inline JSON description
-        let desc_path = format!("{}/descriptions/{}.md", config_dir, agent.id);
+        let desc_path = format!("{}/{}", config_dir, agent.description);
+        debug!("description path: {:?}", desc_path);
+
         if let Ok(content) = load_content(desc_path).await {
             agent.description = content;
         }
