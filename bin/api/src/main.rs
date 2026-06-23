@@ -69,6 +69,7 @@ async fn main() -> Result<()> {
         "http://localhost:4201",
         "http://localhost:4202",
         "https://rustic-ai-rkapps.web.app",
+        "https://ijn-rustic-ai.web.app",
     ];
 
     boot::AgenticBootBuilder::new()
