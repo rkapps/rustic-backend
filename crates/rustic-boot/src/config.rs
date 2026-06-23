@@ -38,6 +38,7 @@ struct AgentConfigFile {
     agents: Vec<AgentConfig>,
 }
 
+
 pub async fn load_provider_config(providers_path: String) -> Result<Vec<ProviderConfig>> {
     let providers_content = load_content(providers_path).await?;
     let providers_file: ProviderConfigFile = serde_json::from_str(&providers_content)?;
@@ -61,6 +62,13 @@ pub async fn load_agents_config(
     let mut agents = agents_file.agents;
     // resolve system_prompt file paths to content
     for agent in &mut agents {
+
+        // load description from .md if available — falls back to inline JSON description
+        let desc_path = format!("{}/descriptions/{}.md", config_dir, agent.id);
+        if let Ok(content) = load_content(desc_path).await {
+            agent.description = content;
+        }
+
         let prompt_path = format!("{}/{}", config_dir, agent.system_prompt);
         agent.system_prompt = load_content(prompt_path.clone()).await.with_context(|| {
             anyhow::anyhow!(
@@ -69,6 +77,8 @@ pub async fn load_agents_config(
                 prompt_path
             )
         })?;
+
+
     }
     Ok(agents)
 }
