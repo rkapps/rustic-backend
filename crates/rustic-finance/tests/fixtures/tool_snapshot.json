@@ -6,60 +6,60 @@
       "sector": "Technology",
       "industry": "Data Storage",
       "price": {
-        "last": 154.81,
-        "prev": 161.26,
-        "open": 161.51,
-        "high": 161.765,
-        "low": 154.01,
-        "change_amt": -6.45,
-        "change_perc": -4.0,
+        "last": 159.71,
+        "prev": 154.81,
+        "open": 158.64,
+        "high": 161.17,
+        "low": 153.33,
+        "change_amt": 4.9,
+        "change_perc": 3.17,
         "wk52_high": 192.83,
         "wk52_low": 93.21
       },
       "fundamentals": {
-        "total_assets": 31594045000,
-        "eps": 6.32,
-        "pe_ratio": 25.52,
-        "peg_ratio": 1.782,
-        "pb_ratio": 23.47,
-        "ps_ratio": 4.562,
-        "forward_pe": 17.83,
+        "total_assets": 31290372000,
+        "eps": 6.36,
+        "pe_ratio": 25.11,
+        "peg_ratio": 1.759,
+        "pb_ratio": 23.16,
+        "ps_ratio": 4.519,
+        "forward_pe": 17.57,
         "beta": 1.434,
         "analyst_target_price": 171.75,
         "analyst_consensus": "Hold"
       },
       "performance": {
-        "5Y": {
-          "perc": 122.59,
-          "price": 69.549133027
-        },
-        "Ytd": {
-          "price": 106.0359995103,
-          "perc": 46.0
-        },
-        "2Y": {
-          "price": 123.8401700518,
-          "perc": 25.01
-        },
-        "6M": {
-          "price": 110.7986585601,
-          "perc": 39.72
-        },
-        "3M": {
-          "price": 100.6038172716,
-          "perc": 53.88
-        },
-        "1W": {
-          "perc": -3.53,
-          "price": 160.47
+        "1M": {
+          "perc": 14.6,
+          "price": 139.36
         },
         "1Y": {
-          "perc": 53.57,
-          "price": 100.8063245377
+          "perc": 58.53,
+          "price": 100.7474595307
         },
-        "1M": {
-          "perc": 28.38,
-          "price": 120.59
+        "6M": {
+          "price": 108.9718174069,
+          "perc": 46.56
+        },
+        "3M": {
+          "perc": 53.88,
+          "price": 103.7877972466
+        },
+        "1W": {
+          "perc": -1.3,
+          "price": 161.82
+        },
+        "Ytd": {
+          "perc": 50.62,
+          "price": 106.0359995103
+        },
+        "2Y": {
+          "price": 122.8106542259,
+          "perc": 30.05
+        },
+        "5Y": {
+          "perc": 122.68,
+          "price": 71.7203188584
         }
       },
       "technical_signals": null,
@@ -72,60 +72,60 @@
       "sector": "Technology",
       "industry": "Data Storage",
       "price": {
-        "last": 1066.07,
-        "prev": 1031.34,
-        "open": 1044.25,
-        "high": 1094.0,
-        "low": 1043.9,
-        "change_amt": 34.73,
-        "change_perc": 3.37,
-        "wk52_high": 1097.0,
-        "wk52_low": 128.66
+        "last": 1070.23,
+        "prev": 1066.07,
+        "open": 1133.36,
+        "high": 1145.0,
+        "low": 1053.53,
+        "change_amt": 4.16,
+        "change_perc": 0.39,
+        "wk52_high": 1145.0,
+        "wk52_low": 132.15
       },
       "fundamentals": {
-        "total_assets": 230505644000,
+        "total_assets": 239976595000,
         "eps": 10.49,
-        "pe_ratio": 97.12,
-        "peg_ratio": 0.714,
-        "pb_ratio": 213.1,
-        "ps_ratio": 21.19,
-        "forward_pe": 42.02,
+        "pe_ratio": 102.02,
+        "peg_ratio": 0.74,
+        "pb_ratio": 221.13,
+        "ps_ratio": 21.99,
+        "forward_pe": 43.67,
         "beta": 2.083,
-        "analyst_target_price": 885.91,
+        "analyst_target_price": 898.09,
         "analyst_consensus": "Buy"
       },
       "performance": {
-        "5Y": {
-          "perc": 1349.72,
-          "price": 73.5364195511
+        "1W": {
+          "price": 1018.8,
+          "perc": 5.05
         },
         "1Y": {
-          "price": 129.6548432158,
-          "perc": 722.24
+          "perc": 727.59,
+          "price": 129.3191033323
         },
-        "3M": {
-          "perc": 159.7,
-          "price": 410.4948801817
+        "1M": {
+          "perc": 31.68,
+          "price": 812.73
         },
         "Ytd": {
           "price": 274.8977094405,
-          "perc": 287.81
-        },
-        "6M": {
-          "perc": 261.3,
-          "price": 295.0648151292
-        },
-        "1M": {
-          "price": 733.35,
-          "perc": 45.37
-        },
-        "1W": {
-          "perc": 22.81,
-          "price": 868.09
+          "perc": 289.32
         },
         "2Y": {
-          "perc": 948.5,
-          "price": 101.6761849598
+          "perc": 974.97,
+          "price": 99.5591425006
+        },
+        "3M": {
+          "price": 424.2003362644,
+          "perc": 152.29
+        },
+        "6M": {
+          "price": 284.7600478307,
+          "perc": 275.84
+        },
+        "5Y": {
+          "price": 73.0708900487,
+          "perc": 1364.65
         }
       },
       "technical_signals": null,
@@ -138,60 +138,60 @@
       "sector": "Technology",
       "industry": "Data Storage",
       "price": {
-        "last": 712.13,
-        "prev": 681.08,
-        "open": 695.475,
-        "high": 741.85,
-        "low": 694.12,
-        "change_amt": 31.05,
-        "change_perc": 4.56,
-        "wk52_high": 741.85,
-        "wk52_low": 58.5
+        "last": 732.62,
+        "prev": 746.23,
+        "open": 772.75,
+        "high": 779.8,
+        "low": 726.6,
+        "change_amt": -13.61,
+        "change_perc": -1.82,
+        "wk52_high": 799.87,
+        "wk52_low": 60.41
       },
       "fundamentals": {
-        "total_assets": 234756112000,
-        "eps": 16.69,
-        "pe_ratio": 40.81,
-        "peg_ratio": 0.606,
-        "pb_ratio": 24.25,
-        "ps_ratio": 19.93,
-        "forward_pe": 35.71,
+        "total_assets": 257212154000,
+        "eps": 16.72,
+        "pe_ratio": 44.63,
+        "peg_ratio": 0.664,
+        "pb_ratio": 26.57,
+        "ps_ratio": 21.84,
+        "forward_pe": 39.22,
         "beta": 2.2,
-        "analyst_target_price": 547.09,
+        "analyst_target_price": 554.13,
         "analyst_consensus": "Buy"
       },
       "performance": {
-        "1Y": {
-          "price": 59.0329928714,
-          "perc": 1106.33
-        },
-        "6M": {
-          "perc": 293.57,
-          "price": 180.9396197879
-        },
-        "1M": {
-          "perc": 56.28,
-          "price": 455.6664309297
-        },
-        "1W": {
-          "price": 529.29,
-          "perc": 34.54
-        },
         "2Y": {
-          "price": 60.3707048511,
-          "perc": 1079.6
+          "perc": 1184.97,
+          "price": 57.0146866081
         },
         "3M": {
-          "price": 293.0141090511,
-          "perc": 143.04
+          "perc": 143.43,
+          "price": 300.961779358
         },
         "5Y": {
-          "perc": 1262.3,
-          "price": 52.2741227223
+          "perc": 1306.15,
+          "price": 52.1010545169
+        },
+        "6M": {
+          "perc": 308.33,
+          "price": 179.4207981506
+        },
+        "1Y": {
+          "price": 59.1327276119,
+          "perc": 1138.94
         },
         "Ytd": {
           "price": 172.1364496403,
-          "perc": 313.7
+          "perc": 325.6
+        },
+        "1W": {
+          "perc": 12.1,
+          "price": 653.53
+        },
+        "1M": {
+          "perc": 51.32,
+          "price": 484.1380850607
         }
       },
       "technical_signals": null,

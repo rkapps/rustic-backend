@@ -1,7 +1,9 @@
 use std::env;
 
 use anyhow::Result;
-use rustic_finance::storage::{FinanceMongoStorageReader, TickerStorageReader, mongo::manager::FinanceMongoStorageManager};
+use rustic_finance::storage::{
+    FinanceMongoStorageReader, TickerStorageReader, mongo::manager::FinanceMongoStorageManager,
+};
 use tokio::fs;
 use tracing::info;
 
@@ -24,9 +26,11 @@ async fn test_get_snapshots() -> Result<()> {
     let manager = get_manager().await?;
     let reader = FinanceMongoStorageReader::new(manager);
 
-    let tickers = reader.get_tickers_by_symbols(vec!["NVDA".to_string(), "AAPL".to_string()]).await?;
+    let tickers = reader
+        .get_tickers_by_symbols(vec!["NVDA".to_string(), "AAPL".to_string()])
+        .await?;
 
-   // save to fixture
+    // save to fixture
     let json = serde_json::to_string_pretty(&tickers).unwrap();
     fs::write("tests/fixtures/tickers.json", &json).await?;
 
