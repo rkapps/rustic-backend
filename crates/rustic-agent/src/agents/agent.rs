@@ -7,7 +7,7 @@ use tokio::{
 };
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, info, trace};
+use tracing::{Instrument, debug, error, info, trace};
 
 use crate::{
     client::{
@@ -73,6 +73,18 @@ impl Agent {
     ///    their results to the message history before the next iteration.
     /// 4. When no tool calls are requested, sends a final [`CompletionChunkResponse::stop`]
     ///    chunk with accumulated token usage and exits.
+    #[tracing::instrument(
+        skip(self, messages, last_response_id),
+        fields(
+            otel.name = %format!("complete_with_screaming agent: {}", self.id),
+            model = %self.model,
+            temperature = %self.temperature,
+            max_tokens = %self.max_tokens,
+            store = %self.store,
+            messages.count = %messages.len(),
+            last_response_id = ?last_response_id,
+        )
+    )]
     pub async fn complete_with_streaming(
         &self,
         messages: &[Message],
@@ -88,17 +100,15 @@ impl Agent {
             .map(|e| ToolDefinition::from_tool(e.as_ref()))
             .collect();
 
-        debug!(
+        trace!(
             target: "agent-tool",
-            defintions= ?definitions,
-            "Agent: {} - Tool definitions", self.id
+            "Tool definitions: {:?}", definitions,
         );
 
         let mcp_definitions = self.mcp_registry.definitions.clone();
-        debug!(
+        trace!(
             target: "agent-tool",
-            defintions= ?mcp_definitions,
-            "Agent: {} - Mcp_definitions", self.id
+            "Mcp_definitions: {:?}", mcp_definitions
         );
 
         mcp_definitions
@@ -114,24 +124,15 @@ impl Agent {
         let mut last_response_id = last_response_id.clone();
         let mut iterations = HashMap::new();
 
-        info!(  model= %agent.model,
-                temperature= %agent.temperature,
-                reasoning= ?&agent.reasoning_effort,
-                maxtokens= %agent.max_tokens,
-                store= %agent.store,
-                last_messages= ?messages.len(),
-                last_response_id= ?last_response_id,
-                "Agent: {} - Completion Start", agent_id
-        );
-
         tokio::spawn(async move {
             let mut iteration = 0;
             const MAX_ITERATIONS: usize = 10;
 
             let mut usage = crate::client::response::CompletionResponseTokenUsage::default();
 
-            debug!(target: "agent-messages",
-                "Agent: {} - Current messages: {:#?}", agent_id, messages
+            debug!(
+                target: "agent-messages",
+                "Current messages: {:#?}", messages
             );
 
             loop {
@@ -140,11 +141,15 @@ impl Agent {
                     break;
                 }
 
-                info!(iteration= %iteration,
-                    messages= ?iterations.get(&iteration),
-                    last_response_id = ?last_response_id,
-                    "Agent: {} - ", agent_id
+                let iter_span = tracing::span!(
+                    tracing::Level::INFO,
+                    "iteration",
+                    otel.name = format!("iteration: {}", iteration),  // ← OTel specific attribute that overrides span name
+                    _n = %iteration,
+                    _last_response_id = ?last_response_id,
+                    _messages= ?iterations.get(&iteration),
                 );
+                // let _enter = iter_span.enter();
 
                 let request = CompletionRequest {
                     id: agent_id.clone(),
@@ -162,7 +167,17 @@ impl Agent {
                     last_response_id: last_response_id.clone(),
                 };
 
-                let mut llm_stream = match agent.client.complete_with_stream(request).await {
+                let mut llm_stream = match agent
+                    .client
+                    .complete_with_stream(request)
+                    .instrument(tracing::info_span!(
+                        parent: &iter_span,
+                        "provider.complete",
+                        otel.name = format!("provider: {}", agent.model),
+                        _store = %agent.store,
+                    ))
+                    .await
+                {
                     Ok(s) => s,
                     Err(e) => {
                         let _ = tx.send(Err(HttpError::NetworkError(e.to_string()))).await;
@@ -173,7 +188,7 @@ impl Agent {
                 let mut tool_calls = Vec::new();
 
                 let mut model = String::new();
-                // let mut response_id = String::new();
+
                 // Gemini sends partial thought tokens as random-looking characters; accumulate
                 // the full thought before appending it as a Thought message so the model receives
                 // a coherent block on the next turn.
@@ -194,14 +209,12 @@ impl Agent {
                         tool_calls.push(call);
                     } else {
                         trace!(
-                            chunk= ?chunk,
-                            "Agent: {}", agent_id
+                            _chunk= ?chunk,
                         );
 
                         if chunk.is_final {
                             debug!(
-                                chunk= ?chunk,
-                                "Agent: {}", agent_id
+                                _chunk= ?chunk,
                             );
 
                             usage += chunk.usage.unwrap();
@@ -219,18 +232,20 @@ impl Agent {
                     }
                 }
 
-                info!(
-                    tool_calls= %tool_calls.len(),
-                    new_response_id= ?last_response_id,
-                    "Agent: {} - ", agent_id
-                );
+                iter_span.in_scope(|| {
+                    info!(
+                        tool_calls= %tool_calls.len(),
+                        new_response_id= ?last_response_id,
+                    );
+                });
 
                 if tool_calls.is_empty() {
-                    info!(
-                        model=%model,
-                        usage= %format_args!("{:#?}", usage),
-                        "Agent: {} - Response Stats final", agent_id
-                    );
+                    iter_span.in_scope(|| {
+                        info!(
+                            _usage= %format_args!("{:#?}", usage),
+                            "Response: {}", model
+                        );
+                    });
 
                     let _ = tx
                         .send(Ok(CompletionChunkResponse::stop(
@@ -268,32 +283,24 @@ impl Agent {
                 for result in results {
                     match result {
                         Ok((tool_call, tool_output)) => {
-                            // debug!(target: "agent-tool", tool_call= ?tool_call, "Tool Call");
-                            debug!(target: "agent-tool",
-                                tool_call= ?tool_call,
-                                "Agent: {} - ", agent_id
-                            );
-                            debug!(target: "agent-tool",
-                                tool_output= ?tool_output,
-                                "Agent: {} - ", agent_id
-                            );
                             nmessages.push(tool_call);
                             nmessages.push(tool_output);
                         }
                         Err(e) => {
-                            error!(target: "agent-tool",
-                                error= ?e,
-                                "Agent: {} - Tool Call Error", agent_id
+                            error!(
+                                target: "agent-tool",
+                                "Tool Call Error: {:?}", e
                             );
                         }
                     };
                 }
 
                 if !nmessages.is_empty() {
-                    info!(
-                        nmessages= ?nmessages.len(),
-                        "Agent: {} - ", agent_id
-                    );
+                    iter_span.in_scope(|| {
+                        info!(
+                            nmessages= ?nmessages.len(),
+                        );
+                    });
                     iterations.insert(iteration, nmessages);
                 }
             }
@@ -311,35 +318,46 @@ impl Agent {
     ///
     /// Returns [`HttpError::MaxIterationsExceeded`] if the model keeps requesting
     /// tools beyond the iteration cap.
+    ///
+    #[tracing::instrument(
+        skip(self, messages, last_response_id),
+        fields(
+            otel.name = %format!("complete agent: {}", self.id),
+            _model = %self.model,
+            _temperature = %self.temperature,
+            _max_tokens = %self.max_tokens,
+            _store = %self.store,
+            _messages.count = %messages.len(),
+            _last_response_id = ?last_response_id,
+        )
+    )]
     pub async fn complete(
         &self,
         messages: &[Message],
         last_response_id: Option<String>,
     ) -> HttpResult<CompletionResponse> {
         let agent_id = &self.id;
-        let agent = self.clone();
 
         let mut definitions: Vec<ToolDefinition> = self
             .tool_registry
             .get_tools()
-            // .cloned()
             .iter()
             .map(|e| ToolDefinition::from_tool(e.as_ref()))
             .collect();
 
-        debug!(target: "agent-messages",
-          "Agent: {} - Current messages: {:#?}", agent_id, messages
+        debug!(
+          "Current messages: {:?}", messages
         );
-        debug!(target: "agent-tool",
-            defintions= ?definitions,
-            "Agent: {} - Tool definitions", self.id
+        trace!(
+            target: "agent-tool",
+            "Tool definitions: {:?}", definitions
         );
 
         let mcp_definitions = self.mcp_registry.definitions.clone();
 
-        debug!(target: "agent-tool",
-            defintions= ?mcp_definitions,
-            "Agent: {} - Mcp_definitions", self.id
+        trace!(
+            target: "agent-tool",
+            "Mcp_definitions: {:?}", mcp_definitions
         );
 
         mcp_definitions
@@ -348,14 +366,6 @@ impl Agent {
 
         let mut last_response_id = last_response_id.clone();
         let mut iterations = HashMap::new();
-
-        info!(  model= %agent.model,
-            temperature= %agent.temperature,
-            reasoning= ?&agent.reasoning_effort,
-            maxtokens= %agent.max_tokens,
-            last_response_id= ?last_response_id,
-            "Agent: {} - Completion Start", agent_id
-        );
 
         let request = CompletionRequest {
             id: self.id.clone(),
@@ -381,31 +391,52 @@ impl Agent {
 
         loop {
             iteration += 1;
-            info!(
-                "Agent: {} Iteration: {}/{} messages: {:?}",
-                agent_id,
-                iteration,
-                MAX_ITERATIONS,
-                nrequest.messages.len()
-            );
+
             if iteration > 5 {
                 sleep(delay).await;
             }
 
+            let iter_span = tracing::span!(
+                    tracing::Level::INFO,
+                    "iteration",
+                    otel.name = format!("iteration: {}", iteration),  // ← OTel specific attribute that overrides span name
+                    n = %iteration,
+                    _last_response_id = ?last_response_id,
+                    _messages= ?iterations.get(&iteration),
+            );
+            // let _enter = iter_span.enter();
+
             if iteration > MAX_ITERATIONS {
-                error!(
-                    "Agent: {}, Max tool iterations exceeded: {}",
-                    agent_id, iteration
-                );
+                iter_span.in_scope(|| {
+                    error!(
+                        "Agent: {}, Max tool iterations exceeded: {}",
+                        agent_id, iteration
+                    );
+                });
+
                 return Err(HttpError::MaxIterationsExceeded);
             }
 
-            trace!("CompletionRequest: {:#?}", nrequest);
+            iter_span.in_scope(|| {
+                trace!("CompletionRequest: {:#?}", nrequest);
+            });
 
             // Call the llm with the request
             nrequest.last_response_id = last_response_id.clone();
             nrequest.iterations = iterations.clone();
-            let response = self.client.complete(nrequest.clone()).await?;
+
+            let response = self
+                .client
+                .complete(nrequest.clone())
+                // .instrument(tracing::Span::current())
+                .instrument(tracing::info_span!(
+                    parent: &iter_span,
+                    "provider.complete",
+                    otel.name = format!("provider: {}", nrequest.model),
+                    _model = %nrequest.model,
+                    _store = %nrequest.store,
+                ))
+                .await?;
             last_response_id = Some(response.response_id.clone());
 
             // Get the tools
@@ -421,22 +452,28 @@ impl Agent {
                 })
                 .collect();
 
-            if tool_calls.is_empty() {
+            iter_span.in_scope(|| {
                 info!(
-                    response= %format_args!("{:#?}", response.text() ),
-                    usage= %format_args!("{:#?}", response.usage),
-                    "Agent: {} - Response Stats final", agent_id
+                    _new_response_id= ?last_response_id,
+                    "Tool calls: {}", tool_calls.len()
                 );
+            });
+
+            if tool_calls.is_empty() {
+                iter_span.in_scope(|| {
+                    info!(
+                        response= %format_args!("{:#?}", response.text() ),
+                        usage= %format_args!("{:#?}", response.usage),
+                        "Response Stats final"
+                    );
+                });
 
                 return Ok(response); // Done - return final answer
             }
 
-            info!(
-                tool_calls= ?tool_calls.len(),
-                "Agent: {} - Response Stats final", agent_id
-            );
-
-            trace!("CompletionResponse: {:#?}", response);
+            iter_span.in_scope(|| {
+                trace!("CompletionResponse: {:#?}", response);
+            });
 
             let thoughts: Vec<Message> = response
                 .contents
@@ -459,6 +496,14 @@ impl Agent {
                 .map(|call| {
                     let sem = semaphore.clone();
                     let timeout_duration = Duration::from_secs(120);
+                    let span = tracing::info_span!(
+                        parent: &iter_span,
+                        "tool.execute",
+                        otel.name = format!("tool: {}", call.name),
+                        _tool = %call.name,
+                        _call_id = %call.id,
+                    );
+
                     async move {
                         let _permit = sem.acquire().await.unwrap();
                         match tokio::time::timeout(
@@ -471,10 +516,13 @@ impl Agent {
                             Err(_) => Err(anyhow::anyhow!("Timeout: {}", call.name)),
                         }
                     }
+                    .instrument(span)
                 })
                 .collect();
 
-            let results = futures::future::join_all(tool_futures).await;
+            let results = futures::future::join_all(tool_futures)
+                .instrument(tracing::Span::current())
+                .await;
 
             //Add thoughts to the messages first
             let mut nmessages: Vec<Message> = Vec::new();
@@ -482,27 +530,26 @@ impl Agent {
             for result in results {
                 match result {
                     Ok((tool_call, tool_output)) => {
-                        debug!(target: "agent-tool", tool_call= ?tool_call, "Agent: {} - ", agent_id);
-                        debug!(target: "agent-tool", tool_output= ?tool_output, "Agent: {} - ", agent_id );
                         nmessages.push(tool_call);
                         nmessages.push(tool_output);
                     }
                     Err(e) => {
-                        error!(target: "agent-tool", agent= %agent_id, error= ?e, "Tool Call Error");
+                        iter_span.in_scope(|| {
+                            error!(target: "agent-tool", agent= %agent_id, error= ?e, "Tool Call Error");
+                        });
                     }
                 };
             }
-            info!(
-                "Agent: {} store: {} last Response Id: {:?} New messages: {:?}",
-                agent_id,
-                nrequest.store,
-                last_response_id,
-                nmessages.len()
-            );
+
+            iter_span.in_scope(|| {
+                info!(
+                    last_response_id,
+                    new_mesages = ?nmessages.len()
+                );
+            });
 
             if !nmessages.is_empty() {
                 iterations.insert(iteration, nmessages);
-                // nrequest.messages.extend(nmessages);
             }
         }
     }
@@ -513,7 +560,6 @@ impl Agent {
     /// found in either registry a JSON error payload is returned to the model so it can recover
     /// gracefully rather than crashing the loop.
     async fn execute_tool_call(&self, call: ToolCallRequest) -> anyhow::Result<(Message, Message)> {
-        let agent_id = &self.id;
         let tool_call_message = Message::ToolCall {
             call_id: call.id.clone(),
             arguments: call.arguments.to_string(),
@@ -523,9 +569,8 @@ impl Agent {
         let output = match self.tool_registry.get_tool(&call.name) {
             Some(tool) => {
                 info!(target: "agent-tool",
-                    name= ?call.name,
-                    arguments= ?call.arguments,
-                    "Agent: {} - Executing tool...", agent_id
+                    _arguments= ?call.arguments,
+                    "Tool call: {:?}", call.name
                 );
 
                 tool.execute(call.arguments.clone()).await?
@@ -533,9 +578,8 @@ impl Agent {
             None => {
                 if self.mcp_registry.has_tool(&call.name) {
                     info!(target: "agent-tool",
-                        name= ?call.name,
-                        arguments= ?call.arguments,
-                        "Agent: {} - Executing Mcp tool...", agent_id
+                        _arguments= ?call.arguments,
+                        "MCP Tool call: {:?}", call.name
                     );
 
                     match self
@@ -547,9 +591,8 @@ impl Agent {
                         Err(e) => {
                             error!(
                                 target: "agent-tool",
-                                error= ?e,
-                                arguments= ?call.arguments,
-                                "Agent: {} - Executing McpTool error...", agent_id
+                                _arguments= ?call.arguments,
+                                "Executing McpTool error: {:?}", e
                             );
 
                             serde_json::json!({
@@ -558,9 +601,9 @@ impl Agent {
                         }
                     }
                 } else {
-                    error!(target: "agent-tool",
-                        name= %call.name,
-                        "Agent: {} - Tool not found...", agent_id
+                    error!(
+                        target: "agent-tool",
+                        "Tool {} not found...", call.name
                     );
 
                     serde_json::json!({
@@ -569,6 +612,12 @@ impl Agent {
                 }
             }
         };
+
+        debug!(
+            target: "agent-tool",
+            _output= ?output,
+            "Tool output: {:?}", call.name
+        );
 
         let tool_output_message = Message::ToolOutput {
             call_id: call.id.clone(),

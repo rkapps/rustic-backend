@@ -16,6 +16,7 @@ use crate::{
     storage::manager::BootStorageManager,
 };
 
+#[derive(Debug)]
 pub struct ConversationService {
     agent_service: Arc<AgentService>,
     storage_manager: Arc<BootStorageManager>,
@@ -81,6 +82,7 @@ impl ConversationService {
         uid: String,
         query: ConversationsQuery,
     ) -> Result<Vec<Conversation>> {
+
         let conversations = self
             .storage_manager
             .get_conversations(&uid, query)
@@ -235,6 +237,13 @@ impl ConversationService {
         Ok(tresponse)
     }
 
+    #[tracing::instrument(
+        skip(self, request),
+        fields(
+            uid = %uid,
+            conversation.id = %conversation_id
+        )
+    )]
     pub async fn send_turn_streaming(
         &self,
         uid: &str,

@@ -6,7 +6,7 @@ use rustic_core::{HttpError, HttpResult};
 use tokio::sync::{Semaphore, mpsc};
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, info, trace, warn};
+use tracing::{Instrument, debug, error, info, trace, warn};
 
 use crate::{
     Agent, CompletionChunkResponse, CompletionResponse, CompletionResponseTokenUsage, Message,
@@ -108,39 +108,44 @@ pub struct PipeLineAgent {
 
 #[async_trait]
 impl Runnable for SingleAgent {
+
+    #[tracing::instrument(
+        skip(self, turns),
+        fields(
+            agent_id = %self.agent.id,
+            strategy= ?self.get_strategy(),
+            temperature= ?self.get_agent().temperature,
+            max_tokens= ?self.get_agent().max_tokens,
+            reasoning_effort= ?self.get_agent().reasoning_effort,
+            turns = turns.len()
+        )
+    )]
     async fn execute(
         &self,
         turns: Vec<CompletionTurn>,
         prompt: &str,
     ) -> HttpResult<CompletionResponse> {
-        info!(
-            turns= ?turns.len(),
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-
-            "Agent {:?} Executing SingleAgent...", self.get_agent_id()
-        );
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
         messages.push(Message::user(prompt.to_string()));
         self.agent.complete(&messages, last_response_id).await
     }
 
+    #[tracing::instrument(
+        skip(self, turns),
+        fields(
+            agent_id = %self.agent.id,
+            strategy= ?self.get_strategy(),
+            temperature= ?self.get_agent().temperature,
+            max_tokens= ?self.get_agent().max_tokens,
+            reasoning_effort= ?self.get_agent().reasoning_effort,
+            turns = turns.len()
+        )
+    )]
     async fn execute_streaming(
         &self,
         turns: Vec<CompletionTurn>,
         prompt: &str,
     ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
-        info!(
-            turns= ?turns.len(),
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-
-            "Agent {:?} Executing SingleAgent Streaming...", self.get_agent_id()
-        );
 
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
         messages.push(Message::user(prompt.to_string()));
@@ -164,19 +169,23 @@ impl Runnable for SingleAgent {
 
 #[async_trait]
 impl Runnable for PipeLineAgent {
+
+    #[tracing::instrument(
+        skip(self, turns, prompt),
+        fields(
+            agent_id = %self.agent.id,
+            strategy= ?self.get_strategy(),
+            temperature= ?self.get_agent().temperature,
+            max_tokens= ?self.get_agent().max_tokens,
+            reasoning_effort= ?self.get_agent().reasoning_effort,
+            turns = turns.len()
+        )
+    )]
     async fn execute(
         &self,
         turns: Vec<CompletionTurn>,
         prompt: &str,
     ) -> HttpResult<CompletionResponse> {
-        info!(
-            turns= ?turns.len(),
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            "Agent {:?} Executing PipelineAgent...", self.get_agent_id()
-        );
 
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
         messages.push(Message::user(prompt.to_string()));
@@ -193,19 +202,23 @@ impl Runnable for PipeLineAgent {
     ///    caller, appends a final [`CompletionChunkResponse::stop`] with total usage, and exits.
     /// 4. Otherwise: runs the nominated sub-agents via [`execute_subs`](PipeLineAgent::execute_subs),
     ///    merges their JSON responses, appends a [`CompletionTurn`] to `pipeline_turns`, and loops.
+    ///
+    #[tracing::instrument(
+        skip(self, turns, prompt),
+        fields(
+            agent_id = %self.agent.id,
+            strategy= ?self.get_strategy(),
+            temperature= ?self.get_agent().temperature,
+            max_tokens= ?self.get_agent().max_tokens,
+            reasoning_effort= ?self.get_agent().reasoning_effort,
+            turns = turns.len()
+        )
+    )]
     async fn execute_streaming(
         &self,
         turns: Vec<CompletionTurn>,
         prompt: &str,
     ) -> HttpResult<ReceiverStream<HttpResult<CompletionChunkResponse>>> {
-        info!(
-            turns= ?turns.len(),
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            "Agent {:?} Executing PipelineAgent Streaming...", self.get_agent_id()
-        );
 
         let (tx, rx) = mpsc::channel::<Result<CompletionChunkResponse, HttpError>>(200);
         let agent_id = self.get_agent_id().clone();
@@ -257,10 +270,8 @@ impl Runnable for PipeLineAgent {
                 store = false;
 
                 info!(
-                    stop= %decision.stop,
-                    execution= ?decision.execution,
-                    agents= ?format_args!("{:#?}", decision.agents),
-                    "Agent: {} Decision", agent_id
+                    _agents= ?format_args!("{:#?}", decision.agents),
+                    "Decision: {:?} Stop: {}", decision.execution, decision.stop
                 );
 
                 // set the last resonse id.
@@ -312,8 +323,8 @@ impl Runnable for PipeLineAgent {
                     };
 
                     info!(
-                        turns = format_args!("{:#?}", pipeline_turns),
-                        "Agent: {} Synthesising...", agent_id
+                        _turns = format_args!("{:#?}", pipeline_turns),
+                        "Synthesising..."
                     );
                     let synthesizer = subs[0].clone();
                     let mut stream = match synthesizer
@@ -359,8 +370,8 @@ impl Runnable for PipeLineAgent {
 
                         if chunk.is_final {
                             info!(
-                                chunk = format_args!("{:#?}", chunk),
-                                "Agent: {} Synthesising done.", agent_id
+                                _chunk = format_args!("{:#?}", chunk),
+                                "Synthesising done."
                             );
 
                             // let response_id = chunk.response_id.clone();
@@ -403,8 +414,7 @@ impl Runnable for PipeLineAgent {
                 let _ = tx.send(Ok(CompletionChunkResponse::status(done))).await;
 
                 info!(
-                    merged= ?format_args!("{:#?}", merged),
-                    "Agent: {} Decision", agent_id
+                    "Merged: {:#?}", merged
                 );
 
                 // sum up the decide and sub usages.
@@ -418,7 +428,7 @@ impl Runnable for PipeLineAgent {
                     user_content: new_prompt,
                 });
             }
-        });
+        }.instrument(tracing::Span::current()));
 
         Ok(ReceiverStream::new(rx))
     }
@@ -481,11 +491,9 @@ impl PipeLineAgent {
         prompt: &str,
         // response_id: Option<String>,
     ) -> Vec<Message> {
-        let agent = self.get_agent();
         info!(
             turns= ?turns.len(),
-            prompt= ?prompt,
-            "Agent: {}", agent.id
+            "Prompt: {}", prompt
         );
         let (mut messages, _) = build_messages_from_turns(turns);
         messages.push(Message::user(prompt.to_string()));
@@ -494,6 +502,12 @@ impl PipeLineAgent {
 
     /// Ask the orchestrator to decide the next stage and return the raw response alongside
     /// the parsed [`StageDecision`].
+    #[tracing::instrument(
+        skip(self, turns),
+        fields(
+            agent_id = %self.get_agent().id,
+        )
+    )]
     pub async fn decide(
         &self,
         turns: &[CompletionTurn],
@@ -505,10 +519,12 @@ impl PipeLineAgent {
         agent.store = store;
         let messages = self.build_orchesrator_messages(turns, prompt);
         debug!(
-            messages= ?messages,
-            "Agent: {}", agent.id
+            "Message: {:?}", messages
         );
-        let response = agent.complete(&messages, response_id).await?;
+        let response = agent
+            .complete(&messages, response_id)
+            .instrument(tracing::Span::current())
+            .await?;
         let decision = self.build_decision(&response)?;
         Ok((response, decision))
     }
@@ -519,6 +535,15 @@ impl PipeLineAgent {
     /// Sequential mode runs sub-agents one at a time in order. Parallel mode runs up to
     /// 5 concurrently (semaphore-bounded) each with a [`SUB_AGENT_TIMEOUT`]-second timeout;
     /// individual failures are logged and skipped rather than aborting the whole stage.
+    #[tracing::instrument(
+        skip(self, decision),
+        fields(
+            agent_id = %self.get_agent().id,
+            execution = ?decision.execution,
+            agents = ?decision.agents,
+            stop = %decision.stop,
+        )
+    )]
     pub async fn execute_subs(
         &self,
         decision: &StageDecision,
@@ -531,8 +556,7 @@ impl PipeLineAgent {
                 for sub in subs {
                     let response = sub.0.execute(Vec::new(), &sub.1).await?;
                     debug!(
-                        response = format_args!("{:?}", response.text()),
-                        "Agent: {}", response.id,
+                        "Response: {:?}", response.text(),
                     );
                     responses.push((sub.0.get_agent_id().to_string(), response));
                 }
@@ -564,8 +588,7 @@ impl PipeLineAgent {
                     match result {
                         Ok(response) => {
                             debug!(
-                                response = format_args!("{:?}", response.text()),
-                                "Agent: {}", response.id,
+                                "Response: {:?}", response.text()
                             );
                             responses.push((response.id.clone(), response));
                         }

@@ -4,7 +4,7 @@ use crate::services::config::agent::{AgentConfig, ExecutionType};
 ///
 /// Agents are registered once from `agents.json` and then looked up by ID at
 /// request time. The registry is read-only after startup.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AgentRegistry {
     pub agents: Vec<AgentConfig>,
 }

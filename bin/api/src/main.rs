@@ -9,7 +9,7 @@ use rustic_boot::{
         templates::template_routes,
     },
 };
-use rustic_core::{Tool, logger::set_logger};
+use rustic_core::{Tool, logger::set_logger_with_telemetry};
 use rustic_economic::service::EconomicService;
 use rustic_finance::service::FinanceService;
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
@@ -22,7 +22,11 @@ async fn main() -> Result<()> {
         "rustic_ai_api=debug,rustic_boot=info,rustic_core=info,fin_analyse=info".to_string()
     });
 
-    set_logger(filter);
+    let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
+        .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
+
+    let endpoint = std::env::var("OTEL_ENDPOINT")?;
+    let _ = set_logger_with_telemetry(filter, "rustic-ai-api", &firebase_project_id, &endpoint).await?;
 
     // Get Embedding client
     let openai_api_key: String =
@@ -31,8 +35,6 @@ async fn main() -> Result<()> {
 
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
-    let firebase_project_id = env::var("RUSTIC_AI_PROJECT_ID")
-        .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
     let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 

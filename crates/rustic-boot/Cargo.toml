@@ -10,6 +10,7 @@ chrono.workspace=true
 futures.workspace=true
 google-cloud-storage.workspace=true
 jsonwebtoken.workspace=true
+opentelemetry.workspace=true
 reqwest.workspace=true
 serde.workspace=true
 serde_json.workspace=true

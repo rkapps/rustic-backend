@@ -41,7 +41,7 @@ use crate::{
 /// Pipeline topologies are built recursively by [`build_runnable_agent`](Self::build_runnable_agent),
 /// which detects cycles via a `visited` set and wraps leaf agents in [`SingleAgent`] and
 /// orchestrators in [`PipeLineAgent`].
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AgentService {
     /// Live LLM client cache keyed by `"{LLM}:{model}"`.
     pub clients: Arc<RwLock<HashMap<String, Arc<dyn LlmClient>>>>,

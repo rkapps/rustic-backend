@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use axum::{Router, extract::FromRef, http::HeaderValue};
+use axum::{Router, extract::FromRef, http::{HeaderValue, Request}};
 use reqwest::{Method, StatusCode, header};
 use rustic_agent::{
     client::mcp::MCPServerAdapter,
@@ -18,7 +18,7 @@ use rustic_agent::{
 };
 use rustic_core::Tool;
 use tokio::{net::TcpListener, sync::RwLock};
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing::{error, info, warn};
 
 use crate::{
@@ -374,6 +374,17 @@ impl AgenticBootBuilder {
             .merge(public_router)
             .merge(protected_router)
             .layer(cors)
+            .layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(|request: &Request<_>| {
+                        tracing::info_span!(
+                            "http.request",
+                            otel.name = format!("{} {}", request.method(), request.uri().path()),
+                            method = %request.method(),
+                            path = %request.uri().path(),
+                        )
+                    })
+            )
             .with_state(app_state);
 
         let listener = TcpListener::bind(addr).await?;

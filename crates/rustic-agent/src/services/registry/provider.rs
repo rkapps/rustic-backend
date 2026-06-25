@@ -5,7 +5,7 @@ use crate::{client::llm::LlmProvider, services::config::provider::ResolvedProvid
 /// Providers are registered once from `providers.json` with environment variables
 /// already resolved to their values. The registry is read-only after startup and
 /// consulted by [`AgentService`](super::super::agent::AgentService) on every agent build.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ProviderRegistry {
     providers: Vec<ResolvedProvider>,
 }
