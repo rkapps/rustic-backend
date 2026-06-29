@@ -1,28 +1,45 @@
 # rustic-core
 
-Shared HTTP client, error types, and utilities used across the rustic-ai workspace.
+Shared HTTP client, error types, `Tool` trait, and logging utilities used across the rustic-ai workspace. Every other crate depends on this one.
 
 ## Contents
 
+### `agents::Tool`
+
+The trait all agent-callable tools must implement:
+
+```rust
+#[async_trait]
+pub trait Tool: Send + Sync + Debug {
+    fn name(&self) -> String;
+    fn description(&self) -> String;
+    fn parameters(&self) -> serde_json::Value;  // JSON Schema object
+    async fn execute(&self, value: serde_json::Value) -> Result<serde_json::Value>;
+}
+```
+
+`rustic-agent` discovers tools via `ToolRegistry` and forwards `name`, `description`, and `parameters` to the LLM as tool definitions. When the model requests a call, the agent dispatches it to `execute`.
+
 ### `http`
 
-`HttpClient` wraps `reqwest` and provides four methods, all of which map HTTP and transport errors to typed `HttpError` variants:
+`HttpClient` wraps `reqwest` with typed error mapping:
 
 | Method | Use case |
-|---|---|
-| `post_request::<T>` | POST, deserialise body into `T` |
+|--------|----------|
+| `post_request::<T>` | POST, deserialise response body into `T` |
 | `post_request_with_headers::<T>` | POST, deserialise body and return response headers |
-| `post_notification` | POST fire-and-forget (response body ignored) |
-| `post_stream_request` | POST, return raw `reqwest::Response` for SSE streaming |
+| `post_notification` | POST fire-and-forget (response body is discarded) |
+| `post_stream_request` | POST, return the raw `reqwest::Response` for SSE streaming |
 
-`post_request_with_headers` transparently handles `text/event-stream` responses by extracting the first `data:` line before deserialisation.
+`post_request_with_headers` transparently handles `text/event-stream` responses by
+extracting the first `data:` line before deserialisation.
 
-### `error`
+### `http::HttpError`
 
-`HttpError` is a typed error enum covering all failure modes:
+Typed error enum:
 
 | Variant | Trigger |
-|---|---|
+|---------|---------|
 | `RateLimited` | HTTP 429 |
 | `ServiceUnavailable` | HTTP 503 |
 | `AuthenticationFailed` | HTTP 401 / 403 |
@@ -30,7 +47,6 @@ Shared HTTP client, error types, and utilities used across the rustic-ai workspa
 | `Timeout` | Request timeout |
 | `NetworkError(String)` | Transport failure (DNS, TCP) |
 | `ApiKeyParsingFailed` | Bad API key format |
-| `ApiVersionParsingFailed` | Bad API version header |
 | `CompletionRequestError(String)` | Provider-level completion error |
 | `ContextTooLong` | Model context window exceeded |
 | `MaxIterationsExceeded` | Agentic loop iteration cap hit |
@@ -40,26 +56,26 @@ Shared HTTP client, error types, and utilities used across the rustic-ai workspa
 
 `HttpResult<T>` is a type alias for `Result<T, HttpError>`.
 
-## Usage
+### `logger`
+
+Two initialisation helpers for `tracing-subscriber`:
 
 ```rust
-use rustic_core::http::{HttpClient, HttpResult};
-use rustic_core::error::HttpError;
+// Simple fmt subscriber — switches to JSON when LOG_FORMAT env var is set
+rustic_core::set_logger(filter_string);
 
-let client = HttpClient::new()?;
+// fmt + OpenTelemetry — exports to OTLP or Google Cloud Trace
+rustic_core::logger::set_logger_with_telemetry(filter, service_name, project_id, endpoint).await?;
+```
 
-// Blocking POST
-let response: MyType = client
-    .post_request(url, Some(headers), body)
-    .await?;
+When `LOG_FORMAT` is set, both functions emit newline-delimited JSON with flattened event fields (compatible with Google Cloud Logging).
 
-// Streaming POST — consume the bytes_stream() yourself
-let raw = client
-    .post_stream_request(url, Some(headers), body)
-    .await?;
+### `config::load_content`
 
-// Retry logic
-if err.is_retryable() {
-    // back off and retry
-}
+Reads a file path or a URL and returns its contents as a `String`. Used by `rustic-boot` to load agent system prompt files referenced in `agents.json`.
+
+## Re-exports
+
+```rust
+use rustic_core::{Tool, HttpClient, HttpError, HttpResult, set_logger, load_content};
 ```

@@ -1,37 +1,45 @@
 # rustic-storage
 
-rustic-storage provides a lightweight repository pattern. Binary file and Mongodb imlemenations.
+Backend-agnostic persistence layer for the rustic-ai workspace. Provides a `Repository<K, M>` trait with two concrete implementations: an append-only flat-file backend (no database required) and a MongoDB backend.
 
-## Features
+## Architecture
 
-- **Simple CRUD operations** - Insert, find, update, delete
-- **Collection-based** - Organize data into named collections
-- **Vector search capabilities** - Semantic similarity
-- **Dynamic Search** - `SearchCriteria` struct and `Searchable` trait
-- **Async-ready** - Trait supports both sync and async implementations
+```text
+core/           — Repository trait and query DSL (application code depends only here)
+  repository.rs — Repository<K,M>, RepoModel<K>, VectorEmbedding, Searchable, SortValue
+  search.rs     — SearchCriteria builder
+  index.rs      — IndexDefinition for create_index
 
-## Vector Search
+file/           — Append-only BSON flat-file backend
+  database.rs   — FileDatabase handle (opens / creates .bin files per collection)
+  repository.rs — Repository impl with in-memory offset map for O(1) ID lookups
+  record.rs     — RecordHeader: 32-byte fixed header (magic, version, CRC32, flags)
 
-- **Cosine similarity**: Measures semantic similarity between embeddings
-- **Vector search**: Finds top-k most similar vectors from a collection
-- **Generic implementation**: Works with any model implementing `VectorEmbedding`
+mongo/          — MongoDB backend
+  database.rs   — MongoDatabase handle
+  repository.rs — Repository impl via the official mongodb driver
+```
 
-## The Repository Trait
+## The `Repository` trait
 
 ```rust
 #[async_trait]
 pub trait Repository<K, M>: Send + Sync {
-    async fn insert(&mut self, repo: M) -> Result<()>;
+    async fn insert(&mut self, model: M) -> Result<()>;
     async fn insert_many(&mut self, models: Vec<M>) -> Result<()>;
     async fn bulk_update(&mut self, models: Vec<M>) -> Result<()>;
-    async fn update(&mut self, repo: M) -> Result<()>;
-    async fn delete(&mut self, repo: M) -> Result<()>;
+    async fn update(&mut self, model: M) -> Result<()>;
+    async fn delete(&mut self, model: M) -> Result<()>;
     async fn delete_many(&mut self, criteria: Option<SearchCriteria>) -> Result<()>;
 
     async fn find_by_id(&mut self, id: K) -> Result<M>;
     async fn find_all(&mut self) -> Result<Vec<M>>;
     async fn find_one(&mut self, search: Option<SearchCriteria>) -> Result<M>;
     async fn find(&mut self, search: Option<SearchCriteria>) -> Result<Vec<M>>;
+
+    async fn aggregate(&mut self, pipeline: Vec<Value>) -> Result<Vec<Value>>;
+    async fn create_index(&mut self, index: IndexDefinition) -> Result<()>;
+    async fn create_indexes(&mut self, indexes: Vec<IndexDefinition>) -> Result<()>;
 
     async fn semantic_search(
         &mut self,
@@ -44,113 +52,30 @@ pub trait Repository<K, M>: Send + Sync {
 }
 ```
 
-**`RepoModel<K>`**: Base model trait with `id()`
-**`VectorEmbedding`**: Models with vector embeddings
-**`Searchable`**: Models that support dynamic search with sort and limit
+Supporting model traits:
 
+| Trait | Required methods |
+|-------|-----------------|
+| `RepoModel<K>` | `id() -> K`, `collection() -> &'static str` |
+| `VectorEmbedding` | `vector() -> &[f32]` — enables `semantic_search` |
+| `Searchable` | `matches_filter`, `get_field_value` — used by the file backend for in-process filtering |
 
-## Binary File features
+## File backend
 
-- **Append-only log** - Write-optimized with crash safety
-- **Fast lookups** - In-memory offset map for O(1) retrieval by ID
-- **Forward-compatible format** - Versioned binary headers for future extensions
+Each collection is stored as a single `.bin` file. Every write appends a fixed 32-byte `RecordHeader` (magic number, version, record type, length, CRC32, flags) followed by a BSON-encoded payload. Updates and deletes also append — updates create a new version of the record; deletes append a tombstone.
 
-## File Format
+An in-memory offset map is built on `FileDatabase::open` by scanning the file once. Subsequent `find_by_id` calls are O(1); filtered queries scan the offset map in-process using the `Searchable` trait.
 
-Each collection is stored as a single `.bin` file with the following structure:
+Intended for development, edge deployments, and tests where no database server is available.
 
+## MongoDB backend
+
+`MongoDatabase` wraps the official `mongodb` driver. `Repository` operations map directly to driver calls. `aggregate` forwards the pipeline verbatim; the file backend always returns `[]` for aggregations.
+
+## Re-exports
+
+```rust
+use rustic_storage::{Repository, RepoModel, RepoKey, Searchable, VectorEmbedding};
+use rustic_storage::SearchCriteria;
+use rustic_storage::{FileDatabase, MongoDatabase};
 ```
-[RecordHeader: 32 bytes]  ← Version, type, length, timestamp, CRC32, flags
-[BSON payload]            ← Serialized document
-
-[RecordHeader: 32 bytes]
-[BSON payload]
-...
-```
-
-**Header fields:**
-
-- Magic number (file format validation)
-- Version (schema evolution)
-- Record type (Active/Deleted)
-- Length (total record size)
-- Timestamp (write time)
-- CRC32 (corruption detection)
-- Flags (compression, encryption, etc.)
-
-## Design Decisions
-
-**Append-only log:**
-
-- Writes always go to end of file
-- Updates create new version (old data remains)
-- Deletes write tombstone records
-- Simple, crash-safe, no corruption risk
-
-**In-memory offset map:**
-
-- Built on startup by scanning file
-- Maps ID → file offset
-- O(1) lookups by ID
-- Trade-off: startup time vs runtime speed
-
-**BSON encoding:**
-
-- Self-describing format
-- Handles complex nested data
-- Compatible with MongoDB
-- Slightly larger than custom binary
-
-**Binary headers:**
-
-- Forward-compatible (version + flags)
-- Corruption detection (CRC32)
-- Metadata without parsing payload
-- Fixed 32-byte size
-
-## Limitations
-
-- No built-in transactions
-- No connection pooling
-- File-based implementation is best for small-medium datasets
-- **No Transactions** - Operations are not atomic across multiple calls
-
-**Best For:**
-
-- ✅ Applications needing flexible storage abstraction
-- ✅ Prototyping and development
-- ✅ Small to medium datasets
-- ✅ Learning Rust async patterns
-
-**Not Suitable For:**
-
-- ❌ Complex queries or joins
-- ❌ Very large datasets
-- ❌ ACID transaction requirements
-
-### Basic Example
-
-examples/repo.rs - Simple single-threaded applications
-cargo run --example repo
-
-examples/database.rs - Multiple repositories, but accessed one at a time
-cargo run --example database
-
-examples/concurrent.rs - Web servers, concurrent applications, multiple threads/tasks
-cargo run --example concurrent
-
-## Future Work
-
-- [ ] Compaction (remove old versions and tombstones)
-- [ ] Persistent offset map (faster startup)
-- [ ] Additional backends (PostgreSQL)
-- [ ] Transactions
-- [ ] Compression
-
-## Contributing
-
-Contributions welcome! Please open an issue or PR.
-
-## License
-
-MIT OR Apache-2.0

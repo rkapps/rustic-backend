@@ -1,147 +1,147 @@
 # rustic-agent
 
-Multi-provider LLM client library for Rust. Provides a unified agent abstraction over Anthropic (Claude), OpenAI (GPT), Google Gemini, and local Ollama-compatible servers with support for streaming, tool use, and MCP servers.
+LLM agent orchestration for the rustic-ai platform. Provides a unified agent abstraction over Anthropic (Claude), OpenAI (GPT), Google Gemini, Groq, and local Anthropic-compatible servers (Ollama) with full tool use, MCP integration, and both single-agent and multi-agent pipeline topologies.
 
 ## Features
 
-- **Multi-provider** — Anthropic, OpenAI, Gemini, Local/Ollama behind a single `LlmClient` trait
-- **Agentic tool loop** — Automatic multi-iteration tool dispatch (blocking and streaming), up to 10 rounds with concurrency control and per-call timeouts
-- **MCP support** — Connect to Model Context Protocol servers with a pluggable adapter interface
-- **Streaming** — SSE streaming for all providers via `complete_with_stream` and `complete_with_tools_streaming`
-- **Extended thinking** — Reasoning/thinking token support for Anthropic and Gemini
-- **Prompt caching** — Cache-control header integration for Anthropic
-- **Token accounting** — Detailed breakdown: input, cached read/write, tool, reasoning, and output tokens
+- **Multi-provider** — Anthropic, OpenAI, Gemini, Groq, Local/Ollama behind a single `LlmClient` trait
+- **Agentic tool loop** — Automatic multi-iteration tool dispatch (up to 10 rounds) with concurrency control and per-call timeouts; tools run concurrently with a semaphore limit of 3
+- **Pipeline agents** — Orchestrator/sub-agent topology where an orchestrator LLM decides which sub-agents to run each stage, in sequential or parallel mode, up to 10 pipeline iterations
+- **MCP support** — Connect to Model Context Protocol servers with a pluggable adapter interface; tools are namespaced per server to avoid collisions
+- **Streaming** — SSE streaming for all providers via `complete_with_streaming`; pipeline agents forward orchestrator status chunks alongside content
+- **Extended thinking** — `ReasoningEffort` (None / Low / Medium / High) for Anthropic and Gemini
+- **Prompt caching** — Cache-control for Anthropic and Gemini with per-turn token cost breakdown
+- **Client caching** — `AgentService` caches provider clients by `"{llm}:{model}"` key; multiple agents sharing the same model reuse the same connection
 
-## Module Layout
+## Module layout
 
-```
-rustic-agent
-├── agents/       — Agent struct and completion loop orchestration
-├── client/       — Provider-agnostic traits and types
-│   ├── llm.rs    — LlmClient trait
-│   ├── message.rs — Message enum (User, Assistant, Thought, ToolCall, ToolOutput)
-│   ├── request.rs — CompletionRequest, ReasoningEffort
-│   ├── response.rs — CompletionResponse, CompletionChunkResponse, token usage
-│   ├── tools.rs  — Tool trait, ToolDefinition, ToolCallRequest
-│   ├── mcp.rs    — MCPServerAdapter trait
-│   └── rpc.rs    — JSON-RPC 2.0 envelope types
+```text
+rustic-agent/src/
+├── agents/
+│   ├── agent.rs     — Agent struct; complete() and complete_with_streaming() tool loops
+│   ├── domain.rs    — AgentInput, CompletionTurn, StageDecision, ExecutionMode
+│   ├── helper.rs    — Message building, JSON helpers, status formatting
+│   └── runner.rs    — Runnable trait, SingleAgent, PipeLineAgent
+├── client/
+│   ├── llm.rs       — LlmClient trait, LlmProvider
+│   ├── message.rs   — Message enum (User, Assistant, Thought, ToolCall, ToolOutput)
+│   ├── mcp.rs       — MCPServerAdapter trait
+│   ├── preset.rs    — Preset enum (Fast, Balanced, Precise, Thorough, Local)
+│   ├── provider.rs  — Provider enum (constructor helpers)
+│   ├── request.rs   — CompletionRequest, ReasoningEffort
+│   ├── response.rs  — CompletionResponse, CompletionChunkResponse, token usage
+│   ├── rpc.rs       — JSON-RPC 2.0 envelope types
+│   └── tools.rs     — ToolDefinition, ToolCallRequest
 ├── providers/
-│   ├── anthropic/ — Claude via Messages API
-│   ├── openai/    — GPT via Responses API
-│   ├── gemini/    — Gemini via Interactions API
-│   └── local/     — Anthropic-compatible local servers (Ollama)
-├── services/     — Higher-level service layer built on top of agents/
-│   ├── agent.rs  — AgentService: builds agents from registries
-│   ├── builder.rs — AgentBuilder: fluent builder with client caching
-│   ├── config/   — JSON-deserialised config types (provider, agent, MCP)
-│   └── registry/ — In-memory registries (ProviderRegistry, AgentRegistry)
+│   ├── anthropic/   — Claude via Messages API
+│   ├── gemini/      — Gemini via Generate Content API
+│   ├── groq/        — Groq via OpenAI-compatible API
+│   ├── local/       — Anthropic-compatible local servers (Ollama)
+│   └── openai/      — GPT via Responses API
+├── services/
+│   ├── agent.rs     — AgentService: builds Runnable instances from registries
+│   ├── builder.rs   — AgentBuilder: fluent builder with client caching and presets
+│   ├── config/      — JSON config types (AgentConfig, ProviderConfig, MCPServerConfig)
+│   └── registry/    — In-memory registries (ProviderRegistry, AgentRegistry)
 └── tools/
-    ├── tool.rs    — ToolRegistry
-    └── mcp.rs     — MCPRegistry, MCPClient, StandardAdapter
+    ├── tool.rs      — ToolRegistry (in-process tools)
+    └── mcp.rs       — MCPRegistry, MCPClient, StandardAdapter
 ```
 
 ## Usage
 
-### Creating an Agent — Direct Construction
-
-Construct `Agent` directly when you already have a client and don't need the service layer.
+### Quick start — direct agent construction
 
 ```rust
 use std::sync::Arc;
 use rustic_agent::{
-    agents::Agent,
-    client::{message::Message, request::ReasoningEffort},
-    providers::anthropic::{completion::AnthropicClient, MODEL_CLAUDE_SONNET_4_6},
-    tools::{mcp::MCPRegistry, tool::ToolRegistry},
+    Agent, AgentBuilder, AgentService, Message,
+    Provider, Preset,
 };
 
-let agent = Agent {
-    client: Arc::new(AnthropicClient::new(api_key)?),
-    llm: "anthropic".to_string(),
-    model: MODEL_CLAUDE_SONNET_4_6.to_string(),
-    system_prompt: Some("You are a helpful assistant.".to_string()),
-    temperature: 0.7,
-    max_tokens: 4096,
-    enable_cache: true,
-    reasoning_effort: ReasoningEffort::Medium,
-    tool_registry: Arc::new(ToolRegistry::new()),
-    mcp_registry: Arc::new(MCPRegistry::new()),
-};
-```
-
-### Creating an Agent — AgentService Builder
-
-`AgentService` manages client caching, tool registration, and MCP servers across multiple agents. Use it in applications that build agents at request time.
-
-```rust
-use std::sync::Arc;
-use tokio::sync::RwLock;
-use rustic_agent::{
-    client::preset::Preset,
-    providers::anthropic::MODEL_CLAUDE_SONNET_4_6,
-    services::{
-        agent::AgentService,
-        registry::{agent::AgentRegistry, provider::ProviderRegistry},
-    },
-    tools::{mcp::MCPRegistry, tool::ToolRegistry},
-};
-
-let service = AgentService::from_registry(
-    Arc::new(ProviderRegistry::new()),
-    Arc::new(AgentRegistry::new()),
-    Arc::new(RwLock::new(ToolRegistry::new())),
-    Arc::new(RwLock::new(MCPRegistry::new())),
-);
-
+// Minimal: build via AgentService (handles client caching)
+let service = AgentService::default();
 let agent = service
     .builder()
+    .with_provider(Provider::anthropic(api_key, "claude-sonnet-4-6"))
+    .await?
     .with_system_prompt("You are a helpful assistant.".to_string())
     .with_preset(Preset::Balanced)
-    .with_anthropic(api_key, MODEL_CLAUDE_SONNET_4_6)
-    .await?
     .build()
     .await?;
+
+let messages = vec![Message::user("What is the capital of France?".to_string())];
+let response = agent.complete(&messages, None).await?;
+println!("{}", response.text().unwrap_or_default());
 ```
 
-#### Presets
+### Completion methods
 
-| Preset | Temperature | Max Tokens | Cache | Reasoning |
-|---|---|---|---|---|
+`Agent` exposes two completion methods; both drive the full agentic tool-use loop:
+
+| Method | Streaming |
+|--------|-----------|
+| `complete(&messages, last_response_id)` | No — returns `CompletionResponse` |
+| `complete_with_streaming(&messages, last_response_id)` | Yes — returns `ReceiverStream<HttpResult<CompletionChunkResponse>>` |
+
+Both methods:
+
+1. Collect tool definitions from `ToolRegistry` and `MCPRegistry`
+2. Call the LLM with the full message history
+3. Execute any requested tool calls concurrently (semaphore-bounded)
+4. Append tool results to the conversation and loop, up to 10 iterations
+5. Return the final response (or stream a stop chunk with aggregated token usage)
+
+### Providers
+
+```rust
+use rustic_agent::Provider;
+
+// Use the Provider enum for a clean API
+Provider::anthropic(api_key, "claude-sonnet-4-6")
+Provider::openai(api_key, "gpt-4o")
+Provider::gemini(api_key, "gemini-2.0-flash")
+Provider::groq(api_key, "llama-3.1-70b-versatile")
+Provider::local("llama3.2", "http://localhost:11434")
+Provider::ollama("llama3.2")   // shorthand for local at default Ollama port
+```
+
+### Presets
+
+`Preset` bundles temperature, max tokens, cache, and reasoning effort:
+
+| Preset | Temperature | Max tokens | Cache | Reasoning |
+|--------|-------------|------------|-------|-----------|
 | `Fast` | 0.7 | 1 024 | No | None |
-| `Balanced` | 0.5 | 2 048 | Yes | Medium |
-| `Precise` | 0.2 | 4 096 | Yes | High |
-| `Thorough` | 0.1 | 8 192 | Yes | High |
+| `Balanced` | 0.5 | 8 192 | Yes | Low |
+| `Precise` | 0.2 | 65 536 | Yes | Low |
+| `Thorough` | 0.1 | 65 536 | Yes | High |
 | `Local` | 0.7 | 4 096 | No | None |
-
-### Completion Methods
-
-| Method | Tools | Streaming |
-|---|---|---|
-| `complete(&messages)` | No | No |
-| `complete_with_stream(&messages)` | No | Yes |
-| `complete_with_tools(&messages)` | Yes | No |
-| `complete_with_tools_streaming(&messages)` | Yes | Yes |
 
 ### Messages
 
 ```rust
-// Standard turns
-Message::User      { content, response_id }
-Message::Assistant { content, response_id }
+use rustic_agent::Message;
 
-// Managed automatically by the tool loop
-Message::Thought   { content }
+Message::user("Hello".to_string())
+Message::assistant("Hi there!".to_string())
+
+// Managed automatically by the tool loop — you do not create these directly
 Message::ToolCall  { call_id, name, arguments }
 Message::ToolOutput { call_id, name, output }
+Message::Thought   { content }   // reasoning tokens for Gemini multi-turn
 ```
 
-`response_id` threads conversation state for providers that require it (OpenAI `previous_response_id`, Gemini `previous_interaction_id`).
+`last_response_id` passed to `complete` / `complete_with_streaming` threads
+provider-side conversation state (OpenAI `previous_response_id`, Gemini `previous_interaction_id`).
 
-### Custom Tools
+### Custom tools
+
+Implement the `Tool` trait from `rustic-core`:
 
 ```rust
 use async_trait::async_trait;
-use rustic_agent::client::tools::Tool;
+use rustic_core::Tool;
 
 #[derive(Debug)]
 struct WeatherTool;
@@ -149,11 +149,11 @@ struct WeatherTool;
 #[async_trait]
 impl Tool for WeatherTool {
     fn name(&self) -> String { "get_weather".to_string() }
-    fn description(&self) -> String { "Get current weather for a city".to_string() }
+    fn description(&self) -> String { "Get current weather for a city.".to_string() }
     fn parameters(&self) -> serde_json::Value {
         serde_json::json!({
             "type": "object",
-            "properties": { "city": { "type": "string" } },
+            "properties": { "city": { "type": "string", "description": "City name" } },
             "required": ["city"]
         })
     }
@@ -161,109 +161,128 @@ impl Tool for WeatherTool {
         Ok(serde_json::json!({ "temperature": "22°C", "city": args["city"] }))
     }
 }
-
-let mut registry = ToolRegistry::new();
-registry.register_tool(WeatherTool);
 ```
 
-### MCP Servers
+Register on the builder:
+
+```rust
+service.builder()
+    .with_tool(WeatherTool)       // statically typed
+    .with_tool_boxed(some_arc)   // Arc<dyn Tool>
+    .with_tools(vec![...])        // Vec<Arc<dyn Tool>>
+    // ...
+    .build().await?;
+```
+
+### MCP servers
 
 ```rust
 use rustic_agent::tools::mcp::{MCPRegistry, MCPServerSetting};
 
-let mut mcp = MCPRegistry::new();
-
 let setting = MCPServerSetting {
-    name: "docs".to_string(),
+    name: "search".to_string(),
     url: "http://localhost:8081/mcp".to_string(),
-    api_key: "".to_string(),
+    api_key: String::new(),
 };
 
-// Initialises the session and fetches the tool list
+// Option A: register all tools the server exposes
+let mut mcp = MCPRegistry::new();
 let definitions = mcp.register_server(setting.clone()).await?;
+mcp.add_definitions(&setting.name, definitions); // namespaced as "search___<tool_name>"
 
-// Bulk-register all tools returned from the server.
-// Each tool is namespaced as "docs___<tool_name>" to avoid collisions.
-mcp.add_definitions(&setting.name, definitions);
+// Option B: register individual tools selectively
+mcp.register_tool("search", "web_search").await?;
 
-// Or register individual tools selectively
-mcp.register_tool("docs", "search").await?;
+// Attach to builder
+service.builder()
+    .with_mcp_registry(setting, MyAdapter {}).await?
+    // or to filter the shared registry to specific tools:
+    .with_filtered_mcp(mcp)
+    // ...
+    .build().await?;
 ```
+
+### Pipeline agents
+
+`PipeLineAgent` implements an orchestrator/sub-agent loop. The orchestrator LLM returns a `StageDecision` JSON each iteration; `PipeLineAgent` runs the nominated sub-agents and loops until `stop: true`.
+
+```json
+{
+  "agents": [
+    { "id": "researcher", "goal": "Find recent news about AAPL" },
+    { "id": "analyst",    "goal": "Summarise the news for an investor" }
+  ],
+  "execution": "sequential",
+  "stop": false,
+  "reasoning": "Need research before analysis"
+}
+```
+
+- **Sequential** — sub-agents run in order; each receives the previous output as context
+- **Parallel** — sub-agents run concurrently (semaphore limit 5, 120 s timeout each)
+- Final stage (`"stop": true`) must list exactly one agent and use `"sequential"` execution
+
+`AgentService.build_runnable` reads an `AgentConfig` and constructs either a `SingleAgent` or `PipeLineAgent` wrapped in `Arc<dyn Runnable>`.
 
 ### Streaming
 
 ```rust
 use tokio_stream::StreamExt;
 
-let mut stream = agent.complete_with_tools_streaming(&messages).await?;
+let mut stream = agent.complete_with_streaming(&messages, None).await?;
 while let Some(chunk) = stream.next().await {
     let chunk = chunk?;
     if chunk.is_final {
-        println!("Usage: {:?}", chunk.usage);
+        println!("\nTokens: {:?}", chunk.usage);
         break;
     }
     print!("{}", chunk.content);
 }
 ```
 
-### Providers
-
-```rust
-// Anthropic — Messages API
-AnthropicClient::new(api_key)?
-AnthropicClient::new_with_base_url(api_key, version, base_url)?  // custom endpoint
-
-// OpenAI — Responses API
-OpenAIClient::new(api_key)?
-
-// Google Gemini — Interactions API
-GeminiClient::new(api_key)?
-
-// Local / Ollama — Anthropic-compatible
-LocalClient::anthropic_compat("http://localhost:11434".to_string())?
-```
+Pipeline agents send `CompletionChunkResponse::status(...)` chunks (e.g. `"  ✅ 1.2s\n"`) between content chunks so the caller can show orchestration progress.
 
 ## Examples
 
-Runnable examples are in [`examples/`](examples/).
-
-| Example | Provider | API | Description |
-|---|---|---|---|
-| `completion` | Gemini | `complete` | Multi-turn chat with `response_id` threading |
-| `completion_with_tools` | Gemini | `complete_with_tools` | Custom local tool (`GetWeatherTool`) |
-| `completion_with_mcp` | OpenAI | `complete_with_tools` | Remote MCP server (Apify) via `AgentService` |
-
 ```bash
+cd crates/rustic-agent
+
+# Multi-turn chat (Gemini, no tools)
 GEMINI_API_KEY=<key> cargo run --example completion
+
+# Custom tool (Gemini + WeatherTool)
 GEMINI_API_KEY=<key> cargo run --example completion_with_tools
+
+# Remote MCP server (OpenAI + Apify MCP via AgentService)
 OPENAI_API_KEY=<key> APIFY_API_KEY=<key> cargo run --example completion_with_mcp
 ```
 
-## Supported Models
+## Supported providers and models
 
 ### Anthropic
 
-| Constant | Model |
-|---|---|
-| `MODEL_CLAUDE_SONNET_4_6` | `claude-sonnet-4-6` |
-| `MODEL_CLAUDE_SONNET_4_5` | `claude-sonnet-4-5` |
-| `MODEL_CLAUDE_HAIKU_4_5` | `claude-haiku-4-5` |
-| `MODEL_CLAUDE_OPUS_4_6` | `claude-opus-4-6` |
+| Constant | Model ID |
+|----------|----------|
+| `anthropic::MODEL_CLAUDE_SONNET_4_6` | `claude-sonnet-4-6` |
+| `anthropic::MODEL_CLAUDE_SONNET_4_5` | `claude-sonnet-4-5` |
+| `anthropic::MODEL_CLAUDE_HAIKU_4_5` | `claude-haiku-4-5` |
+| `anthropic::MODEL_CLAUDE_OPUS_4_5` | `claude-opus-4-5` |
 
 ### OpenAI
 
-| Constant | Model |
-|---|---|
-| `MODEL_GPT_5_4` | `gpt-5.4` |
-| `MODEL_GPT_5_4_MINI` | `gpt-5.4-mini` |
-| `MODEL_GPT_5_4_NANO` | `gpt-5.4-nano` |
-| `MODEL_TEXT_EMBEDDING_3_SMALL` | `text-embedding-3-small` |
+| Constant | Model ID |
+|----------|----------|
+| `openai::MODEL_GPT_4O` | `gpt-4o` |
+| `openai::MODEL_GPT_4O_MINI` | `gpt-4o-mini` |
 
-### Gemini
+### Google Gemini
 
-| Constant | Model |
-|---|---|
-| `MODEL_GEMINI_3_FLASH_PREVIEW` | `gemini-3-flash-preview` |
-| `MODEL_GEMINI_3_1_FLASH_LITE_PREVIEW` | `gemini-3.1-flash-lite-preview` |
-| `MODEL_GEMINI_3_1_PRO_PREVIEW` | `gemini-3.1-pro-preview` |
-| `MODEL_GEMINI_EMBEDDING_001` | `gemini-embedding-001` |
+| Constant | Model ID |
+|----------|----------|
+| `gemini::MODEL_GEMINI_2_FLASH` | `gemini-2.0-flash` |
+| `gemini::MODEL_GEMINI_2_PRO` | `gemini-2.0-pro` |
+| `gemini::MODEL_GEMINI_2_5_FLASH` | `gemini-2.5-flash-preview-05-20` |
+
+### Groq
+
+Groq is configured via `Provider::groq(api_key, model_id)` where `model_id` is any Groq-hosted model identifier (e.g. `"llama-3.1-70b-versatile"`).
