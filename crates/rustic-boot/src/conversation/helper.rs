@@ -5,7 +5,7 @@ use tracing::info;
 use rustic_agent::{
     AgentService,
     agents::{
-        domain::{AgentInput, CompletionTurn},
+        domain::{AgentInput, CompletionTurn, LlmConfig},
         runner::Runnable,
     },
     client::response::CompletionResponseTokenUsage,
@@ -25,14 +25,16 @@ pub async fn build_agent_runner(
         "Conversation {} does not have an agent",
         conversation.id
     ))?;
-
+    let llm_config = LlmConfig {
+        llm: Some(conversation.llm.clone()),
+        model: Some(conversation.model.clone()),
+        preset: None,
+    };
     let input = AgentInput::new(
         agent_id,
-        conversation.llm.clone(),
-        conversation.model.clone(),
+        llm_config,
         conversation.system_prompt.clone(),
         conversation.strategy.clone(),
-        None,
     );
 
     agent_service.build_runnable(&input).await

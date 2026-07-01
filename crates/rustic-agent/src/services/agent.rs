@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
 use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
+    collections::{HashMap, HashSet}, ops::Deref, sync::Arc,
 };
 use tracing::{debug, info, trace};
 
@@ -10,7 +9,7 @@ use tokio::sync::RwLock;
 use crate::{
     Agent,
     agents::{
-        domain::AgentInput,
+        domain::{AgentInput, LlmConfig},
         runner::{PipeLineAgent, Runnable, SingleAgent},
     },
     client::{llm::LlmClient, preset::Preset, provider::Provider},
@@ -132,42 +131,50 @@ impl AgentService {
     /// Returns an error if `agent_id` is not registered or the provider cannot be resolved.
     pub async fn build_agent_for_id(
         &self,
-        parent_agent_id: Option<String>,
         agent_id: &str,
-        llm: &str,
-        model: &str,
+        llm_config: &LlmConfig,
         system_prompt: Option<String>,
         strategy: &CompletionStrategy,
-        preset: Option<Preset>,
     ) -> Result<Agent> {
+        
         let agent_config = self.find_agent_config(agent_id).await?;
 
-        let provider = self.resolve_provider(agent_id, llm, Some(model))?;
+        let llm = llm_config.llm.as_deref().ok_or_else(|| {
+            anyhow::anyhow!("Agent '{}': llm not resolved", agent_id)
+        })?;        
+        let model = llm_config.model.as_deref().ok_or_else(|| {
+            anyhow::anyhow!("Agent '{}': model not resolved", agent_id)
+        })?;        
+        let preset = llm_config.preset.clone().ok_or_else(|| {
+            anyhow::anyhow!("Agent '{}': preset not resolved", agent_id)
+        })?;        
+        
+        let provider = self.resolve_provider(agent_id, &llm, Some(&model))?;
 
         // default the system prompt from agent config
         let system_prompt = system_prompt.or(Some(agent_config.system_prompt));
 
-        let mut dpreset = match &provider {
-            Provider::Local { .. } => Preset::Local,
-            _ => Preset::Balanced,
-        };
+        // let mut dpreset = match &provider {
+        //     Provider::Local { .. } => Preset::Local,
+        //     _ => Preset::Balanced,
+        // };
 
-        if let Some(preset) = preset {
-            dpreset = preset;
-        } else {
-            // override from agent
-            if let Some(agent_preset) = agent_config.preset {
-                dpreset = agent_preset;
-            } else {
-                // override from parent
-                if let Some(parent_agent_id) = parent_agent_id {
-                    let parent_config = self.find_agent_config(&parent_agent_id).await?;
-                    if let Some(parent_preset) = parent_config.preset {
-                        dpreset = parent_preset;
-                    }
-                }
-            }
-        }
+        // if let Some(preset) = &llm_config.preset {
+        //     dpreset = preset.clone();
+        // } else {
+            // // override from agent
+            // if let Some(agent_preset) = agent_config.preset {
+            //     dpreset = agent_preset;
+            // } else {
+            //     // override from parent
+            //     if let Some(parent_agent_id) = parent_agent_id {
+            //         let parent_config = self.find_agent_config(&parent_agent_id).await?;
+            //         if let Some(parent_preset) = parent_config.preset {
+            //             dpreset = parent_preset;
+            //         }
+            //     }
+            // }
+        // }
 
         let tool_registry = {
             let global = self.tool_registry.read().await;
@@ -203,7 +210,7 @@ impl AgentService {
         // info!("System Prompt: {}", agent_config.system_prompt);
         info!(
             strategy= ?strategy,
-            preset= ?dpreset,
+            preset= ?preset,
             tools= ?tool_registry.get_tools().len(),
             // system_prompt= ?agent_config.system_prompt,
            "Agent: {} - build_agent_handle", agent_config.id
@@ -215,7 +222,7 @@ impl AgentService {
             .with_system_prompt(system_prompt.unwrap_or_default())
             .with_tools(tool_registry.get_tools())
             .with_filtered_mcp(mcp_registry)
-            .with_preset(dpreset)
+            .with_preset(preset)
             .with_provider(provider)
             .await?
             .build()
@@ -271,15 +278,21 @@ impl AgentService {
             ));
         }
 
+        
+        let agent_llm_config = config.llm_config.as_ref().ok_or_else(|| {
+            anyhow::anyhow!("Agent '{:?}': llm_config not resolved", input.llm_config)
+        })?;
+
+        // set the preset
+        let mut input_llm_config = input.llm_config.clone();
+        input_llm_config.preset = agent_llm_config.preset.clone();
+
         let agent = self
             .build_agent_for_id(
-                Some(input.agent_id.clone()),
                 &input.agent_id,
-                &input.llm,
-                &input.model,
+                &input_llm_config,
                 input.system_prompt.clone(),
                 &input.strategy,
-                input.preset.clone(),
             )
             .await?;
 
@@ -294,15 +307,22 @@ impl AgentService {
                 ));
                 let mut subs = Vec::new();
                 for sub_agent in pipeline_config.available_agents {
-                    let config = self.find_agent_config(&sub_agent.id).await?;
-                    let strategy = config.get_strategy();
+                    let sub_config = self.find_agent_config(&sub_agent.id).await?;
+                    let strategy = sub_config.get_strategy();
+
+                    // resolution — sub_agent_ref override merges with sub_config default
+                    // which merges with conversation llm_config as final fallback
+                    let resolved_llm = sub_agent
+                        .llm_config
+                        .unwrap_or_default()
+                        .merge(sub_config.llm_config.unwrap_or_default())
+                        .merge(input.llm_config.clone());
+
                     let sub_input = AgentInput::new(
                         sub_agent.id.clone(),
-                        input.llm.clone(),
-                        input.model.clone(),
-                        Some(config.system_prompt),
+                        resolved_llm,
+                        Some(sub_config.system_prompt),
                         strategy,
-                        sub_agent.preset.clone(),
                     );
                     let sub_agent = Box::pin(self.build_runnable_agent(&sub_input, visited))
                         .await

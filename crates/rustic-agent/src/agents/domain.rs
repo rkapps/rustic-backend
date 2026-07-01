@@ -10,14 +10,10 @@ use crate::{Preset, services::config::agent::CompletionStrategy};
 #[derive(Debug, Clone)]
 pub struct AgentInput {
     pub agent_id: String,
-    /// Provider ID (e.g. `"anthropic"`, `"openai"`).
-    pub llm: String,
-    /// Model identifier forwarded to the provider (e.g. `"claude-sonnet-4-6"`).
-    pub model: String,
+    pub llm_config: LlmConfig,
     /// Optional system prompt override; `None` falls back to an empty string.
     pub system_prompt: Option<String>,
     pub strategy: CompletionStrategy,
-    pub preset: Option<Preset>,
     /// Nested sub-agent inputs; empty for leaf agents, unused by `new()`.
     pub subs: Vec<AgentInput>,
 }
@@ -25,20 +21,36 @@ pub struct AgentInput {
 impl AgentInput {
     pub fn new(
         agent_id: String,
-        llm: String,
-        model: String,
+        llm_config: LlmConfig,
         system_prompt: Option<String>,
         strategy: CompletionStrategy,
-        preset: Option<Preset>,
     ) -> Self {
         Self {
             agent_id,
-            llm,
-            model,
+            llm_config,
             system_prompt,
             strategy,
             subs: Vec::new(),
-            preset,
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserialize, Clone, Serialize)]
+pub struct LlmConfig {
+    /// Provider ID (e.g. `"anthropic"`, `"openai"`).
+    pub llm: Option<String>,
+    /// Model identifier forwarded to the provider (e.g. `"claude-sonnet-4-6"`).
+    pub model: Option<String>,
+    pub preset: Option<Preset>,
+}
+
+impl LlmConfig {
+    /// Merge two configs — self takes priority, other fills in missing fields
+    pub fn merge(self, other: LlmConfig) -> LlmConfig {
+        LlmConfig {
+            llm: self.llm.or(other.llm),
+            model: self.model.or(other.model),
+            preset: self.preset.or(other.preset),
         }
     }
 }

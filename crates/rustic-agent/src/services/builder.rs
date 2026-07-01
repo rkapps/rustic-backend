@@ -211,6 +211,7 @@ impl<'a> AgentBuilder<'a> {
         match preset {
             Preset::Fast => self.with_preset_fast(),
             Preset::Balanced => self.with_preset_balanced(),
+            Preset::Data => self.with_preset_data(),
             Preset::Precise => self.with_preset_precise(),
             Preset::Thorough => self.with_preset_thorough(),
             Preset::Local => self.with_preset_local(),
@@ -228,24 +229,31 @@ impl<'a> AgentBuilder<'a> {
     pub fn with_preset_balanced(mut self) -> Self {
         self.enable_cache = true;
         self.reasoning_effort = ReasoningEffort::Low;
-        self.with_temperature(0.5).with_max_tokens(8192)
+        self.with_temperature(0.5).with_max_tokens(4096)
     }
 
-    /// `Precise` — cache enabled, high reasoning, 0.2 temperature, 4 096 max tokens.
+    /// `Precise` — cache enabled, high reasoning, 0.2 temperature, 16384 max tokens.
     pub fn with_preset_precise(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::Low;
-        self.with_temperature(0.2).with_max_tokens(65536)
+        self.reasoning_effort = ReasoningEffort::High;
+        self.with_temperature(0.2).with_max_tokens(16384)
     }
 
-    /// `Thorough` — cache enabled, high reasoning, 0.1 temperature, 8 192 max tokens.
+    /// `data` — cache enabled, low reasoning, 0.1 temperature, 65536 max tokens.
+    pub fn with_preset_data(mut self) -> Self {
+        self.enable_cache = true;
+        self.reasoning_effort = ReasoningEffort::Low;
+        self.with_temperature(0.1).with_max_tokens(65536)
+    }
+
+    /// `Thorough` — cache enabled, high reasoning, 0.1 temperature, 65536 max tokens.
     pub fn with_preset_thorough(mut self) -> Self {
         self.enable_cache = true;
         self.reasoning_effort = ReasoningEffort::High;
         self.with_temperature(0.1).with_max_tokens(65536)
     }
 
-    /// `Local` — no cache, no reasoning, 0.7 temperature, 4 096 max tokens. Tuned for Ollama.
+    /// `Local` — no cache, no reasoning, 0.7 temperature, 4096 max tokens. Tuned for Ollama.
     pub fn with_preset_local(mut self) -> Self {
         self.enable_cache = false;
         self.reasoning_effort = ReasoningEffort::None;

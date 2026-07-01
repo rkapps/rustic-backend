@@ -4,7 +4,7 @@ use rustic_agent::services::config::{
 };
 use rustic_core::load_content;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatTemplate {
@@ -72,6 +72,7 @@ pub async fn load_agents_config(
         }
 
         let prompt_path = format!("{}/{}", config_dir, agent.system_prompt);
+        info!("System prompt path: {}", prompt_path);
         agent.system_prompt = load_content(prompt_path.clone()).await.with_context(|| {
             anyhow::anyhow!(
                 "System prompt load for agent '{}' at '{}' error:",

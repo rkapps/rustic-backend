@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{Preset, services::config::agent::HistoryMode::Full};
+use crate::{agents::domain::LlmConfig, services::config::agent::HistoryMode::Full};
 
 /// Controls how an agent participates in request handling.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -21,7 +21,8 @@ pub struct AgentConfig {
     pub id: String,
     pub name: String,
     pub description: String,
-    pub preset: Option<Preset>,
+    pub llm_config: Option<LlmConfig>,
+    // pub preset: Option<Preset>,
     /// When `true`, the agent appears in the public catalog and can be started directly by users.
     pub standalone: bool,
     pub execution: ExecutionType,
@@ -31,7 +32,7 @@ pub struct AgentConfig {
     pub tools: Vec<String>,
     #[serde(default)]
     pub mcp_tools: Vec<String>,
-    pub model_assignment: ModelAssignment,
+    // pub model_assignment: ModelAssignment,
     /// Conversation strategy overrides; `None` uses the server default.
     pub conversation: ConversationConfig,
     /// Pipeline-specific settings; `None` for `SingleAgent` execution types.
@@ -45,21 +46,6 @@ impl AgentConfig {
     pub fn get_history_mode(&self) -> HistoryMode {
         self.conversation.history_mode.clone().unwrap_or(Full)
     }
-}
-
-/// Default and allowed provider/model combinations for an agent.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ModelAssignment {
-    pub default: ModelProvider,
-    pub allowed: Vec<ModelProvider>,
-}
-
-/// A provider + model pair used in model assignment config.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ModelProvider {
-    /// Provider identifier (e.g. `"anthropic"`, `"openai"`).
-    pub provider: String,
-    pub model: String,
 }
 
 /// Pipeline-specific configuration used when `execution` is `Pipeline` or `PipelineAgent`.
@@ -82,16 +68,9 @@ pub struct PipelineConfig {
 pub struct AvailableAgent {
     pub id: String,
     #[serde(default)]
-    pub preset: Option<Preset>,
+    pub llm_config: Option<LlmConfig>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum MessageContext {
-    Goal, // original user messages
-    Last, // last stage output
-    All,  // full accumulated context
-}
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ConversationConfig {

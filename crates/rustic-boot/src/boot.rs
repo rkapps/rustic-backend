@@ -340,8 +340,8 @@ impl AgenticBootBuilder {
             ),
             None => {
                 info!(
-                    "   Registered agent: {} preset: {:?}",
-                    agent_config.id, agent_config.preset
+                    "   Registered agent: {} llm_config: {:?}",
+                    agent_config.id, agent_config.llm_config
                 );
                 agent_registry.register_agent(agent_config);
             }
