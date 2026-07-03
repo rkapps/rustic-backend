@@ -75,10 +75,20 @@ impl Tool for TickerPeersTool {
             .get_ticker_peers_by_symbols(params.symbols, params.limit)
             .await?;
 
+        let peers: Vec<String> = peers
+            .iter()
+            .flat_map(|p| {
+                // include the symbol itself
+                std::iter::once(p.symbol.clone())
+                    // plus all its peers
+                    .chain(p.peers.iter().map(|peer| peer.symbol.clone()))
+            })
+            .collect::<std::collections::HashSet<String>>() // deduplicate
+            .into_iter()
+            .collect();
         let elapsed = start.elapsed();
         info!("Peers: {:?}  {:.1}s", peers.len(), elapsed.as_secs_f32());
 
-        Ok(json!({ "peers": if peers.is_empty() {Value::Null} else { json!(peers)} }))
-
+        Ok(json!({ "symbols": if peers.is_empty() {Value::Null} else { json!(peers)} }))
     }
 }
