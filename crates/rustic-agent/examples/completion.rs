@@ -45,6 +45,7 @@ async fn main() -> Result<()> {
         store: true,
         temperature: 0.7,
         tool_registry: Arc::new(ToolRegistry::new()),
+        response_format_schema: None,
     };
 
     let mut last_response_id = None;
