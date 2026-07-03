@@ -4,9 +4,8 @@ use anyhow::Result;
 use rustic_core::Tool;
 use rustic_finance::{
     storage::{
-        FinanceMongoStorageReader, TickerStorageReader, mongo::manager::FinanceMongoStorageManager,
-    },
-    tools::{ticker_screening::TickerScreeningTool, ticker_snapshot::TickerSnapshotTool},
+        FinanceMongoStorageReader, mongo::manager::FinanceMongoStorageManager,
+    }, tools::{ticker_peers::TickerPeersTool, ticker_screening::TickerScreeningTool, ticker_snapshot::TickerSnapshotTool},
 };
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 use serde_json::json;
@@ -25,6 +24,24 @@ pub(crate) async fn get_manager() -> Result<FinanceMongoStorageManager> {
     let manager = FinanceMongoStorageManager::new(&mongo_uri, &mongo_db).await;
 
     manager
+}
+
+
+#[tokio::test]
+async fn test_tool_peers() -> Result<()> {
+    let manager = get_manager().await?;
+    let reader = FinanceMongoStorageReader::new(manager);
+
+    let tool = TickerPeersTool::new(Arc::new(reader.clone()));
+    let value = json!({"symbols":["NVDA"]});
+
+    let result = tool.execute(value).await?;
+    // save to fixture
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    fs::write("tests/fixtures/tool_peers.json", &json).await?;
+
+    // println!("{:#?}", taxonomy);
+    Ok(())
 }
 
 #[tokio::test]
