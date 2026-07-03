@@ -4,7 +4,7 @@ use crate::client::{
 };
 use anyhow::{Context, Result};
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Value, json};
 use tracing::{debug, info, trace};
 
 /// Serialized body sent to `POST /v1/messages`.
@@ -19,6 +19,9 @@ pub struct AnthropicCompletionRequest {
     system: Option<String>,
     stream: bool,
     pub tools: Vec<AnthropicToolDefinition>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub output_config: Option<AnthropicOutputConfig>
 }
 
 impl AnthropicCompletionRequest {
@@ -55,12 +58,12 @@ impl AnthropicCompletionRequest {
     }
 }
 
-/// System-prompt block (currently unused in favour of a plain string field).
-#[derive(Debug, Serialize)]
-pub struct AnthropicCompletionRequestSystem {
-    r#type: String,
-    text: String,
-}
+// /// System-prompt block (currently unused in favour of a plain string field).
+// #[derive(Debug, Serialize)]
+// pub struct AnthropicCompletionRequestSystem {
+//     r#type: String,
+//     text: String,
+// }
 
 /// Cache-control marker sent alongside the request to enable ephemeral prompt caching.
 #[derive(Debug, Serialize)]
@@ -146,6 +149,20 @@ impl AnthropicThinking {
         }
     }
 }
+
+
+/// Tool schema in Anthropic's format (`input_schema` instead of `parameters`).
+#[derive(Debug, Serialize)]
+pub struct AnthropicOutputConfig {
+    format: Value,
+}
+
+// #[derive(Debug, Serialize)]
+// pub struct AnthropicOutputConfigFormat {
+//     r#type: String,
+//     schema: Value
+// }
+
 
 impl AnthropicCompletionRequest {
     /// Convert a provider-agnostic [`CompletionRequest`] into Anthropic's wire format.
@@ -270,6 +287,17 @@ impl AnthropicCompletionRequest {
 
         debug!("thikning: {:?}", thinking);
 
+        // if response format schema is available, use it
+        let output_config  = if let Some(response_format_schema) = request.response_format_schema {
+            let response_format = json!({
+                "type": "json_schema",
+                "schema": response_format_schema                
+            });
+            Some(AnthropicOutputConfig { format: response_format })
+        } else {
+            None
+        };
+
         let arequest = AnthropicCompletionRequest {
             max_tokens: request.max_tokens,
             messages,
@@ -280,6 +308,7 @@ impl AnthropicCompletionRequest {
             thinking,
             stream: request.stream,
             tools: atools,
+            output_config
         };
 
         Ok(arequest)

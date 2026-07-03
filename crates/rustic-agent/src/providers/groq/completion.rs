@@ -76,6 +76,7 @@ pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
         store: false,
         definitions: request.definitions.clone(),
         last_response_id: None,
+        response_format_schema: request.response_format_schema
     }
 
 }

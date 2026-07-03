@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use serde_json::Value;
+
 use crate::client::{message::Message, tools::ToolDefinition};
 
 /// All parameters needed to issue a completion request to an LLM backend.
@@ -33,6 +35,8 @@ pub struct CompletionRequest {
     pub definitions: Vec<ToolDefinition>,
 
     pub last_response_id: Option<String>,
+    pub response_format_schema: Option<Value>
+
 }
 
 /// Controls the depth of chain-of-thought reasoning the model applies before responding.

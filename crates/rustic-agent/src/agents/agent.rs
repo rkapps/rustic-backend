@@ -1,6 +1,7 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use rustic_core::{HttpError, HttpResult};
+use serde_json::Value;
 use tokio::{
     sync::{Semaphore, mpsc},
     time::sleep,
@@ -58,6 +59,8 @@ pub struct Agent {
     pub tool_registry: Arc<ToolRegistry>,
     /// Registry of remote MCP server tools the agent can call.
     pub mcp_registry: Arc<MCPRegistry>,
+    pub response_format_schema: Option<Value>
+
 }
 
 impl Agent {
@@ -165,6 +168,7 @@ impl Agent {
                     store: agent.store,
                     definitions: new_definitions.clone(),
                     last_response_id: last_response_id.clone(),
+                    response_format_schema: agent.response_format_schema.clone()
                 };
 
                 let mut llm_stream = match agent
@@ -381,6 +385,7 @@ impl Agent {
             enable_cache: self.enable_cache,
             definitions,
             last_response_id: None,
+            response_format_schema: self.response_format_schema.clone()
         };
 
         const MAX_ITERATIONS: usize = 10;
@@ -615,7 +620,7 @@ impl Agent {
 
         debug!(
             target: "agent-tool",
-            _output= ?output,
+            _output= format_args!("{:?}", serde_json::to_string_pretty(&output)),
             "Tool output: {:?}", call.name
         );
 

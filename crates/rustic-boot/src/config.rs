@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use anyhow::{Context, Result};
 use rustic_agent::services::config::{
     agent::AgentConfig, mcp::MCPServerConfig, provider::ProviderConfig,
@@ -81,6 +83,13 @@ pub async fn load_agents_config(
             )
         })?;
 
+        let response_format_schema_path = format!("{}/{}", config_dir, agent.response_format_schema_path);
+        info!("Response format schema path: {}", response_format_schema_path);
+
+        if let Ok(schema) = load_content(response_format_schema_path.clone()).await {
+            agent.response_format_schema = Some(serde_json::Value::from_str(&schema)?);
+            info!("response schema: {:?}", agent.response_format_schema);
+        }
 
     }
     Ok(agents)

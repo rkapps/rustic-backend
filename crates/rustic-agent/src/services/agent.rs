@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
+use serde_json::Value;
 use std::{
-    collections::{HashMap, HashSet}, ops::Deref, sync::Arc,
+    collections::{HashMap, HashSet}, sync::Arc,
 };
 use tracing::{debug, info, trace};
 
@@ -135,6 +136,7 @@ impl AgentService {
         llm_config: &LlmConfig,
         system_prompt: Option<String>,
         strategy: &CompletionStrategy,
+        response_format_schema: &Option<Value>
     ) -> Result<Agent> {
         
         let agent_config = self.find_agent_config(agent_id).await?;
@@ -153,28 +155,6 @@ impl AgentService {
 
         // default the system prompt from agent config
         let system_prompt = system_prompt.or(Some(agent_config.system_prompt));
-
-        // let mut dpreset = match &provider {
-        //     Provider::Local { .. } => Preset::Local,
-        //     _ => Preset::Balanced,
-        // };
-
-        // if let Some(preset) = &llm_config.preset {
-        //     dpreset = preset.clone();
-        // } else {
-            // // override from agent
-            // if let Some(agent_preset) = agent_config.preset {
-            //     dpreset = agent_preset;
-            // } else {
-            //     // override from parent
-            //     if let Some(parent_agent_id) = parent_agent_id {
-            //         let parent_config = self.find_agent_config(&parent_agent_id).await?;
-            //         if let Some(parent_preset) = parent_config.preset {
-            //             dpreset = parent_preset;
-            //         }
-            //     }
-            // }
-        // }
 
         let tool_registry = {
             let global = self.tool_registry.read().await;
@@ -220,6 +200,7 @@ impl AgentService {
             .builder(&agent_config.id)
             .with_strategy(strategy.clone())
             .with_system_prompt(system_prompt.unwrap_or_default())
+            .with_response_format_schema(response_format_schema.clone())
             .with_tools(tool_registry.get_tools())
             .with_filtered_mcp(mcp_registry)
             .with_preset(preset)
@@ -293,6 +274,7 @@ impl AgentService {
                 &input_llm_config,
                 input.system_prompt.clone(),
                 &input.strategy,
+                &config.response_format_schema
             )
             .await?;
 

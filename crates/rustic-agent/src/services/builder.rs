@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use rustic_core::Tool;
+use serde_json::Value;
 use std::sync::Arc;
 use tracing::debug;
 
@@ -53,6 +54,7 @@ pub struct AgentBuilder<'a> {
     pending_tools: Vec<Arc<dyn Tool>>,
     filtered_mcp: Option<MCPRegistry>,
     strategy: Option<CompletionStrategy>,
+    response_format_schema: Option<Value>
 }
 
 impl<'a> AgentBuilder<'a> {
@@ -72,6 +74,7 @@ impl<'a> AgentBuilder<'a> {
             pending_tools: Vec::new(),
             filtered_mcp: None,
             strategy: None,
+            response_format_schema: None
         }
     }
 
@@ -242,8 +245,8 @@ impl<'a> AgentBuilder<'a> {
     /// `data` — cache enabled, low reasoning, 0.1 temperature, 65536 max tokens.
     pub fn with_preset_data(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::Low;
-        self.with_temperature(0.1).with_max_tokens(65536)
+        self.reasoning_effort = ReasoningEffort::Medium;
+        self.with_temperature(0.1).with_max_tokens(32768)
     }
 
     /// `Thorough` — cache enabled, high reasoning, 0.1 temperature, 65536 max tokens.
@@ -268,6 +271,11 @@ impl<'a> AgentBuilder<'a> {
     /// Override the max output token limit directly, bypassing preset defaults.
     pub fn with_max_tokens(mut self, max_tokens: i32) -> Self {
         self.max_tokens = Some(max_tokens);
+        self
+    }
+
+    pub fn with_response_format_schema(mut self, response_format_schema: Option<Value>) -> Self {
+        self.response_format_schema = response_format_schema;
         self
     }
 
@@ -339,6 +347,7 @@ impl<'a> AgentBuilder<'a> {
 
         let reasoning_effort = self.reasoning_effort;
         let enable_cache = self.enable_cache;
+        let response_format_schema = self.response_format_schema;
 
         let store = match &self.strategy {
             Some(CompletionStrategy::Stateful) => true,
@@ -359,6 +368,7 @@ impl<'a> AgentBuilder<'a> {
             enable_cache,
             tool_registry,
             mcp_registry,
+            response_format_schema
         })
     }
 }

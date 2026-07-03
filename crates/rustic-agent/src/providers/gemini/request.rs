@@ -1,6 +1,8 @@
+use std::str::FromStr;
+
 use anyhow::Result;
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Value, json};
 use tracing::{debug, info, trace};
 
 use crate::{
@@ -27,6 +29,8 @@ pub struct GeminiInteractionsRequest {
     store: bool,
     generation_config: GeminiCompletionRequestConfig,
     pub tools: Vec<ToolDefinition>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    response_format: Option<Value>,
 }
 
 impl GeminiInteractionsRequest {
@@ -177,6 +181,8 @@ impl GeminiInteractionsRequest {
         let crequest = request.clone();
         let mut inputs: Vec<GeminiStepRequestInput> = Vec::new();
         let mut function_result_contents: Vec<GeminiStepRequestInput> = Vec::new();
+        let mut function_call_contents: Vec<GeminiStepRequestInput> = Vec::new();
+
         let model_contents: Vec<GeminiStepRequestInput> = Vec::new();
         let mut user_input: Option<GeminiStepRequestInput> = None;
         let iterations = request.iterations;
@@ -191,7 +197,7 @@ impl GeminiInteractionsRequest {
             .collect();
 
         debug!(
-            target: "agent-openai",
+            target: "agent-gemini",
             request_messages= ?request.messages.len(),
             iterations_messages = format_args!("{:#?}", iterations),
             current_iteration = ?current_iteration
@@ -275,10 +281,20 @@ impl GeminiInteractionsRequest {
                 }
 
                 Message::ToolCall {
-                    arguments: _,
-                    call_id: _,
-                    name: _,
-                } => {}
+                    arguments,
+                    call_id,
+                    name,
+                } => {
+                    // let value = serde_json::Value::from_str(&arguments)?;
+                    // function_call_contents.push(GeminiStepRequestInput::FunctionCall {
+                    //     r#type: "function_call".to_string(),
+                    //     id: Some(call_id),
+                    //     call_id: None,
+                    //     result: None,
+                    //     arguments: Some(value),
+                    //     name: name,
+                    // });
+                }
 
                 Message::ToolOutput {
                     call_id,
@@ -312,6 +328,11 @@ impl GeminiInteractionsRequest {
             inputs.extend(model_contents);
         }
 
+        // push tool calls
+        if !function_call_contents.is_empty() {
+            inputs.extend(function_call_contents);
+        }
+
         // Push tool results
         if !function_result_contents.is_empty() {
             inputs.extend(function_result_contents);
@@ -323,30 +344,50 @@ impl GeminiInteractionsRequest {
             None
         };
 
+        let system_instruction = if interaction_id.is_none() {
+            request.system.clone().unwrap_or_default()
+        } else {
+            String::default()
+        };
+
+        let tools = request
+            .definitions
+            .into_iter()
+            .map(|mut def| {
+                // clean top-level description
+                def.description = def
+                    .description
+                    .replace('\n', " ")
+                    .split_whitespace()
+                    .collect::<Vec<&str>>()
+                    .join(" ");
+                // clean parameters recursively (handles nested descriptions too)
+                def.parameters = clean_for_gemini(&def.parameters);
+                def
+            })
+            .collect();
+
+        // if response format schema is available, use it
+        let response_format = if let Some(response_format_schema) = request.response_format_schema {
+            Some(json!({
+                "type": "text",
+                "mime_type": "application/json",
+                "schema": response_format_schema                
+            }))
+        } else {
+            None
+        };
+
         let grequest = GeminiInteractionsRequest {
             model: MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
             input: inputs,
-            system_instruction: request.system.clone().unwrap_or_default(),
+            system_instruction,
             previous_interaction_id: interaction_id,
             stream: request.stream,
             store: request.store,
             generation_config: GeminiCompletionRequestConfig::new(&crequest),
-            tools: request
-                .definitions
-                .into_iter()
-                .map(|mut def| {
-                    // clean top-level description
-                    def.description = def
-                        .description
-                        .replace('\n', " ")
-                        .split_whitespace()
-                        .collect::<Vec<&str>>()
-                        .join(" ");
-                    // clean parameters recursively (handles nested descriptions too)
-                    def.parameters = clean_for_gemini(&def.parameters);
-                    def
-                })
-                .collect(),
+            tools,
+            response_format,
         };
         Ok(grequest)
     }

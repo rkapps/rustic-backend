@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::{agents::domain::LlmConfig, services::config::agent::HistoryMode::Full};
 
@@ -37,6 +38,10 @@ pub struct AgentConfig {
     pub conversation: ConversationConfig,
     /// Pipeline-specific settings; `None` for `SingleAgent` execution types.
     pub pipeline: Option<PipelineConfig>,
+    #[serde(default)]
+    pub response_format_schema_path: String,
+    #[serde(default)]
+    pub response_format_schema: Option<Value>
 }
 
 impl AgentConfig {
