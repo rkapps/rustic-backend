@@ -88,7 +88,7 @@ pub async fn load_agents_config(
 
         if let Ok(schema) = load_content(response_format_schema_path.clone()).await {
             agent.response_format_schema = Some(serde_json::Value::from_str(&schema)?);
-            info!("response schema: {:?}", agent.response_format_schema);
+            trace!("response schema: {:?}", agent.response_format_schema);
         }
 
     }

@@ -287,16 +287,17 @@ impl AnthropicCompletionRequest {
 
         debug!("thikning: {:?}", thinking);
 
-        // if response format schema is available, use it
-        let output_config  = if let Some(response_format_schema) = request.response_format_schema {
-            let response_format = json!({
-                "type": "json_schema",
-                "schema": response_format_schema                
-            });
-            Some(AnthropicOutputConfig { format: response_format })
-        } else {
-            None
-        };
+        // // if response format schema is available, use it
+        // let output_config  = if let Some(response_format_schema) = request.response_format_schema {
+        //     let response_format = json!({
+        //         "type": "json_schema",
+        //         "schema": response_format_schema                
+        //     });
+        //     Some(AnthropicOutputConfig { format: response_format })
+        // } else {
+        //     None
+        // };
+        let output_config = None;
 
         let arequest = AnthropicCompletionRequest {
             max_tokens: request.max_tokens,

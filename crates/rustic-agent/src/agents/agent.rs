@@ -59,8 +59,7 @@ pub struct Agent {
     pub tool_registry: Arc<ToolRegistry>,
     /// Registry of remote MCP server tools the agent can call.
     pub mcp_registry: Arc<MCPRegistry>,
-    pub response_format_schema: Option<Value>
-
+    pub response_format_schema: Option<Value>,
 }
 
 impl Agent {
@@ -79,13 +78,13 @@ impl Agent {
     #[tracing::instrument(
         skip(self, messages, last_response_id),
         fields(
-            otel.name = %format!("complete_with_screaming agent: {}", self.id),
-            model = %self.model,
-            temperature = %self.temperature,
-            max_tokens = %self.max_tokens,
-            store = %self.store,
-            messages.count = %messages.len(),
-            last_response_id = ?last_response_id,
+            otel.name = %format!("complete_with_streaming agent: {}", self.id),
+            _last_response_id = ?last_response_id,
+            _max_tokens = %self.max_tokens,
+            _messages.count = %messages.len(),
+            _model = %self.model,
+            _store = %self.store,
+            _temperature = %self.temperature,
         )
     )]
     pub async fn complete_with_streaming(
@@ -127,188 +126,200 @@ impl Agent {
         let mut last_response_id = last_response_id.clone();
         let mut iterations = HashMap::new();
 
-        tokio::spawn(async move {
-            let mut iteration = 0;
-            const MAX_ITERATIONS: usize = 10;
+        tokio::spawn(
+            async move {
+                let mut iteration = 0;
+                const MAX_ITERATIONS: usize = 10;
 
-            let mut usage = crate::client::response::CompletionResponseTokenUsage::default();
+                let mut usage = crate::client::response::CompletionResponseTokenUsage::default();
 
-            debug!(
-                target: "agent-messages",
-                "Current messages: {:#?}", messages
-            );
-
-            loop {
-                iteration += 1;
-                if iteration > MAX_ITERATIONS {
-                    break;
-                }
-
-                let iter_span = tracing::span!(
-                    tracing::Level::INFO,
-                    "iteration",
-                    otel.name = format!("iteration: {}", iteration),  // ← OTel specific attribute that overrides span name
-                    _n = %iteration,
-                    _last_response_id = ?last_response_id,
-                    _messages= ?iterations.get(&iteration),
+                debug!(
+                    target: "agent-messages",
+                    "Current messages: {:#?}", messages
                 );
-                // let _enter = iter_span.enter();
 
-                let request = CompletionRequest {
-                    id: agent_id.clone(),
-                    model: agent.model.clone(),
-                    system: system_prompt.clone(),
-                    messages: messages.clone(),
-                    iterations: iterations.clone(),
-                    temperature: agent.temperature,
-                    max_tokens: agent.max_tokens,
-                    reasoning_effort: agent.reasoning_effort.clone(),
-                    enable_cache: agent.enable_cache,
-                    stream: true,
-                    store: agent.store,
-                    definitions: new_definitions.clone(),
-                    last_response_id: last_response_id.clone(),
-                    response_format_schema: agent.response_format_schema.clone()
-                };
-
-                let mut llm_stream = match agent
-                    .client
-                    .complete_with_stream(request)
-                    .instrument(tracing::info_span!(
-                        parent: &iter_span,
-                        "provider.complete",
-                        otel.name = format!("provider: {}", agent.model),
-                        _store = %agent.store,
-                    ))
-                    .await
-                {
-                    Ok(s) => s,
-                    Err(e) => {
-                        let _ = tx.send(Err(HttpError::NetworkError(e.to_string()))).await;
+                loop {
+                    iteration += 1;
+                    if iteration > MAX_ITERATIONS {
                         break;
                     }
-                };
 
-                let mut tool_calls = Vec::new();
+                    let iter_span = tracing::span!(
+                        tracing::Level::INFO,
+                        "iteration",
+                        otel.name = format!("iteration: {}", iteration),  // ← OTel specific attribute that overrides span name
+                        _n = %iteration,
+                        _last_response_id = ?last_response_id,
+                        _messages= ?iterations.get(&iteration),
+                    );
+                    // let _enter = iter_span.enter();
 
-                let mut model = String::new();
+                    let request = CompletionRequest {
+                        id: agent_id.clone(),
+                        model: agent.model.clone(),
+                        system: system_prompt.clone(),
+                        messages: messages.clone(),
+                        iterations: iterations.clone(),
+                        temperature: agent.temperature,
+                        max_tokens: agent.max_tokens,
+                        reasoning_effort: agent.reasoning_effort.clone(),
+                        enable_cache: agent.enable_cache,
+                        stream: true,
+                        store: agent.store,
+                        definitions: new_definitions.clone(),
+                        last_response_id: last_response_id.clone(),
+                        response_format_schema: agent.response_format_schema.clone(),
+                    };
 
-                // Gemini sends partial thought tokens as random-looking characters; accumulate
-                // the full thought before appending it as a Thought message so the model receives
-                // a coherent block on the next turn.
-                let mut thought_content = String::new();
-
-                // 2. "Pump" the chunks through the channel as they arrive
-                while let Some(chunk_result) = llm_stream.next().await {
-                    let chunk = match chunk_result {
-                        Ok(chunk) => chunk,
+                    let mut llm_stream = match agent
+                        .client
+                        .complete_with_stream(request)
+                        .instrument(tracing::info_span!(
+                            parent: &iter_span,
+                            "provider.complete",
+                            otel.name = format!("provider: {}", agent.model),
+                            _store = %agent.store,
+                        ))
+                        .await
+                    {
+                        Ok(s) => s,
                         Err(e) => {
-                            tracing::error!("Stream chunk error: {}", e);
                             let _ = tx.send(Err(HttpError::NetworkError(e.to_string()))).await;
                             break;
                         }
                     };
-                    if let Some(call) = chunk.tool_call {
-                        debug!(agent= %agent_id, tool_call= ?call, "Tool Call");
-                        tool_calls.push(call);
-                    } else {
-                        trace!(
-                            _chunk= ?chunk,
-                        );
 
-                        if chunk.is_final {
-                            debug!(
+                    let mut tool_calls = Vec::new();
+
+                    let mut model = String::new();
+
+                    // Gemini sends partial thought tokens as random-looking characters; accumulate
+                    // the full thought before appending it as a Thought message so the model receives
+                    // a coherent block on the next turn.
+                    let mut thought_content = String::new();
+
+                    // 2. "Pump" the chunks through the channel as they arrive
+                    while let Some(chunk_result) = llm_stream.next().await {
+                        let chunk = match chunk_result {
+                            Ok(chunk) => chunk,
+                            Err(e) => {
+                                tracing::error!("Stream chunk error: {}", e);
+                                let _ = tx.send(Err(HttpError::NetworkError(e.to_string()))).await;
+                                break;
+                            }
+                        };
+                        if let Some(call) = chunk.tool_call {
+                            debug!(agent= %agent_id, tool_call= ?call, "Tool Call");
+                            tool_calls.push(call);
+                        } else {
+                            trace!(
                                 _chunk= ?chunk,
                             );
 
-                            usage += chunk.usage.unwrap();
-                            last_response_id = Some(chunk.response_id);
-                            model = chunk.model;
-                        } else if !chunk.content.is_empty() {
-                            let _ = tx.send(Ok(chunk)).await;
-                        } else if !chunk.thought.is_empty() {
-                            thought_content.push_str(&chunk.thought);
-                            // while antropic thoughts are text, gemini are random characters. we need to collect the thoughts because
-                            // gemini requires the thoughts to be sent back.
-                            // Do not send the chunks for now..
-                            // let _ = tx.send(Ok(chunk)).await;
+                            if chunk.is_final {
+                                debug!(
+                                    _chunk= ?chunk,
+                                );
+
+                                usage += chunk.usage.unwrap();
+                                last_response_id = Some(chunk.response_id);
+                                model = chunk.model;
+                            } else if !chunk.content.is_empty() {
+                                let _ = tx.send(Ok(chunk)).await;
+                            } else if !chunk.thought.is_empty() {
+                                thought_content.push_str(&chunk.thought);
+                                // while antropic thoughts are text, gemini are random characters. we need to collect the thoughts because
+                                // gemini requires the thoughts to be sent back.
+                                // Do not send the chunks for now..
+                                // let _ = tx.send(Ok(chunk)).await;
+                            }
                         }
                     }
-                }
 
-                iter_span.in_scope(|| {
-                    info!(
-                        tool_calls= %tool_calls.len(),
-                        new_response_id= ?last_response_id,
-                    );
-                });
-
-                if tool_calls.is_empty() {
                     iter_span.in_scope(|| {
                         info!(
-                            _usage= %format_args!("{:#?}", usage),
-                            "Response: {}", model
+                            _tool_calls= %tool_calls.len(),
+                            _new_response_id= ?last_response_id,
                         );
                     });
+
+                    if tool_calls.is_empty() {
+                        iter_span.in_scope(|| {
+                            info!(
+                                _usage= %format_args!("{:#?}", usage),
+                                "Response: {}", model
+                            );
+                        });
+
+                        let _ = tx
+                            .send(Ok(CompletionChunkResponse::stop(
+                                agent_id.clone(),
+                                model,
+                                last_response_id.clone().unwrap_or_default(),
+                                Some(usage),
+                            )))
+                            .await;
+                        break;
+                    }
+                    let tool_futures: Vec<_> = tool_calls
+                        .into_iter()
+                        .map(|call| {
+                            let span = tracing::info_span!(
+                                parent: &iter_span,
+                                "tool.execute",
+                                otel.name = format!("tool: {}", call.name),
+                                _tool = %call.name,
+                                _call_id = %call.id,
+                            );
+                            agent.execute_tool_call(call.clone()).instrument(span)
+                        })
+                        .collect();
 
                     let _ = tx
-                        .send(Ok(CompletionChunkResponse::stop(
+                        .send(Ok(CompletionChunkResponse::content(
                             agent_id.clone(),
-                            model,
-                            last_response_id.clone().unwrap_or_default(),
-                            Some(usage),
+                            String::new(),
+                            "Executing tools...".into(),
                         )))
                         .await;
-                    break;
-                }
-                let tool_futures: Vec<_> = tool_calls
-                    .into_iter()
-                    .map(|call| agent.execute_tool_call(call.clone()))
-                    .collect();
 
-                let _ = tx
-                    .send(Ok(CompletionChunkResponse::content(
-                        agent_id.clone(),
-                        String::new(),
-                        "Executing tools...".into(),
-                    )))
-                    .await;
+                    let results = futures::future::join_all(tool_futures).await;
 
-                let results = futures::future::join_all(tool_futures).await;
+                    //Add thoughts to the messages first
+                    let mut nmessages: Vec<Message> = Vec::new();
+                    if !thought_content.is_empty() {
+                        nmessages.push(Message::Thought {
+                            content: thought_content,
+                        });
+                    }
 
-                //Add thoughts to the messages first
-                let mut nmessages: Vec<Message> = Vec::new();
-                if !thought_content.is_empty() {
-                    nmessages.push(Message::Thought {
-                        content: thought_content,
-                    });
-                }
+                    for result in results {
+                        match result {
+                            Ok((tool_call, tool_output)) => {
+                                nmessages.push(tool_call);
+                                nmessages.push(tool_output);
+                            }
+                            Err(e) => {
+                                error!(
+                                    target: "agent-tool",
+                                    "Tool Call Error: {:?}", e
+                                );
+                            }
+                        };
+                    }
 
-                for result in results {
-                    match result {
-                        Ok((tool_call, tool_output)) => {
-                            nmessages.push(tool_call);
-                            nmessages.push(tool_output);
-                        }
-                        Err(e) => {
-                            error!(
-                                target: "agent-tool",
-                                "Tool Call Error: {:?}", e
+                    if !nmessages.is_empty() {
+                        iter_span.in_scope(|| {
+                            info!(
+                                nmessages= ?nmessages.len(),
                             );
-                        }
-                    };
-                }
-
-                if !nmessages.is_empty() {
-                    iter_span.in_scope(|| {
-                        info!(
-                            nmessages= ?nmessages.len(),
-                        );
-                    });
-                    iterations.insert(iteration, nmessages);
+                        });
+                        iterations.insert(iteration, nmessages);
+                    }
                 }
             }
-        });
+            .instrument(tracing::Span::current()),
+        );
 
         Ok(ReceiverStream::new(rx))
     }
@@ -327,12 +338,12 @@ impl Agent {
         skip(self, messages, last_response_id),
         fields(
             otel.name = %format!("complete agent: {}", self.id),
-            _model = %self.model,
-            _temperature = %self.temperature,
-            _max_tokens = %self.max_tokens,
-            _store = %self.store,
-            _messages.count = %messages.len(),
             _last_response_id = ?last_response_id,
+            _max_tokens = %self.max_tokens,
+            _messages.count = %messages.len(),
+            _model = %self.model,
+            _store = %self.store,
+            _temperature = %self.temperature,
         )
     )]
     pub async fn complete(
@@ -349,9 +360,7 @@ impl Agent {
             .map(|e| ToolDefinition::from_tool(e.as_ref()))
             .collect();
 
-        debug!(
-          "Current messages: {:?}", messages
-        );
+        debug!("Current messages: {:?}", messages);
         trace!(
             target: "agent-tool",
             "Tool definitions: {:?}", definitions
@@ -385,7 +394,7 @@ impl Agent {
             enable_cache: self.enable_cache,
             definitions,
             last_response_id: None,
-            response_format_schema: self.response_format_schema.clone()
+            response_format_schema: self.response_format_schema.clone(),
         };
 
         const MAX_ITERATIONS: usize = 10;
@@ -548,8 +557,8 @@ impl Agent {
 
             iter_span.in_scope(|| {
                 info!(
-                    last_response_id,
-                    new_mesages = ?nmessages.len()
+                    _last_response_id = ?last_response_id,
+                    _new_mesages = ?nmessages.len()
                 );
             });
 
