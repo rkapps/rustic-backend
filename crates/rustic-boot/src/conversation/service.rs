@@ -183,6 +183,13 @@ impl ConversationService {
         Ok(turn)
     }
 
+    #[tracing::instrument(
+        skip(self, request),
+        fields(
+            uid = %uid,
+            conversation.id = %conversation_id
+        )
+    )]
     pub async fn send_turn(
         &self,
         uid: &str,
@@ -269,121 +276,6 @@ impl ConversationService {
         Ok(Box::pin(stream))
     }
 
-    // pub async fn run_conversation_new(
-    //     &self,
-    //     conversation: &Conversation,
-    //     turns: Vec<Turn>,
-    // ) -> Result<CompletionResponse> {
-    //     let runner = build_agent_runner(self.agent_service.clone(), conversation, turns).await?;
-    //     let response = runner.execute().await?;
-    //     Ok(response)
-    // }
-
-    // pub async fn run_conversation(
-    //     &self,
-    //     conversation: &Conversation,
-    //     messages: &[Message],
-    // ) -> Result<CompletionResponse> {
-    //     debug!("Run Conversation: {:?}", conversation.id);
-    //     // build based on the conversatoin type
-    //     match conversation.conversation_type {
-    //         ConversationType::Chat => {
-    //             let agent = self
-    //                 .agent_service
-    //                 .build_chat_agent(
-    //                     &conversation.llm,
-    //                     &conversation.model,
-    //                     &conversation.system_prompt,
-    //                     &conversation.strategy,
-    //                 )
-    //                 .await?;
-    //             let response = agent.complete(messages).await?;
-    //             Ok(response)
-    //         }
-    //         ConversationType::Agent => {
-    //             if let Some(agent_id) = &conversation.agent_id {
-    //                 let mut visited = HashSet::new();
-    //                 let handle = self
-    //                     .agent_service
-    //                     .build_agent_handle(
-    //                         None,
-    //                         agent_id,
-    //                         &conversation.llm,
-    //                         &conversation.model,
-    //                         &conversation.strategy,
-    //                         None,
-    //                         &mut visited,
-    //                     )
-    //                     .await?;
-    //                 let response = handle.execute(messages).await?;
-    //                 Ok(response)
-    //             } else {
-    //                 Err(anyhow::anyhow!("Conversation agent_id is blank."))
-    //             }
-    //         }
-    //     }
-    // }
-
-    // pub async fn run_conversation_streaming_new(
-    //     &self,
-    //     conversation: &Conversation,
-    //     turns: Vec<Turn>,
-    //     prompt: &str,
-    // ) -> Result<CompletionStreamResponse> {
-    //     let runner = build_agent_runner(self.agent_service.clone(), conversation, turns).await?;
-    //     let stream = runner.execute_streaming().await?;
-    //     Ok(Box::pin(stream))
-    // }
-
-    // pub async fn run_conversation_streaming(
-    //     &self,
-    //     conversation: &Conversation,
-    //     messages: &[Message],
-    // ) -> Result<CompletionStreamResponse> {
-    //     // run agents based on conversation type
-    //     match conversation.conversation_type {
-    //         ConversationType::Chat => {
-    //             let agent = self
-    //                 .agent_service
-    //                 .build_chat_agent(
-    //                     &conversation.llm,
-    //                     &conversation.model,
-    //                     &conversation.system_prompt,
-    //                     &conversation.strategy,
-    //                 )
-    //                 .await?;
-    //             let stream = agent.complete_with_streaming(messages).await?;
-    //             Ok(Box::pin(stream))
-    //         }
-    //         ConversationType::Agent => {
-    //             if let Some(agent_id) = &conversation.agent_id {
-    //                 let mut visited = HashSet::new();
-    //                 let handle = self
-    //                     .agent_service
-    //                     .build_agent_handle(
-    //                         None,
-    //                         agent_id,
-    //                         &conversation.llm,
-    //                         &conversation.model,
-    //                         &conversation.strategy,
-    //                         None,
-    //                         &mut visited,
-    //                     )
-    //                     .await?;
-
-    //                 debug!(
-    //                     "Building conversatino agent: {} conversation messages: {}",
-    //                     agent_id,
-    //                     messages.len()
-    //                 );
-    //                 let stream = handle.execute_streaming(messages).await?;
-    //                 Ok(Box::pin(stream))
-    //             } else {
-    //                 Err(anyhow::anyhow!("Conversation agent_id is blank."))
-    //             }
-    //         }
-    //     }
-    // }
 
     pub async fn recalculate_conversation_usage_cost(&self, uid: &str, id: &str) -> Result<()> {
         let mut conversation = self.get_conversation(uid, id).await.map_err(|e| {
