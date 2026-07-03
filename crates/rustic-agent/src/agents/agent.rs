@@ -83,6 +83,7 @@ impl Agent {
             _max_tokens = %self.max_tokens,
             _messages.count = %messages.len(),
             _model = %self.model,
+            _reasoning_effort= ?self.reasoning_effort,
             _store = %self.store,
             _temperature = %self.temperature,
         )
@@ -342,6 +343,7 @@ impl Agent {
             _max_tokens = %self.max_tokens,
             _messages.count = %messages.len(),
             _model = %self.model,
+            _reasoning_effort= ?self.reasoning_effort,
             _store = %self.store,
             _temperature = %self.temperature,
         )

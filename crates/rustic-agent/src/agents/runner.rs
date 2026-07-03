@@ -112,12 +112,12 @@ impl Runnable for SingleAgent {
     #[tracing::instrument(
         skip(self, turns),
         fields(
-            agent_id = %self.agent.id,
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            turns = turns.len()
+            _agent_id = %self.agent.id,
+            _max_tokens= ?self.get_agent().max_tokens,
+            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _strategy= ?self.get_strategy(),
+            _temperature= ?self.get_agent().temperature,
+            _turns = turns.len()
         )
     )]
     async fn execute(
@@ -133,12 +133,12 @@ impl Runnable for SingleAgent {
     #[tracing::instrument(
         skip(self, turns),
         fields(
-            agent_id = %self.agent.id,
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            turns = turns.len()
+            _agent_id = %self.agent.id,
+            _max_tokens= ?self.get_agent().max_tokens,
+            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _strategy= ?self.get_strategy(),
+            _temperature= ?self.get_agent().temperature,
+            _turns = turns.len()
         )
     )]
     async fn execute_streaming(
@@ -173,12 +173,12 @@ impl Runnable for PipeLineAgent {
     #[tracing::instrument(
         skip(self, turns, prompt),
         fields(
-            agent_id = %self.agent.id,
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            turns = turns.len()
+            _agent_id = %self.agent.id,
+            _max_tokens= ?self.get_agent().max_tokens,
+            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _strategy= ?self.get_strategy(),
+            _temperature= ?self.get_agent().temperature,
+            _turns = turns.len()
         )
     )]
     async fn execute(
@@ -206,12 +206,12 @@ impl Runnable for PipeLineAgent {
     #[tracing::instrument(
         skip(self, turns, prompt),
         fields(
-            agent_id = %self.agent.id,
-            strategy= ?self.get_strategy(),
-            temperature= ?self.get_agent().temperature,
-            max_tokens= ?self.get_agent().max_tokens,
-            reasoning_effort= ?self.get_agent().reasoning_effort,
-            turns = turns.len()
+            _agent_id = %self.agent.id,
+            _max_tokens= ?self.get_agent().max_tokens,
+            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _strategy= ?self.get_strategy(),
+            _temperature= ?self.get_agent().temperature,
+            _turns = turns.len()
         )
     )]
     async fn execute_streaming(
@@ -505,7 +505,8 @@ impl PipeLineAgent {
     #[tracing::instrument(
         skip(self, turns),
         fields(
-            agent_id = %self.get_agent().id,
+            _agent_id = %self.get_agent().id,
+            _prompt = ?prompt
         )
     )]
     pub async fn decide(
@@ -538,10 +539,10 @@ impl PipeLineAgent {
     #[tracing::instrument(
         skip(self, decision),
         fields(
-            agent_id = %self.get_agent().id,
-            execution = ?decision.execution,
-            agents = ?decision.agents,
-            stop = %decision.stop,
+            _agent_id = %self.get_agent().id,
+            _agents = ?decision.agents,
+            _execution = ?decision.execution,
+            _stop = %decision.stop,
         )
     )]
     pub async fn execute_subs(

@@ -119,6 +119,7 @@ impl Conversation {
 pub struct ConversationUpdateRequest {
     pub title: Option<String>,
     pub system_prompt: Option<String>,
+    pub strategy: CompletionStrategy,
     pub history_mode: Option<HistoryMode>, // only valid if strategy=stateful
     pub max_turns: Option<u32>,            // only valid if history_mode=trimmed
 }
@@ -131,21 +132,28 @@ impl Conversation {
         if let Some(system_prompt) = request.system_prompt {
             self.system_prompt = Some(system_prompt);
         }
-        if let Some(history_mode) = request.history_mode {
-            if self.strategy != CompletionStrategy::Stateful {
-                return Err(anyhow::anyhow!(
-                    "history_mode only valid for stateful conversations"
-                ));
+
+        self.strategy = request.strategy;
+        if self.strategy == CompletionStrategy::Stateless {
+            self.history_mode = None;
+            self.max_turns = None;
+        } else {
+            if let Some(history_mode) = request.history_mode {
+                if self.strategy != CompletionStrategy::Stateful {
+                    return Err(anyhow::anyhow!(
+                        "history_mode only valid for stateful conversations"
+                    ));
+                }
+                self.history_mode = Some(history_mode);
             }
-            self.history_mode = Some(history_mode);
-        }
-        if let Some(max_turns) = request.max_turns {
-            if self.history_mode != Some(HistoryMode::Trimmed) {
-                return Err(anyhow::anyhow!(
-                    "max_turns only valid for trimmed history mode"
-                ));
+            if let Some(max_turns) = request.max_turns {
+                if self.history_mode != Some(HistoryMode::Trimmed) {
+                    return Err(anyhow::anyhow!(
+                        "max_turns only valid for trimmed history mode"
+                    ));
+                }
+                self.max_turns = Some(max_turns);
             }
-            self.max_turns = Some(max_turns);
         }
         self.last_updated_at = Utc::now();
         Ok(())
