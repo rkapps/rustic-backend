@@ -119,6 +119,7 @@ impl Conversation {
 pub struct ConversationUpdateRequest {
     pub title: Option<String>,
     pub system_prompt: Option<String>,
+    pub stream: bool,
     pub strategy: CompletionStrategy,
     pub history_mode: Option<HistoryMode>, // only valid if strategy=stateful
     pub max_turns: Option<u32>,            // only valid if history_mode=trimmed
@@ -132,7 +133,7 @@ impl Conversation {
         if let Some(system_prompt) = request.system_prompt {
             self.system_prompt = Some(system_prompt);
         }
-
+        self.stream  = request.stream;
         self.strategy = request.strategy;
         if self.strategy == CompletionStrategy::Stateless {
             self.history_mode = None;
