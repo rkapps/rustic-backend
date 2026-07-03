@@ -349,11 +349,12 @@ impl<'a> AgentBuilder<'a> {
         let enable_cache = self.enable_cache;
         let response_format_schema = self.response_format_schema;
 
-        let store = match &self.strategy {
-            Some(CompletionStrategy::Stateful) => true,
-            Some(CompletionStrategy::Stateless) => false,
-            None => false, // default to stateless
-        };
+        // let store = match &self.strategy {
+        //     Some(CompletionStrategy::Stateful) => true,
+        //     Some(CompletionStrategy::Stateless) => false,
+        //     None => false, // default to stateless
+        // };
+        let store = true;
 
         Ok(Agent {
             id: self.id,
