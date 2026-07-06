@@ -1,8 +1,10 @@
 use anyhow::Result;
 use rustic_core::Tool;
+#[cfg(feature = "writer")]
+use rustic_providers::economic::bea::model::BeaParamValue;
 use std::sync::Arc;
 
-use rustic_providers::{BeaClient, CensusClient, FredClient, economic::bea::model::BeaParamValue};
+use rustic_providers::{BeaClient, CensusClient, FredClient};
 
 use crate::storage::mongo::reader::EconomicMongoStorageReader;
 use crate::storage::mongo::writer::EconomicMongoStorageWriter;

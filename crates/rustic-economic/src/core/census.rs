@@ -5,39 +5,35 @@ use rustic_providers::CensusClient;
 use tracing::{error, info};
 
 use crate::{
-    core::helper::{process_census_records, resolve_years},
-    domain::CensusData,
+    core::helper::{get_variable_description, process_census_records, resolve_years},
     storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::CensusStorageReader,
         writer::CensusStorageWriter,
     },
+    tools::domain::CensusEntity,
 };
 
 pub async fn get_census_data(
     reader: Arc<EconomicMongoStorageReader>,
-    variables: &[&str],
+    variables: Vec<String>,
     dataset: &str,
     geo_fips: Option<&str>,
     geo_type: Option<&str>,
     state_prefix: Option<&str>,
     year: &str,
-) -> Result<Vec<CensusData>> {
+) -> Result<Vec<CensusEntity>> {
     // expand LAST5 to actual years
     let years = resolve_years(year);
+    let mut results = reader
+        .get_census_by_dataset_variable(dataset, variables, geo_fips, geo_type, state_prefix, years)
+        .await?;
 
-    let mut result = Vec::new();
-
-    for y in &years {
-        for variable in variables {
-            let stored = reader
-                .get_census_filtered(dataset, variable, geo_fips, geo_type, state_prefix, y)
-                .await?;
-
-            result.extend(stored);
-        }
+    // add the description
+    for result in &mut results {
+        result.description = get_variable_description(&result.variable);
     }
-    Ok(result)
+    Ok(results)
 }
 
 pub async fn update_census(

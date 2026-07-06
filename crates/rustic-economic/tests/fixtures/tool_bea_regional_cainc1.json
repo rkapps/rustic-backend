@@ -1,0 +1,30 @@
+{
+  "bea_regional": [
+    {
+      "code": "CAINC1-1",
+      "description": "Personal Income",
+      "geos": [
+        {
+          "geo_type": "STATE",
+          "geo_name": "California",
+          "geo_fips": "06000",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3021645501.0
+            },
+            {
+              "year": "2023",
+              "value": 3182779295.0
+            },
+            {
+              "year": "2024",
+              "value": 3400237317.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "provider": "bea"
+}

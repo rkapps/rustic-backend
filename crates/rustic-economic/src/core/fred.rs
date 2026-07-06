@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use anyhow::Result;
 use chrono::Utc;
-use rustic_providers::{DataPoint, FredClient};
+use rustic_providers::FredClient;
 use tracing::info;
 
 use crate::{
@@ -18,19 +18,9 @@ use crate::{
 pub async fn get_fred_series(
     reader: Arc<EconomicMongoStorageReader>,
     series_id: &str,
-    limit: Option<usize>,
-) -> Result<Vec<DataPoint>> {
+) -> Result<EconomicSeries> {
     let stored = reader.get_series(series_id).await?;
-    if stored.is_none() {
-        return Ok(Vec::new());
-    }
-    let stored = stored.unwrap();
-
-    let obs = match limit {
-        Some(n) => stored.observations.into_iter().take(n).collect(),
-        None => stored.observations,
-    };
-    Ok(obs)
+    Ok(stored)
 }
 
 pub async fn update_fred_series(
@@ -61,6 +51,7 @@ pub async fn update_fred_series(
         next_refresh: Some(next_refresh(frequency)),
     };
     info!(
+        target: "economic-tool",
         "Series: {} observations: {:?}",
         series_id,
         series.observations.len()

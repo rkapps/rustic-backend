@@ -1,0 +1,259 @@
+{
+  "fred_series": [
+    {
+      "series_id": "CPIAUCSL",
+      "category": "consumer_health",
+      "name": "Consumer Price Index",
+      "observations": [
+        {
+          "date": "2026-04-01",
+          "value": 332.407
+        },
+        {
+          "date": "2026-03-01",
+          "value": 330.293
+        },
+        {
+          "date": "2026-02-01",
+          "value": 327.46
+        },
+        {
+          "date": "2026-01-01",
+          "value": 326.588
+        },
+        {
+          "date": "2025-12-01",
+          "value": 326.031
+        },
+        {
+          "date": "2025-11-01",
+          "value": 325.063
+        },
+        {
+          "date": "2025-09-01",
+          "value": 324.245
+        },
+        {
+          "date": "2025-08-01",
+          "value": 323.291
+        },
+        {
+          "date": "2025-07-01",
+          "value": 322.169
+        },
+        {
+          "date": "2025-06-01",
+          "value": 321.435
+        }
+      ]
+    },
+    {
+      "series_id": "UMCSENT",
+      "category": "consumer_health",
+      "name": "Consumer Sentiment",
+      "observations": [
+        {
+          "date": "2026-04-01",
+          "value": 49.8
+        },
+        {
+          "date": "2026-03-01",
+          "value": 53.3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 56.6
+        },
+        {
+          "date": "2026-01-01",
+          "value": 56.4
+        },
+        {
+          "date": "2025-12-01",
+          "value": 52.9
+        },
+        {
+          "date": "2025-11-01",
+          "value": 51.0
+        },
+        {
+          "date": "2025-10-01",
+          "value": 53.6
+        },
+        {
+          "date": "2025-09-01",
+          "value": 55.1
+        },
+        {
+          "date": "2025-08-01",
+          "value": 58.2
+        },
+        {
+          "date": "2025-07-01",
+          "value": 61.7
+        }
+      ]
+    },
+    {
+      "series_id": "UNRATE",
+      "category": "consumer_health",
+      "name": "Unemployment Rate",
+      "observations": [
+        {
+          "date": "2026-05-01",
+          "value": 4.3
+        },
+        {
+          "date": "2026-04-01",
+          "value": 4.3
+        },
+        {
+          "date": "2026-03-01",
+          "value": 4.3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 4.4
+        },
+        {
+          "date": "2026-01-01",
+          "value": 4.3
+        },
+        {
+          "date": "2025-12-01",
+          "value": 4.4
+        },
+        {
+          "date": "2025-11-01",
+          "value": 4.5
+        },
+        {
+          "date": "2025-09-01",
+          "value": 4.4
+        },
+        {
+          "date": "2025-08-01",
+          "value": 4.3
+        },
+        {
+          "date": "2025-07-01",
+          "value": 4.3
+        }
+      ]
+    },
+    {
+      "series_id": "PCE",
+      "category": "consumer_health",
+      "name": "Personal Consumption Expenditures",
+      "observations": [
+        {
+          "date": "2026-04-01",
+          "value": 21979.4
+        },
+        {
+          "date": "2026-03-01",
+          "value": 21868.3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 21655.8
+        },
+        {
+          "date": "2026-01-01",
+          "value": 21509.1
+        },
+        {
+          "date": "2025-12-01",
+          "value": 21445.9
+        },
+        {
+          "date": "2025-11-01",
+          "value": 21356.0
+        },
+        {
+          "date": "2025-10-01",
+          "value": 21288.1
+        },
+        {
+          "date": "2025-09-01",
+          "value": 21202.4
+        },
+        {
+          "date": "2025-08-01",
+          "value": 21123.8
+        },
+        {
+          "date": "2025-07-01",
+          "value": 21007.3
+        }
+      ]
+    },
+    {
+      "series_id": "DFFFRC1A027NBEA",
+      "category": "consumer_spending",
+      "name": "Furniture and Furnishings",
+      "observations": [
+        {
+          "date": "2025-01-01",
+          "value": 293.895
+        },
+        {
+          "date": "2024-01-01",
+          "value": 281.899
+        },
+        {
+          "date": "2023-01-01",
+          "value": 276.849
+        },
+        {
+          "date": "2022-01-01",
+          "value": 274.586
+        },
+        {
+          "date": "2021-01-01",
+          "value": 262.517
+        }
+      ]
+    },
+    {
+      "series_id": "DFDHRC1Q027SBEA",
+      "category": "consumer_spending",
+      "name": "Furnishings Durable Equipment",
+      "observations": [
+        {
+          "date": "2026-01-01",
+          "value": 521.802
+        },
+        {
+          "date": "2025-10-01",
+          "value": 510.964
+        },
+        {
+          "date": "2025-07-01",
+          "value": 507.997
+        },
+        {
+          "date": "2025-04-01",
+          "value": 507.27
+        },
+        {
+          "date": "2025-01-01",
+          "value": 503.129
+        },
+        {
+          "date": "2024-10-01",
+          "value": 501.823
+        },
+        {
+          "date": "2024-07-01",
+          "value": 493.577
+        },
+        {
+          "date": "2024-04-01",
+          "value": 485.049
+        }
+      ]
+    }
+  ],
+  "provider": "fred"
+}

@@ -6,13 +6,16 @@ use rustic_providers::{BeaClient, economic::bea::model::BeaParamValue};
 use tracing::{error, info};
 
 use crate::{
-    core::helper::{next_refresh, resolve_years},
+    core::helper::{
+        get_bea_metric_description, get_bea_regional_code, next_refresh, resolve_years,
+    },
     domain::{BeaNipaData, BeaRegionalData},
     storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::BeaStorageReader,
         writer::BeaStorageWriter,
     },
+    tools::domain::{BeaNipaEntity, BeaRegionalEntity},
 };
 
 pub async fn get_geo_fips(bea: BeaClient) -> Result<Vec<BeaParamValue>> {
@@ -23,25 +26,17 @@ pub async fn get_bea_nipa(
     reader: Arc<EconomicMongoStorageReader>,
     table_name: &str,
     year: &str,
-) -> Result<Vec<BeaNipaData>> {
-    let years: Vec<String> = if year == "LAST5" {
-        vec![
-            "2025".to_string(),
-            "2024".to_string(),
-            "2023".to_string(),
-            "2022".to_string(),
-            "2021".to_string(),
-        ]
-    } else {
-        year.split(',').map(|y| y.trim().to_string()).collect()
-    };
-    let mut result = Vec::new();
+) -> Result<Vec<BeaNipaEntity>> {
+    let years: Vec<String> = resolve_years(year);
 
-    for y in &years {
-        let stored = reader.get_bea_nipa_by_table(table_name, y).await?;
-        result.extend(stored);
-    }
-
+    info!(
+        target: "economic-tool",
+        "Bea nipa table_name: {} years: {:?}",
+        table_name, years,
+    );
+    let result = reader
+        .get_bea_nipa_by_table_series(table_name, years)
+        .await?;
     Ok(result)
 }
 
@@ -52,18 +47,17 @@ pub async fn get_bea_regional(
     geo_type: Option<&str>,
     state_prefix: Option<&str>,
     year: &str,
-) -> Result<Vec<BeaRegionalData>> {
+) -> Result<Vec<BeaRegionalEntity>> {
     let years = resolve_years(year);
-    let mut result = Vec::new();
-
-    for y in &years {
-        let stored = reader
-            .get_bea_regional_filtered(table_name, geo_fips, geo_type, state_prefix, y)
-            .await?;
-        result.extend(stored);
+    let code = get_bea_regional_code(table_name);
+    let mut results = reader
+        .get_bea_regional_by_table_series(&code, years, geo_fips, geo_type, state_prefix)
+        .await?;
+    // add the description
+    for result in &mut results {
+        result.description = get_bea_metric_description(&result.code);
     }
-
-    Ok(result)
+    Ok(results)
 }
 
 pub async fn update_bea_nipa(
@@ -74,6 +68,7 @@ pub async fn update_bea_nipa(
     year: &str,
 ) -> Result<()> {
     info!(
+        target: "economic-tool",
         "Bea nipa table_name: {} frequency: {} years: {}",
         table_name, frequency, year,
     );

@@ -2,8 +2,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
 use serde_json::{Value, json};
-use tracing::debug;
 use std::sync::Arc;
+use tracing::{debug, info};
 
 use crate::{core::census::get_census_data, storage::mongo::reader::EconomicMongoStorageReader};
 
@@ -63,8 +63,8 @@ impl Tool for CensusDataTool {
                 },
                 "dataset": {
                     "type": "string",
-                    "enum": ["acs1", "acs5"],
-                    "description": "acs1=1-year estimates, acs5=5-year estimates (includes rural areas)"
+                    "enum": ["acs5"],
+                    "description": "acs5=5-year estimates (includes rural areas)"
                 },
                 "variables": {
                     "type": "array",
@@ -91,12 +91,13 @@ impl Tool for CensusDataTool {
     }
 
     async fn execute(&self, params: Value) -> Result<Value> {
-        let variables: Vec<&str> = params["variables"]
-            .as_array()
-            .ok_or_else(|| anyhow::anyhow!("variables required"))?
-            .iter()
-            .filter_map(|v| v.as_str())
-            .collect();
+        let variables: Vec<String> = params["variables"]
+        .as_array()
+        .ok_or_else(|| anyhow::anyhow!("variables required"))?
+        .iter()
+        // Extract the inner string slice instead of converting the JSON block to a string
+        .filter_map(|v| v.as_str().map(|s| s.to_string()))
+        .collect();
 
         let dataset = params["dataset"].as_str().unwrap_or("acs5");
         let year = params["year"].as_str().unwrap_or("LAST5");
@@ -104,9 +105,15 @@ impl Tool for CensusDataTool {
         let geo_type = params["geo_type"].as_str();
         let state_prefix = params["state_prefix"].as_str();
 
+        info!(
+            target: "economic-tool",
+            "Census data - dataset: {} variables: {:?} year: {:?} geo_type: {:?} geo_fips: {:?}", dataset, variables, year, geo_type, geo_fips
+        );
+
+
         let records = get_census_data(
             self.reader.clone(),
-            &variables,
+            variables.clone(),
             dataset,
             geo_fips,
             geo_type,
@@ -116,14 +123,12 @@ impl Tool for CensusDataTool {
         .await?;
         debug!(
             target: "economic-tool",
-            "Census data - dataset: {} year: {:?} geo_fips: {:?}", dataset, year, geo_fips
+            "Census: {}", records.len()
         );
         // census
         Ok(json!({
-            "dataset": dataset,
-            "geo": geo_fips,
-            "year": year,
-            "records": if records.is_empty() {Value::Null} else {json!(records)}
+            "census": if records.is_empty() {Value::Null} else {json!(records)},
+            "provider":   "census"
         }))
     }
 }

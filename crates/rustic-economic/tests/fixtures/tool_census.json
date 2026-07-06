@@ -1,0 +1,2990 @@
+{
+  "census": [
+    {
+      "dataset": "acs5",
+      "variable": "B01002_001E",
+      "description": "Median Age",
+      "geos": [
+        {
+          "geo_type": "state",
+          "geo_name": "Massachusetts",
+          "geo_fips": "25",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.8"
+            },
+            {
+              "year": "2023",
+              "value": "40.0"
+            },
+            {
+              "year": "2024",
+              "value": "40.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nebraska",
+          "geo_fips": "31",
+          "data": [
+            {
+              "year": "2022",
+              "value": "36.9"
+            },
+            {
+              "year": "2023",
+              "value": "37.1"
+            },
+            {
+              "year": "2024",
+              "value": "37.2"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Tennessee",
+          "geo_fips": "47",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.9"
+            },
+            {
+              "year": "2023",
+              "value": "38.9"
+            },
+            {
+              "year": "2024",
+              "value": "38.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New York",
+          "geo_fips": "36",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.3"
+            },
+            {
+              "year": "2023",
+              "value": "39.6"
+            },
+            {
+              "year": "2024",
+              "value": "39.8"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Minnesota",
+          "geo_fips": "27",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.5"
+            },
+            {
+              "year": "2023",
+              "value": "38.6"
+            },
+            {
+              "year": "2024",
+              "value": "38.8"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wisconsin",
+          "geo_fips": "55",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.9"
+            },
+            {
+              "year": "2023",
+              "value": "40.1"
+            },
+            {
+              "year": "2024",
+              "value": "40.2"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Dakota",
+          "geo_fips": "38",
+          "data": [
+            {
+              "year": "2022",
+              "value": "35.4"
+            },
+            {
+              "year": "2023",
+              "value": "35.7"
+            },
+            {
+              "year": "2024",
+              "value": "35.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Missouri",
+          "geo_fips": "29",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.8"
+            },
+            {
+              "year": "2023",
+              "value": "38.9"
+            },
+            {
+              "year": "2024",
+              "value": "39.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Mexico",
+          "geo_fips": "35",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.6"
+            },
+            {
+              "year": "2023",
+              "value": "39.2"
+            },
+            {
+              "year": "2024",
+              "value": "39.4"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Utah",
+          "geo_fips": "49",
+          "data": [
+            {
+              "year": "2022",
+              "value": "31.4"
+            },
+            {
+              "year": "2023",
+              "value": "31.7"
+            },
+            {
+              "year": "2024",
+              "value": "32.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Arkansas",
+          "geo_fips": "05",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.4"
+            },
+            {
+              "year": "2023",
+              "value": "38.4"
+            },
+            {
+              "year": "2024",
+              "value": "38.5"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oklahoma",
+          "geo_fips": "40",
+          "data": [
+            {
+              "year": "2022",
+              "value": "36.9"
+            },
+            {
+              "year": "2023",
+              "value": "36.9"
+            },
+            {
+              "year": "2024",
+              "value": "37.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Puerto Rico",
+          "geo_fips": "72",
+          "data": [
+            {
+              "year": "2022",
+              "value": "43.7"
+            },
+            {
+              "year": "2023",
+              "value": "44.2"
+            },
+            {
+              "year": "2024",
+              "value": "44.8"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Pennsylvania",
+          "geo_fips": "42",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.8"
+            },
+            {
+              "year": "2023",
+              "value": "40.9"
+            },
+            {
+              "year": "2024",
+              "value": "40.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Virginia",
+          "geo_fips": "51",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.7"
+            },
+            {
+              "year": "2023",
+              "value": "38.8"
+            },
+            {
+              "year": "2024",
+              "value": "39.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maine",
+          "geo_fips": "23",
+          "data": [
+            {
+              "year": "2022",
+              "value": "44.8"
+            },
+            {
+              "year": "2023",
+              "value": "44.8"
+            },
+            {
+              "year": "2024",
+              "value": "44.8"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wyoming",
+          "geo_fips": "56",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.5"
+            },
+            {
+              "year": "2023",
+              "value": "38.8"
+            },
+            {
+              "year": "2024",
+              "value": "39.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Montana",
+          "geo_fips": "30",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.1"
+            },
+            {
+              "year": "2023",
+              "value": "40.2"
+            },
+            {
+              "year": "2024",
+              "value": "40.4"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Indiana",
+          "geo_fips": "18",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.0"
+            },
+            {
+              "year": "2023",
+              "value": "38.0"
+            },
+            {
+              "year": "2024",
+              "value": "38.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alaska",
+          "geo_fips": "02",
+          "data": [
+            {
+              "year": "2022",
+              "value": "35.3"
+            },
+            {
+              "year": "2023",
+              "value": "35.6"
+            },
+            {
+              "year": "2024",
+              "value": "35.8"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Connecticut",
+          "geo_fips": "09",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.9"
+            },
+            {
+              "year": "2023",
+              "value": "41.2"
+            },
+            {
+              "year": "2024",
+              "value": "41.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Delaware",
+          "geo_fips": "10",
+          "data": [
+            {
+              "year": "2022",
+              "value": "41.4"
+            },
+            {
+              "year": "2023",
+              "value": "41.5"
+            },
+            {
+              "year": "2024",
+              "value": "41.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alabama",
+          "geo_fips": "01",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.3"
+            },
+            {
+              "year": "2023",
+              "value": "39.3"
+            },
+            {
+              "year": "2024",
+              "value": "39.3"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Ohio",
+          "geo_fips": "39",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.6"
+            },
+            {
+              "year": "2023",
+              "value": "39.6"
+            },
+            {
+              "year": "2024",
+              "value": "39.7"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Iowa",
+          "geo_fips": "19",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.4"
+            },
+            {
+              "year": "2023",
+              "value": "38.6"
+            },
+            {
+              "year": "2024",
+              "value": "38.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Louisiana",
+          "geo_fips": "22",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.6"
+            },
+            {
+              "year": "2023",
+              "value": "37.8"
+            },
+            {
+              "year": "2024",
+              "value": "38.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Texas",
+          "geo_fips": "48",
+          "data": [
+            {
+              "year": "2022",
+              "value": "35.2"
+            },
+            {
+              "year": "2023",
+              "value": "35.5"
+            },
+            {
+              "year": "2024",
+              "value": "35.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Vermont",
+          "geo_fips": "50",
+          "data": [
+            {
+              "year": "2022",
+              "value": "42.9"
+            },
+            {
+              "year": "2023",
+              "value": "43.0"
+            },
+            {
+              "year": "2024",
+              "value": "43.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Hampshire",
+          "geo_fips": "33",
+          "data": [
+            {
+              "year": "2022",
+              "value": "43.1"
+            },
+            {
+              "year": "2023",
+              "value": "43.2"
+            },
+            {
+              "year": "2024",
+              "value": "43.3"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Colorado",
+          "geo_fips": "08",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.3"
+            },
+            {
+              "year": "2023",
+              "value": "37.5"
+            },
+            {
+              "year": "2024",
+              "value": "37.7"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Michigan",
+          "geo_fips": "26",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.9"
+            },
+            {
+              "year": "2023",
+              "value": "40.1"
+            },
+            {
+              "year": "2024",
+              "value": "40.2"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Washington",
+          "geo_fips": "53",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.0"
+            },
+            {
+              "year": "2023",
+              "value": "38.2"
+            },
+            {
+              "year": "2024",
+              "value": "38.3"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Mississippi",
+          "geo_fips": "28",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.1"
+            },
+            {
+              "year": "2023",
+              "value": "38.4"
+            },
+            {
+              "year": "2024",
+              "value": "38.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Carolina",
+          "geo_fips": "45",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.0"
+            },
+            {
+              "year": "2023",
+              "value": "40.1"
+            },
+            {
+              "year": "2024",
+              "value": "40.2"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kansas",
+          "geo_fips": "20",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.1"
+            },
+            {
+              "year": "2023",
+              "value": "37.2"
+            },
+            {
+              "year": "2024",
+              "value": "37.4"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "District of Columbia",
+          "geo_fips": "11",
+          "data": [
+            {
+              "year": "2022",
+              "value": "34.8"
+            },
+            {
+              "year": "2023",
+              "value": "34.9"
+            },
+            {
+              "year": "2024",
+              "value": "34.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "California",
+          "geo_fips": "06",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.3"
+            },
+            {
+              "year": "2023",
+              "value": "37.6"
+            },
+            {
+              "year": "2024",
+              "value": "37.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maryland",
+          "geo_fips": "24",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.1"
+            },
+            {
+              "year": "2023",
+              "value": "39.3"
+            },
+            {
+              "year": "2024",
+              "value": "39.4"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nevada",
+          "geo_fips": "32",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.5"
+            },
+            {
+              "year": "2023",
+              "value": "38.9"
+            },
+            {
+              "year": "2024",
+              "value": "39.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Jersey",
+          "geo_fips": "34",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.0"
+            },
+            {
+              "year": "2023",
+              "value": "40.1"
+            },
+            {
+              "year": "2024",
+              "value": "40.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kentucky",
+          "geo_fips": "21",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.1"
+            },
+            {
+              "year": "2023",
+              "value": "39.1"
+            },
+            {
+              "year": "2024",
+              "value": "39.1"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Florida",
+          "geo_fips": "12",
+          "data": [
+            {
+              "year": "2022",
+              "value": "42.4"
+            },
+            {
+              "year": "2023",
+              "value": "42.6"
+            },
+            {
+              "year": "2024",
+              "value": "42.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Dakota",
+          "geo_fips": "46",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.5"
+            },
+            {
+              "year": "2023",
+              "value": "37.7"
+            },
+            {
+              "year": "2024",
+              "value": "38.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Arizona",
+          "geo_fips": "04",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.4"
+            },
+            {
+              "year": "2023",
+              "value": "38.8"
+            },
+            {
+              "year": "2024",
+              "value": "39.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Georgia",
+          "geo_fips": "13",
+          "data": [
+            {
+              "year": "2022",
+              "value": "37.2"
+            },
+            {
+              "year": "2023",
+              "value": "37.4"
+            },
+            {
+              "year": "2024",
+              "value": "37.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "West Virginia",
+          "geo_fips": "54",
+          "data": [
+            {
+              "year": "2022",
+              "value": "42.6"
+            },
+            {
+              "year": "2023",
+              "value": "42.7"
+            },
+            {
+              "year": "2024",
+              "value": "42.7"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Idaho",
+          "geo_fips": "16",
+          "data": [
+            {
+              "year": "2022",
+              "value": "36.9"
+            },
+            {
+              "year": "2023",
+              "value": "37.1"
+            },
+            {
+              "year": "2024",
+              "value": "37.3"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Rhode Island",
+          "geo_fips": "44",
+          "data": [
+            {
+              "year": "2022",
+              "value": "40.1"
+            },
+            {
+              "year": "2023",
+              "value": "40.5"
+            },
+            {
+              "year": "2024",
+              "value": "40.6"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Illinois",
+          "geo_fips": "17",
+          "data": [
+            {
+              "year": "2022",
+              "value": "38.7"
+            },
+            {
+              "year": "2023",
+              "value": "38.9"
+            },
+            {
+              "year": "2024",
+              "value": "39.0"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oregon",
+          "geo_fips": "41",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.9"
+            },
+            {
+              "year": "2023",
+              "value": "40.1"
+            },
+            {
+              "year": "2024",
+              "value": "40.4"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Hawaii",
+          "geo_fips": "15",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.9"
+            },
+            {
+              "year": "2023",
+              "value": "40.6"
+            },
+            {
+              "year": "2024",
+              "value": "40.9"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Carolina",
+          "geo_fips": "37",
+          "data": [
+            {
+              "year": "2022",
+              "value": "39.1"
+            },
+            {
+              "year": "2023",
+              "value": "39.1"
+            },
+            {
+              "year": "2024",
+              "value": "39.1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dataset": "acs5",
+      "variable": "B25077_001E",
+      "description": "Median Home Value",
+      "geos": [
+        {
+          "geo_type": "state",
+          "geo_name": "Pennsylvania",
+          "geo_fips": "42",
+          "data": [
+            {
+              "year": "2022",
+              "value": "226200"
+            },
+            {
+              "year": "2023",
+              "value": "240500"
+            },
+            {
+              "year": "2024",
+              "value": "254500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Minnesota",
+          "geo_fips": "27",
+          "data": [
+            {
+              "year": "2022",
+              "value": "286800"
+            },
+            {
+              "year": "2023",
+              "value": "305500"
+            },
+            {
+              "year": "2024",
+              "value": "329300"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Puerto Rico",
+          "geo_fips": "72",
+          "data": [
+            {
+              "year": "2022",
+              "value": "121800"
+            },
+            {
+              "year": "2023",
+              "value": "124600"
+            },
+            {
+              "year": "2024",
+              "value": "131500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Hampshire",
+          "geo_fips": "33",
+          "data": [
+            {
+              "year": "2022",
+              "value": "337100"
+            },
+            {
+              "year": "2023",
+              "value": "367200"
+            },
+            {
+              "year": "2024",
+              "value": "402500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Missouri",
+          "geo_fips": "29",
+          "data": [
+            {
+              "year": "2022",
+              "value": "199400"
+            },
+            {
+              "year": "2023",
+              "value": "215600"
+            },
+            {
+              "year": "2024",
+              "value": "230300"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Hawaii",
+          "geo_fips": "15",
+          "data": [
+            {
+              "year": "2022",
+              "value": "764800"
+            },
+            {
+              "year": "2023",
+              "value": "808200"
+            },
+            {
+              "year": "2024",
+              "value": "839100"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Louisiana",
+          "geo_fips": "22",
+          "data": [
+            {
+              "year": "2022",
+              "value": "198300"
+            },
+            {
+              "year": "2023",
+              "value": "208700"
+            },
+            {
+              "year": "2024",
+              "value": "216500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oklahoma",
+          "geo_fips": "40",
+          "data": [
+            {
+              "year": "2022",
+              "value": "170500"
+            },
+            {
+              "year": "2023",
+              "value": "185900"
+            },
+            {
+              "year": "2024",
+              "value": "199800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Connecticut",
+          "geo_fips": "09",
+          "data": [
+            {
+              "year": "2022",
+              "value": "323700"
+            },
+            {
+              "year": "2023",
+              "value": "343200"
+            },
+            {
+              "year": "2024",
+              "value": "366900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nebraska",
+          "geo_fips": "31",
+          "data": [
+            {
+              "year": "2022",
+              "value": "205600"
+            },
+            {
+              "year": "2023",
+              "value": "223800"
+            },
+            {
+              "year": "2024",
+              "value": "238600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Mexico",
+          "geo_fips": "35",
+          "data": [
+            {
+              "year": "2022",
+              "value": "216000"
+            },
+            {
+              "year": "2023",
+              "value": "232200"
+            },
+            {
+              "year": "2024",
+              "value": "248100"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alaska",
+          "geo_fips": "02",
+          "data": [
+            {
+              "year": "2022",
+              "value": "318000"
+            },
+            {
+              "year": "2023",
+              "value": "333300"
+            },
+            {
+              "year": "2024",
+              "value": "352900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Tennessee",
+          "geo_fips": "47",
+          "data": [
+            {
+              "year": "2022",
+              "value": "232100"
+            },
+            {
+              "year": "2023",
+              "value": "256800"
+            },
+            {
+              "year": "2024",
+              "value": "286700"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Vermont",
+          "geo_fips": "50",
+          "data": [
+            {
+              "year": "2022",
+              "value": "272400"
+            },
+            {
+              "year": "2023",
+              "value": "290500"
+            },
+            {
+              "year": "2024",
+              "value": "316600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maryland",
+          "geo_fips": "24",
+          "data": [
+            {
+              "year": "2022",
+              "value": "380500"
+            },
+            {
+              "year": "2023",
+              "value": "397700"
+            },
+            {
+              "year": "2024",
+              "value": "419900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Arkansas",
+          "geo_fips": "05",
+          "data": [
+            {
+              "year": "2022",
+              "value": "162400"
+            },
+            {
+              "year": "2023",
+              "value": "175300"
+            },
+            {
+              "year": "2024",
+              "value": "188000"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "District of Columbia",
+          "geo_fips": "11",
+          "data": [
+            {
+              "year": "2022",
+              "value": "705000"
+            },
+            {
+              "year": "2023",
+              "value": "724600"
+            },
+            {
+              "year": "2024",
+              "value": "737100"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Montana",
+          "geo_fips": "30",
+          "data": [
+            {
+              "year": "2022",
+              "value": "305700"
+            },
+            {
+              "year": "2023",
+              "value": "338100"
+            },
+            {
+              "year": "2024",
+              "value": "375800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maine",
+          "geo_fips": "23",
+          "data": [
+            {
+              "year": "2022",
+              "value": "244800"
+            },
+            {
+              "year": "2023",
+              "value": "266400"
+            },
+            {
+              "year": "2024",
+              "value": "296600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nevada",
+          "geo_fips": "32",
+          "data": [
+            {
+              "year": "2022",
+              "value": "373800"
+            },
+            {
+              "year": "2023",
+              "value": "406100"
+            },
+            {
+              "year": "2024",
+              "value": "435400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Ohio",
+          "geo_fips": "39",
+          "data": [
+            {
+              "year": "2022",
+              "value": "183300"
+            },
+            {
+              "year": "2023",
+              "value": "199200"
+            },
+            {
+              "year": "2024",
+              "value": "214800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Virginia",
+          "geo_fips": "51",
+          "data": [
+            {
+              "year": "2022",
+              "value": "339800"
+            },
+            {
+              "year": "2023",
+              "value": "360700"
+            },
+            {
+              "year": "2024",
+              "value": "383700"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Dakota",
+          "geo_fips": "38",
+          "data": [
+            {
+              "year": "2022",
+              "value": "232500"
+            },
+            {
+              "year": "2023",
+              "value": "241100"
+            },
+            {
+              "year": "2024",
+              "value": "249900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Georgia",
+          "geo_fips": "13",
+          "data": [
+            {
+              "year": "2022",
+              "value": "245900"
+            },
+            {
+              "year": "2023",
+              "value": "272900"
+            },
+            {
+              "year": "2024",
+              "value": "303300"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Delaware",
+          "geo_fips": "10",
+          "data": [
+            {
+              "year": "2022",
+              "value": "305200"
+            },
+            {
+              "year": "2023",
+              "value": "326800"
+            },
+            {
+              "year": "2024",
+              "value": "352000"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Carolina",
+          "geo_fips": "45",
+          "data": [
+            {
+              "year": "2022",
+              "value": "216200"
+            },
+            {
+              "year": "2023",
+              "value": "236700"
+            },
+            {
+              "year": "2024",
+              "value": "259000"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oregon",
+          "geo_fips": "41",
+          "data": [
+            {
+              "year": "2022",
+              "value": "423100"
+            },
+            {
+              "year": "2023",
+              "value": "454200"
+            },
+            {
+              "year": "2024",
+              "value": "477600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wyoming",
+          "geo_fips": "56",
+          "data": [
+            {
+              "year": "2022",
+              "value": "269900"
+            },
+            {
+              "year": "2023",
+              "value": "285100"
+            },
+            {
+              "year": "2024",
+              "value": "309700"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alabama",
+          "geo_fips": "01",
+          "data": [
+            {
+              "year": "2022",
+              "value": "179400"
+            },
+            {
+              "year": "2023",
+              "value": "195100"
+            },
+            {
+              "year": "2024",
+              "value": "209900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "West Virginia",
+          "geo_fips": "54",
+          "data": [
+            {
+              "year": "2022",
+              "value": "145800"
+            },
+            {
+              "year": "2023",
+              "value": "155600"
+            },
+            {
+              "year": "2024",
+              "value": "162600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "California",
+          "geo_fips": "06",
+          "data": [
+            {
+              "year": "2022",
+              "value": "659300"
+            },
+            {
+              "year": "2023",
+              "value": "695400"
+            },
+            {
+              "year": "2024",
+              "value": "734700"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Mississippi",
+          "geo_fips": "28",
+          "data": [
+            {
+              "year": "2022",
+              "value": "151000"
+            },
+            {
+              "year": "2023",
+              "value": "161400"
+            },
+            {
+              "year": "2024",
+              "value": "169800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Indiana",
+          "geo_fips": "18",
+          "data": [
+            {
+              "year": "2022",
+              "value": "183600"
+            },
+            {
+              "year": "2023",
+              "value": "201600"
+            },
+            {
+              "year": "2024",
+              "value": "218200"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Arizona",
+          "geo_fips": "04",
+          "data": [
+            {
+              "year": "2022",
+              "value": "321400"
+            },
+            {
+              "year": "2023",
+              "value": "358900"
+            },
+            {
+              "year": "2024",
+              "value": "394500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Iowa",
+          "geo_fips": "19",
+          "data": [
+            {
+              "year": "2022",
+              "value": "181600"
+            },
+            {
+              "year": "2023",
+              "value": "195900"
+            },
+            {
+              "year": "2024",
+              "value": "208000"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Florida",
+          "geo_fips": "12",
+          "data": [
+            {
+              "year": "2022",
+              "value": "292200"
+            },
+            {
+              "year": "2023",
+              "value": "325000"
+            },
+            {
+              "year": "2024",
+              "value": "359000"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Jersey",
+          "geo_fips": "34",
+          "data": [
+            {
+              "year": "2022",
+              "value": "401400"
+            },
+            {
+              "year": "2023",
+              "value": "427600"
+            },
+            {
+              "year": "2024",
+              "value": "454400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Carolina",
+          "geo_fips": "37",
+          "data": [
+            {
+              "year": "2022",
+              "value": "234900"
+            },
+            {
+              "year": "2023",
+              "value": "259400"
+            },
+            {
+              "year": "2024",
+              "value": "288900"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Colorado",
+          "geo_fips": "08",
+          "data": [
+            {
+              "year": "2022",
+              "value": "465900"
+            },
+            {
+              "year": "2023",
+              "value": "502200"
+            },
+            {
+              "year": "2024",
+              "value": "539400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Massachusetts",
+          "geo_fips": "25",
+          "data": [
+            {
+              "year": "2022",
+              "value": "483900"
+            },
+            {
+              "year": "2023",
+              "value": "525800"
+            },
+            {
+              "year": "2024",
+              "value": "562100"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Washington",
+          "geo_fips": "53",
+          "data": [
+            {
+              "year": "2022",
+              "value": "473400"
+            },
+            {
+              "year": "2023",
+              "value": "519800"
+            },
+            {
+              "year": "2024",
+              "value": "564600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Rhode Island",
+          "geo_fips": "44",
+          "data": [
+            {
+              "year": "2022",
+              "value": "343100"
+            },
+            {
+              "year": "2023",
+              "value": "368800"
+            },
+            {
+              "year": "2024",
+              "value": "404200"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Utah",
+          "geo_fips": "49",
+          "data": [
+            {
+              "year": "2022",
+              "value": "408500"
+            },
+            {
+              "year": "2023",
+              "value": "455000"
+            },
+            {
+              "year": "2024",
+              "value": "489400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Idaho",
+          "geo_fips": "16",
+          "data": [
+            {
+              "year": "2022",
+              "value": "331600"
+            },
+            {
+              "year": "2023",
+              "value": "376000"
+            },
+            {
+              "year": "2024",
+              "value": "418600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kentucky",
+          "geo_fips": "21",
+          "data": [
+            {
+              "year": "2022",
+              "value": "177000"
+            },
+            {
+              "year": "2023",
+              "value": "192300"
+            },
+            {
+              "year": "2024",
+              "value": "205600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Illinois",
+          "geo_fips": "17",
+          "data": [
+            {
+              "year": "2022",
+              "value": "239100"
+            },
+            {
+              "year": "2023",
+              "value": "250500"
+            },
+            {
+              "year": "2024",
+              "value": "263300"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Dakota",
+          "geo_fips": "46",
+          "data": [
+            {
+              "year": "2022",
+              "value": "219500"
+            },
+            {
+              "year": "2023",
+              "value": "236800"
+            },
+            {
+              "year": "2024",
+              "value": "257400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Michigan",
+          "geo_fips": "26",
+          "data": [
+            {
+              "year": "2022",
+              "value": "201100"
+            },
+            {
+              "year": "2023",
+              "value": "217600"
+            },
+            {
+              "year": "2024",
+              "value": "231600"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New York",
+          "geo_fips": "36",
+          "data": [
+            {
+              "year": "2022",
+              "value": "384100"
+            },
+            {
+              "year": "2023",
+              "value": "403000"
+            },
+            {
+              "year": "2024",
+              "value": "423800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Texas",
+          "geo_fips": "48",
+          "data": [
+            {
+              "year": "2022",
+              "value": "238000"
+            },
+            {
+              "year": "2023",
+              "value": "260400"
+            },
+            {
+              "year": "2024",
+              "value": "283800"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wisconsin",
+          "geo_fips": "55",
+          "data": [
+            {
+              "year": "2022",
+              "value": "231400"
+            },
+            {
+              "year": "2023",
+              "value": "247400"
+            },
+            {
+              "year": "2024",
+              "value": "266500"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kansas",
+          "geo_fips": "20",
+          "data": [
+            {
+              "year": "2022",
+              "value": "189300"
+            },
+            {
+              "year": "2023",
+              "value": "203400"
+            },
+            {
+              "year": "2024",
+              "value": "217200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dataset": "acs5",
+      "variable": "B25003_002E",
+      "description": "Owner Units",
+      "geos": [
+        {
+          "geo_type": "state",
+          "geo_name": "Arkansas",
+          "geo_fips": "05",
+          "data": [
+            {
+              "year": "2022",
+              "value": "775956"
+            },
+            {
+              "year": "2023",
+              "value": "786534"
+            },
+            {
+              "year": "2024",
+              "value": "800864"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Connecticut",
+          "geo_fips": "09",
+          "data": [
+            {
+              "year": "2022",
+              "value": "932588"
+            },
+            {
+              "year": "2023",
+              "value": "939912"
+            },
+            {
+              "year": "2024",
+              "value": "952989"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Montana",
+          "geo_fips": "30",
+          "data": [
+            {
+              "year": "2022",
+              "value": "306432"
+            },
+            {
+              "year": "2023",
+              "value": "314266"
+            },
+            {
+              "year": "2024",
+              "value": "317400"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Dakota",
+          "geo_fips": "46",
+          "data": [
+            {
+              "year": "2022",
+              "value": "240328"
+            },
+            {
+              "year": "2023",
+              "value": "246105"
+            },
+            {
+              "year": "2024",
+              "value": "250621"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kentucky",
+          "geo_fips": "21",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1205067"
+            },
+            {
+              "year": "2023",
+              "value": "1223574"
+            },
+            {
+              "year": "2024",
+              "value": "1239908"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Louisiana",
+          "geo_fips": "22",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1185633"
+            },
+            {
+              "year": "2023",
+              "value": "1200407"
+            },
+            {
+              "year": "2024",
+              "value": "1216127"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Hawaii",
+          "geo_fips": "15",
+          "data": [
+            {
+              "year": "2022",
+              "value": "298816"
+            },
+            {
+              "year": "2023",
+              "value": "305869"
+            },
+            {
+              "year": "2024",
+              "value": "310247"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alabama",
+          "geo_fips": "01",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1347792"
+            },
+            {
+              "year": "2023",
+              "value": "1377062"
+            },
+            {
+              "year": "2024",
+              "value": "1402155"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Michigan",
+          "geo_fips": "26",
+          "data": [
+            {
+              "year": "2022",
+              "value": "2906470"
+            },
+            {
+              "year": "2023",
+              "value": "2946157"
+            },
+            {
+              "year": "2024",
+              "value": "2984190"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Massachusetts",
+          "geo_fips": "25",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1711341"
+            },
+            {
+              "year": "2023",
+              "value": "1728986"
+            },
+            {
+              "year": "2024",
+              "value": "1741158"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oklahoma",
+          "geo_fips": "40",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1004078"
+            },
+            {
+              "year": "2023",
+              "value": "1015207"
+            },
+            {
+              "year": "2024",
+              "value": "1027837"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wyoming",
+          "geo_fips": "56",
+          "data": [
+            {
+              "year": "2022",
+              "value": "168393"
+            },
+            {
+              "year": "2023",
+              "value": "171299"
+            },
+            {
+              "year": "2024",
+              "value": "174619"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Kansas",
+          "geo_fips": "20",
+          "data": [
+            {
+              "year": "2022",
+              "value": "767875"
+            },
+            {
+              "year": "2023",
+              "value": "776311"
+            },
+            {
+              "year": "2024",
+              "value": "788409"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nevada",
+          "geo_fips": "32",
+          "data": [
+            {
+              "year": "2022",
+              "value": "679960"
+            },
+            {
+              "year": "2023",
+              "value": "701914"
+            },
+            {
+              "year": "2024",
+              "value": "721197"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Georgia",
+          "geo_fips": "13",
+          "data": [
+            {
+              "year": "2022",
+              "value": "2565877"
+            },
+            {
+              "year": "2023",
+              "value": "2619529"
+            },
+            {
+              "year": "2024",
+              "value": "2676357"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "South Carolina",
+          "geo_fips": "45",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1434662"
+            },
+            {
+              "year": "2023",
+              "value": "1478858"
+            },
+            {
+              "year": "2024",
+              "value": "1522121"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "West Virginia",
+          "geo_fips": "54",
+          "data": [
+            {
+              "year": "2022",
+              "value": "531027"
+            },
+            {
+              "year": "2023",
+              "value": "536082"
+            },
+            {
+              "year": "2024",
+              "value": "545595"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Puerto Rico",
+          "geo_fips": "72",
+          "data": [
+            {
+              "year": "2022",
+              "value": "829943"
+            },
+            {
+              "year": "2023",
+              "value": "844228"
+            },
+            {
+              "year": "2024",
+              "value": "876586"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Alaska",
+          "geo_fips": "02",
+          "data": [
+            {
+              "year": "2022",
+              "value": "175198"
+            },
+            {
+              "year": "2023",
+              "value": "178369"
+            },
+            {
+              "year": "2024",
+              "value": "180833"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Wisconsin",
+          "geo_fips": "55",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1641590"
+            },
+            {
+              "year": "2023",
+              "value": "1660505"
+            },
+            {
+              "year": "2024",
+              "value": "1682214"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Arizona",
+          "geo_fips": "04",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1815352"
+            },
+            {
+              "year": "2023",
+              "value": "1873231"
+            },
+            {
+              "year": "2024",
+              "value": "1924098"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Missouri",
+          "geo_fips": "29",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1661854"
+            },
+            {
+              "year": "2023",
+              "value": "1688072"
+            },
+            {
+              "year": "2024",
+              "value": "1708413"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Mississippi",
+          "geo_fips": "28",
+          "data": [
+            {
+              "year": "2022",
+              "value": "775465"
+            },
+            {
+              "year": "2023",
+              "value": "786289"
+            },
+            {
+              "year": "2024",
+              "value": "801788"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maryland",
+          "geo_fips": "24",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1564056"
+            },
+            {
+              "year": "2023",
+              "value": "1578702"
+            },
+            {
+              "year": "2024",
+              "value": "1597565"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Maine",
+          "geo_fips": "23",
+          "data": [
+            {
+              "year": "2022",
+              "value": "426239"
+            },
+            {
+              "year": "2023",
+              "value": "436029"
+            },
+            {
+              "year": "2024",
+              "value": "443573"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Carolina",
+          "geo_fips": "37",
+          "data": [
+            {
+              "year": "2022",
+              "value": "2717961"
+            },
+            {
+              "year": "2023",
+              "value": "2778672"
+            },
+            {
+              "year": "2024",
+              "value": "2853493"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Idaho",
+          "geo_fips": "16",
+          "data": [
+            {
+              "year": "2022",
+              "value": "486279"
+            },
+            {
+              "year": "2023",
+              "value": "502140"
+            },
+            {
+              "year": "2024",
+              "value": "514361"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Tennessee",
+          "geo_fips": "47",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1819725"
+            },
+            {
+              "year": "2023",
+              "value": "1855793"
+            },
+            {
+              "year": "2024",
+              "value": "1890569"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Florida",
+          "geo_fips": "12",
+          "data": [
+            {
+              "year": "2022",
+              "value": "5585924"
+            },
+            {
+              "year": "2023",
+              "value": "5756809"
+            },
+            {
+              "year": "2024",
+              "value": "5918647"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Illinois",
+          "geo_fips": "17",
+          "data": [
+            {
+              "year": "2022",
+              "value": "3312809"
+            },
+            {
+              "year": "2023",
+              "value": "3343034"
+            },
+            {
+              "year": "2024",
+              "value": "3378910"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Rhode Island",
+          "geo_fips": "44",
+          "data": [
+            {
+              "year": "2022",
+              "value": "270950"
+            },
+            {
+              "year": "2023",
+              "value": "276344"
+            },
+            {
+              "year": "2024",
+              "value": "281002"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "District of Columbia",
+          "geo_fips": "11",
+          "data": [
+            {
+              "year": "2022",
+              "value": "130865"
+            },
+            {
+              "year": "2023",
+              "value": "132288"
+            },
+            {
+              "year": "2024",
+              "value": "134683"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Ohio",
+          "geo_fips": "39",
+          "data": [
+            {
+              "year": "2022",
+              "value": "3200314"
+            },
+            {
+              "year": "2023",
+              "value": "3235568"
+            },
+            {
+              "year": "2024",
+              "value": "3267904"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Iowa",
+          "geo_fips": "19",
+          "data": [
+            {
+              "year": "2022",
+              "value": "922684"
+            },
+            {
+              "year": "2023",
+              "value": "932618"
+            },
+            {
+              "year": "2024",
+              "value": "943396"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Utah",
+          "geo_fips": "49",
+          "data": [
+            {
+              "year": "2022",
+              "value": "751652"
+            },
+            {
+              "year": "2023",
+              "value": "773345"
+            },
+            {
+              "year": "2024",
+              "value": "790144"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "California",
+          "geo_fips": "06",
+          "data": [
+            {
+              "year": "2022",
+              "value": "7407361"
+            },
+            {
+              "year": "2023",
+              "value": "7494811"
+            },
+            {
+              "year": "2024",
+              "value": "7567568"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "North Dakota",
+          "geo_fips": "38",
+          "data": [
+            {
+              "year": "2022",
+              "value": "202213"
+            },
+            {
+              "year": "2023",
+              "value": "206123"
+            },
+            {
+              "year": "2024",
+              "value": "208084"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Colorado",
+          "geo_fips": "08",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1507547"
+            },
+            {
+              "year": "2023",
+              "value": "1542215"
+            },
+            {
+              "year": "2024",
+              "value": "1571735"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Virginia",
+          "geo_fips": "51",
+          "data": [
+            {
+              "year": "2022",
+              "value": "2199299"
+            },
+            {
+              "year": "2023",
+              "value": "2234492"
+            },
+            {
+              "year": "2024",
+              "value": "2266609"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Washington",
+          "geo_fips": "53",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1900252"
+            },
+            {
+              "year": "2023",
+              "value": "1929694"
+            },
+            {
+              "year": "2024",
+              "value": "1954777"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Oregon",
+          "geo_fips": "41",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1062522"
+            },
+            {
+              "year": "2023",
+              "value": "1078343"
+            },
+            {
+              "year": "2024",
+              "value": "1087983"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Delaware",
+          "geo_fips": "10",
+          "data": [
+            {
+              "year": "2022",
+              "value": "279923"
+            },
+            {
+              "year": "2023",
+              "value": "286340"
+            },
+            {
+              "year": "2024",
+              "value": "293383"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Texas",
+          "geo_fips": "48",
+          "data": [
+            {
+              "year": "2022",
+              "value": "6545727"
+            },
+            {
+              "year": "2023",
+              "value": "6723729"
+            },
+            {
+              "year": "2024",
+              "value": "6879255"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Nebraska",
+          "geo_fips": "31",
+          "data": [
+            {
+              "year": "2022",
+              "value": "516651"
+            },
+            {
+              "year": "2023",
+              "value": "523603"
+            },
+            {
+              "year": "2024",
+              "value": "530878"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Indiana",
+          "geo_fips": "18",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1860566"
+            },
+            {
+              "year": "2023",
+              "value": "1886485"
+            },
+            {
+              "year": "2024",
+              "value": "1916243"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Mexico",
+          "geo_fips": "35",
+          "data": [
+            {
+              "year": "2022",
+              "value": "558179"
+            },
+            {
+              "year": "2023",
+              "value": "572064"
+            },
+            {
+              "year": "2024",
+              "value": "585937"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New York",
+          "geo_fips": "36",
+          "data": [
+            {
+              "year": "2022",
+              "value": "4128119"
+            },
+            {
+              "year": "2023",
+              "value": "4164793"
+            },
+            {
+              "year": "2024",
+              "value": "4196985"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Minnesota",
+          "geo_fips": "27",
+          "data": [
+            {
+              "year": "2022",
+              "value": "1631701"
+            },
+            {
+              "year": "2023",
+              "value": "1652534"
+            },
+            {
+              "year": "2024",
+              "value": "1666687"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Pennsylvania",
+          "geo_fips": "42",
+          "data": [
+            {
+              "year": "2022",
+              "value": "3593490"
+            },
+            {
+              "year": "2023",
+              "value": "3629624"
+            },
+            {
+              "year": "2024",
+              "value": "3656971"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "Vermont",
+          "geo_fips": "50",
+          "data": [
+            {
+              "year": "2022",
+              "value": "193222"
+            },
+            {
+              "year": "2023",
+              "value": "196162"
+            },
+            {
+              "year": "2024",
+              "value": "200079"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Jersey",
+          "geo_fips": "34",
+          "data": [
+            {
+              "year": "2022",
+              "value": "2195831"
+            },
+            {
+              "year": "2023",
+              "value": "2215482"
+            },
+            {
+              "year": "2024",
+              "value": "2239128"
+            }
+          ]
+        },
+        {
+          "geo_type": "state",
+          "geo_name": "New Hampshire",
+          "geo_fips": "33",
+          "data": [
+            {
+              "year": "2022",
+              "value": "393945"
+            },
+            {
+              "year": "2023",
+              "value": "399663"
+            },
+            {
+              "year": "2024",
+              "value": "404453"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "provider": "census"
+}

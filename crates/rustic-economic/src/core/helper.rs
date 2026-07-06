@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc};
+use chrono::{Datelike, Duration, Utc};
 use rustic_providers::economic::census::model::CensusRecord;
 
 use crate::domain::CensusData;
@@ -13,40 +13,8 @@ pub(crate) fn next_refresh(frequency: &str) -> chrono::DateTime<Utc> {
     }
 }
 
-// pub(crate) fn fips_to_census_geo(geo_fips: &str) -> String {
-//     if geo_fips == "00000" {
-//         "us:1".to_string()
-//     } else if geo_fips.ends_with("000") {
-//         // state — 06000 → state:06
-//         format!("state:{}", &geo_fips[..2])
-//     } else {
-//         // county — 06075 → county:075&in=state:06
-//         format!("county:{}&in=state:{}", &geo_fips[2..], &geo_fips[..2])
-//     }
-// }
-
-// pub(crate) fn geo_type(geo_fip: &BeaParamValue) -> &'static str {
-//     let key = geo_fip.key.as_str();
-//     let name = geo_fip.description.as_str();
-
-//     if key == "00000" {
-//         "national"
-//     } else if ("91000"..="98000").contains(&key) {
-//         "region"
-//     } else if key.ends_with("000") {
-//         "state"
-//     } else if name.contains("Metropolitan") || name.contains("Nonmetropolitan") {
-//         "metro"
-//     } else if name.contains("Division") {
-//         "division"
-//     } else {
-//         "county"
-//     }
-// }
-
 pub(crate) fn resolve_years(year: &str) -> Vec<String> {
-    let current_year = 2026; // latest available BEA year
-
+    let current_year = Utc::now().year(); // latest available BEA year
     match year {
         "LAST5" => (0..5).map(|i| (current_year - i).to_string()).collect(),
         "LAST3" => (0..3).map(|i| (current_year - i).to_string()).collect(),
@@ -93,5 +61,38 @@ pub fn process_census_records(
             last_refreshed: Utc::now(),
             next_refresh: next_refresh("a"),
         });
+    }
+}
+
+pub fn get_variable_description(variable_code: &str) -> String {
+    match variable_code {
+        "B19013_001E" => "Median Income".to_string(),
+        "B01002_001E" => "Median Age".to_string(),
+        "B01003_001E" => "Total Population".to_string(),
+        "B25003_002E" => "Owner Units".to_string(),
+        "B25077_001E" => "Median Home Value".to_string(),
+        "B17001_002E" => "Poverty Count".to_string(),
+        "B23025_005E" => "Unemployment Count".to_string(),
+        _ => "Unknown Metric".to_string(),
+    }
+}
+
+pub fn get_bea_regional_code(table_name: &str) -> String {
+    match table_name {
+        "CAINC1" => "CAINC1-1".to_string(),
+        "CAINC4" => "CAINC4-10".to_string(),
+        "CAINC5N" => "CAINC5N-10".to_string(),
+        "CAGDP1" => "CAGDP1-1".to_string(),
+        _ => "Unknown Metric".to_string(),
+    }
+}
+
+pub fn get_bea_metric_description(code: &str) -> String {
+    match code {
+        "CAINC1-1" => "Personal Income".to_string(),
+        "CAINC4-10" => "Income Summary".to_string(),
+        "CAINC5N-10" => "Work Earnings".to_string(),
+        "CAGDP1-1" => "Local GDP".to_string(),
+        _ => "Unknown Metric".to_string(),
     }
 }

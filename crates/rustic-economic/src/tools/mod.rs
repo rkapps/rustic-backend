@@ -1,6 +1,7 @@
 pub mod bea;
 pub mod census;
 pub mod fred;
+pub mod domain;
 
 // // rustic-economic/src/lib.rs
 // use anyhow::Result;

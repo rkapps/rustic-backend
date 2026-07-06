@@ -114,19 +114,30 @@ impl Tool for BeaDataTool {
         match dataset {
             "nipa" => {
                 let rows = get_bea_nipa(self.reader.clone(), table_name, year).await?;
+                debug!(
+                    target: "economic-tool",
+                    "Bea: {}", rows.len()
+                );
                 Ok(json!({
-                    "dataset":    dataset,
-                    "table_name": table_name,
-                    "year":       year,
-                    "data":       rows,
+                    "bea_nipa":   if rows.is_empty() {Value::Null} else {json!(rows)},
                     "provider":   "bea"
                 }))
             }
             "regional" => {
-                let line_code = params["line_code"].as_str().unwrap_or("1");
+                // let line_code = params["line_code"].as_str().unwrap_or("1");
                 let geo_fips = params["geo_fips"].as_str();
                 let geo_type = params["geo_type"].as_str();
                 let state_prefix = params["state_prefix"].as_str();
+
+                info!(
+                    target: "economic-tool",
+                    "bea regional table_name: {} geo_fips: {:?} geo_type: {:?} state_prefix: {:?} year: {}",
+                    table_name,
+                    geo_fips,
+                    geo_type,
+                    state_prefix,
+                    year,
+                );
 
                 let rows = get_bea_regional(
                     self.reader.clone(),
@@ -137,29 +148,16 @@ impl Tool for BeaDataTool {
                     year,
                 )
                 .await?;
-
                 debug!(
                     target: "economic-tool",
-                    "bea regional table_name: {} geo_fips: {:?} geo_type: {:?} state_prefix: {:?} year: {} - rows: {}",
-                    table_name,
-                    geo_fips,
-                    geo_type,
-                    state_prefix,
-                    year,
-                    rows.len()
+                    "Bea: {}", rows.len()
                 );
 
                 Ok(json!({
-                    "dataset":    dataset,
-                    "table_name": table_name,
-                    "line_code":  line_code,
-                    "geo_fips":   geo_fips,
-                    "year":       year,
-                    "data":       if rows.is_empty() {Value::Null} else {json!(rows)},
-                    "unit":       "Thousands of dollars",
-                    "provider":   "bea",
-                    "note":       "UNIT_MULT=3 means thousands of dollars"
+                    "bea_regional":   if rows.is_empty() {Value::Null} else {json!(rows)},
+                    "provider":   "bea"
                 }))
+
             }
             _ => Err(anyhow::anyhow!("dataset must be 'nipa' or 'regional'")),
         }

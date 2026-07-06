@@ -13,12 +13,16 @@ use crate::{
 
 #[async_trait]
 impl FredStorageReader for EconomicMongoStorageReader {
-    async fn get_series(&self, series_id: &str) -> Result<Option<EconomicSeries>> {
-        let Ok(repo) = self.manager.economic_series().await else {
-            return Err(anyhow::anyhow!("Error getting EconomicSeries Repository"));
-        };
-        let mut repo = repo.lock().await;
-        Ok(repo.find_by_id(series_id.to_owned()).await.ok())
+    async fn get_series(&self, series_id: &str) -> Result<EconomicSeries> {
+        match self.manager.economic_series().await {
+            Ok(repo) => {
+                let mut repo = repo.lock().await;
+                repo.find_by_id(series_id.to_string()).await
+            }
+            Err(e) => {
+                return Err(anyhow::anyhow!("Error getting CensusData: {}", e));
+            }
+        }              
     }
 
     async fn list_active(&self) -> Result<Vec<EconomicSeries>> {

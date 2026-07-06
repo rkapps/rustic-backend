@@ -1,11 +1,15 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use std::sync::Arc;
 use tracing::debug;
 
-use crate::{core::fred::get_fred_series, storage::mongo::reader::EconomicMongoStorageReader};
+use crate::{
+    core::fred::get_fred_series, storage::mongo::reader::EconomicMongoStorageReader,
+    tools::domain::FredSeriesEntity,
+};
 #[derive(Debug, Clone)]
 pub struct FredDataTool {
     reader: Arc<EconomicMongoStorageReader>,
@@ -31,36 +35,59 @@ impl Tool for FredDataTool {
         json!({
             "type": "object",
             "properties": {
-                "series_id": {
-                    "type": "string",
-                    "description": "FRED series ID e.g. CPIAUCSL, UMCSENT, UNRATE, HOUST"
+                "series_ids": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "List of Fred series e.g. CPIAUCSL, UMCSENT, UNRATE, HOUST"
                 },
                 "limit": {
                     "type": "integer",
-                    "description": "Number of observations to return. Default 3.",
-                    "default": 3
+                    "description": "Number of observations to return. Default 12.",
+                    "default": 12
                 }
             },
-            "required": ["series_id"]
+            "required": ["series_ids"]
         })
     }
 
-    async fn execute(&self, params: Value) -> Result<Value> {
-        let series_id = params["series_id"]
-            .as_str()
-            .ok_or_else(|| anyhow::anyhow!("series_id required"))?;
+    async fn execute(&self, value: Value) -> Result<Value> {
+        #[derive(Debug, Deserialize)]
+        struct Params {
+            series_ids: Vec<String>,
+            #[serde(default = "default_limit")]
+            limit: Option<usize>,
+        }
+        fn default_limit() -> Option<usize> {
+            Some(12)
+        }
 
-        let limit = params["limit"].as_u64().map(|n| n as usize);
-        let data_points = get_fred_series(self.reader.clone(), series_id, limit).await?;
+        let params: Params = serde_json::from_value(value.clone())
+            .map_err(|e| anyhow::anyhow!("Failed to deserialize params: {:?} — {:?}", value, e))?;
+
+        let series_ids = params.series_ids;
+        let limit = params.limit;
+
+        let mut fseriesa = Vec::new();
+        for series_id in series_ids {
+            let series = get_fred_series(self.reader.clone(), &series_id).await?;
+            let obs = match limit {
+                Some(n) => series.observations.into_iter().take(n).collect(),
+                None => series.observations,
+            };
+            let fseries = FredSeriesEntity {
+                series_id: series.series_id,
+                name: series.name,
+                category: series.category,
+                observations: obs,
+            };
+            fseriesa.push(fseries);
+        }
 
         debug!(
             target: "economic-tool",
-            "Fred series_id: {} observations: {:?}", series_id, data_points
+            "Fred series: {:?}", fseriesa.len()
         );
 
-        Ok(json!({
-            "series_id": series_id,
-            "observations": if data_points.is_empty() {Value::Null} else {json!(data_points)}
-        }))
+        Ok(json!({"fred_series": fseriesa, "provider":   "fred"}))
     }
 }

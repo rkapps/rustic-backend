@@ -1,7 +1,8 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
-use tracing::debug;
+use serde_json::json;
+use tracing::{debug, error, trace};
 
 use crate::{
     domain::CensusData,
@@ -10,16 +11,141 @@ use crate::{
         reader::CensusStorageReader,
         writer::CensusStorageWriter,
     },
+    tools::domain::CensusEntity,
 };
 
 #[async_trait]
 impl CensusStorageReader for EconomicMongoStorageReader {
-    async fn get_census(&self, id: &str) -> Result<Option<CensusData>> {
+    async fn get_census(&self, id: &str) -> Result<CensusData> {
+        match self.manager.census().await {
+            Ok(repo) => {
+                let mut repo = repo.lock().await;
+                repo.find_by_id(id.to_string()).await
+            }
+            Err(e) => {
+                return Err(anyhow::anyhow!("Error getting CensusData: {}", e));
+            }
+        }
+    }
+
+    async fn get_census_by_dataset_variable(
+        &self,
+        dataset: &str,
+        variables: Vec<String>,
+        geo_fips: Option<&str>,
+        geo_type: Option<&str>,
+        state_prefix: Option<&str>,
+        years: Vec<String>,
+    ) -> Result<Vec<CensusEntity>> {
         let Ok(repo) = self.manager.census().await else {
             return Err(anyhow::anyhow!("Error getting Census Repository"));
         };
         let mut repo = repo.lock().await;
-        Ok(repo.find_by_id(id.to_owned()).await.ok())
+
+        let mut match_conditions = vec![
+            json! ({ "dataset": dataset }),
+            json! ({ "variable": { "$in": variables } }),
+            json! ({ "year": { "$in": years } }),
+        ];
+
+
+        // Append optional fields only if they contain data
+        if let Some(geo_type) = geo_type {
+            match_conditions.push(json!({ "geo_type": geo_type })); // Maps your raw field to the struct
+        }
+        if let Some(geo_fips) = geo_fips {
+            match_conditions.push(json! ({ "geo_fips": geo_fips }));
+        }
+
+        if let Some(prefix) = state_prefix {
+            match_conditions.push(json!( {
+                "geo_fips": {
+                    // The ^ symbol anchors the regex match strictly to the start of the string
+                    "$regex": format!("^{}", prefix),
+                    "$options": "i" // Optional: case-insensitive if your prefixes ever contain characters
+                }
+            }));
+        }
+
+        debug!(
+            target: "economic-tool",
+            "match_conditions: {:#?}", match_conditions
+        );
+
+        // 3. Construct the pipeline array
+        let pipeline = vec![
+            // Stage 1: Dynamic Filters
+            json! ({ "$match": { "$and": match_conditions } }),
+            // Stage 2: Group into CensusValueEntity array per Geography
+            json! ({
+                "$group": {
+                    "_id": {
+                        "dataset": "$dataset",
+                        "variable": "$variable",
+                        "geo_type": "$geo_type",
+                        "geo_name": "$geo_name",
+                        "geo_fips": "$geo_fips"
+                    },
+                    "data": {
+                        "$push": {
+                            "year": "$year",
+                            "value": "$value"
+                        }
+                    }
+                }
+            }),
+            // Stage 3: Group into CensusGeoEntity array per Dataset/Variable
+            json!({
+                "$group": {
+                    "_id": {
+                        "dataset": "$_id.dataset",
+                        "variable": "$_id.variable"
+                    },
+                    "geos": {
+                        "$push": {
+                            "geo_type": "$_id.geo_type",
+                            "geo_name": "$_id.geo_name",
+                            "geo_fips": "$_id.geo_fips",
+                            "data": "$data"
+                        }
+                    }
+                }
+            }),
+            // Stage 4: Project fields 1:1 with your CensusEntity struct layout
+            json!({
+                "$project": {
+                    "_id": 0,
+                    "dataset": "$_id.dataset",
+                    "variable": "$_id.variable",
+                    "geos": 1
+                }
+            }),
+        ];
+
+        let results = repo.aggregate(pipeline).await?;
+        debug!(
+            target: "economic-tool",
+            "results: {:#?}", results.len()
+        );
+        let mut entities: Vec<CensusEntity> = Vec::new();
+
+        for (index, val) in results.iter().enumerate() {
+            match serde_json::from_value::<CensusEntity>(val.clone()) {
+                Ok(entity) => entities.push(entity),
+                Err(err) => {
+                    // This will print the exact field, key, or type that Serde is choking on!
+                    error!(
+                        target: "economic-tool",
+                        "Serde failed at item index {}: {}", index, err
+                    );
+                }
+            }
+        }
+        trace!(
+            target: "economic-tool",
+            "census: {:#?}", entities
+        );
+        Ok(entities)
     }
 
     async fn get_census_filtered(
