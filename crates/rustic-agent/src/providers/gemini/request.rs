@@ -379,7 +379,7 @@ impl GeminiInteractionsRequest {
         };
 
         let grequest = GeminiInteractionsRequest {
-            model: MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
+            model: request.model,
             input: inputs,
             system_instruction,
             previous_interaction_id: interaction_id,
