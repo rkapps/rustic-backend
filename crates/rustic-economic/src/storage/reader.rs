@@ -1,6 +1,5 @@
 use crate::{
-    domain::{BeaNipaData, BeaRegionalData, CensusData, EconomicSeries},
-    tools::domain::{BeaNipaEntity, BeaRegionalEntity, CensusEntity},
+    domain::{bea::{BeaNipa, BeaRegional}, census::Census, fred::FredSeries}, tools::domain::{BeaNipaEntity, BeaRegionalEntity, CensusEntity},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -14,26 +13,27 @@ pub trait StorageReader:
 
 #[async_trait]
 pub trait FredStorageReader: Send + Sync + Debug {
-    async fn get_series(&self, series_id: &str) -> Result<EconomicSeries>;
-    async fn list_active(&self) -> Result<Vec<EconomicSeries>>;
+    async fn get_series(&self, series_id: &str) -> Result<FredSeries>;
+    async fn list_active(&self) -> Result<Vec<FredSeries>>;
 }
 
 #[async_trait]
 pub trait BeaStorageReader: Send + Sync + Debug {
     // BEA NIPA
-    async fn get_bea_nipa(&self, id: &str) -> Result<BeaNipaData>;
+    async fn get_bea_nipa(&self, id: &str) -> Result<BeaNipa>;
     async fn get_bea_nipa_by_table_series(
         &self,
-        table_name: &str,
+        table_name: String,
+        series_codes: Vec<String>,
         years: Vec<String>,
     ) -> Result<Vec<BeaNipaEntity>>;
 
-    async fn get_bea_regional(&self, id: &str) -> Result<BeaRegionalData>;
+    async fn get_bea_regional(&self, id: &str) -> Result<BeaRegional>;
     async fn get_bea_regional_by_table_series(
         &self,
-        table_name: &str,
+        codes: Vec<String>,
         years: Vec<String>,
-        geo_fips: Option<&str>,
+        geo_fips: Vec<String>,
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
     ) -> Result<Vec<BeaRegionalEntity>>;
@@ -42,7 +42,7 @@ pub trait BeaStorageReader: Send + Sync + Debug {
         &self,
         table_name: &str,
         year: &str,
-    ) -> Result<Vec<BeaRegionalData>>;
+    ) -> Result<Vec<BeaRegional>>;
 
     async fn get_bea_regional_filtered(
         &self,
@@ -51,17 +51,17 @@ pub trait BeaStorageReader: Send + Sync + Debug {
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         year: &str,
-    ) -> Result<Vec<BeaRegionalData>>;
+    ) -> Result<Vec<BeaRegional>>;
 }
 
 #[async_trait]
 pub trait CensusStorageReader: Send + Sync + Debug {
-    async fn get_census(&self, id: &str) -> Result<CensusData>;
+    async fn get_census(&self, id: &str) -> Result<Census>;
     async fn get_census_by_dataset_variable(
         &self,
         dataset: &str,
         variables: Vec<String>,
-        geo_fips: Option<&str>,
+        geo_fips: Vec<String>,
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         years: Vec<String>,
@@ -75,5 +75,5 @@ pub trait CensusStorageReader: Send + Sync + Debug {
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         year: &str,
-    ) -> Result<Vec<CensusData>>;
+    ) -> Result<Vec<Census>>;
 }

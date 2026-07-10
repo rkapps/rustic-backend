@@ -13,11 +13,11 @@ pub struct FredObservation {
 
 #[derive(Debug, Deserialize)]
 pub struct FredSeriesResponse {
-    pub seriess: Vec<FredSeries>,
+    pub seriess: Vec<FredSeriesRecord>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct FredSeries {
+pub struct FredSeriesRecord {
     pub id: String,
     pub title: String,
     pub frequency: String,

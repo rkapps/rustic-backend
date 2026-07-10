@@ -3,8 +3,7 @@ use std::{env, sync::Arc};
 use anyhow::Result;
 use rustic_core::{Tool, set_logger};
 use rustic_economic::{
-    storage::mongo::{manager::EconomicMongoStorageManager, reader::EconomicMongoStorageReader},
-    tools::{bea::BeaDataTool, census::CensusDataTool, fred::FredDataTool},
+    storage::mongo::{manager::EconomicMongoStorageManager, reader::EconomicMongoStorageReader}, tools::{bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool, fred::FredDataTool},
 };
 use serde_json::json;
 use tokio::fs;
@@ -48,8 +47,8 @@ async fn test_tool_bea_nipa() -> Result<()> {
     let manager = get_manager().await?;
     let reader = EconomicMongoStorageReader::new(manager);
 
-    let tool = BeaDataTool::new(Arc::new(reader.clone()));
-    let value = json!({"dataset": "nipa", "table_name":"T20100", "year": "LAST5"});
+    let tool = BeaNipaDataTool::new(Arc::new(reader.clone()));
+    let value = json!({"table_name": "T20100", "series_codes": ["DPCERC", "A065RC"], "year": "2023"});
 
     let result = tool.execute(value).await?;
     // save to fixture
@@ -60,21 +59,38 @@ async fn test_tool_bea_nipa() -> Result<()> {
 
 
 #[tokio::test]
-async fn test_tool_bea_regional_cainc1() -> Result<()> {
+async fn test_tool_bea_regional_cainc1_national() -> Result<()> {
     set_logger("economic-tool=debug".to_string());
     let manager = get_manager().await?;
     let reader = EconomicMongoStorageReader::new(manager);
 
-    let tool = BeaDataTool::new(Arc::new(reader.clone()));
+    let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
-        "dataset": "regional", "table_name":"CAINC1", "year": "LAST5",
-        "geo_fips": "06000"
+        "code":"CAINC1", "line_codes": ["1"], "year": "LAST5", "geo_fips": ["00000"]
     }); 
 
     let result = tool.execute(value).await?;
     // save to fixture
     let json = serde_json::to_string_pretty(&result).unwrap();
-    fs::write("tests/fixtures/tool_bea_regional_cainc1.json", &json).await?;
+    fs::write("tests/fixtures/tool_bea_regional_cainc1_national.json", &json).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_tool_bea_regional_cainc1_state() -> Result<()> {
+    set_logger("economic-tool=debug".to_string());
+    let manager = get_manager().await?;
+    let reader = EconomicMongoStorageReader::new(manager);
+
+    let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
+    let value = json!({
+        "code":"CAINC1", "line_codes": ["1"], "year": "LAST5", "geo_fips": ["06000", "04000" ]
+    }); 
+
+    let result = tool.execute(value).await?;
+    // save to fixture
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    fs::write("tests/fixtures/tool_bea_regional_cainc1_state.json", &json).await?;
     Ok(())
 }
 
@@ -85,10 +101,9 @@ async fn test_tool_bea_regional_cainc1_county() -> Result<()> {
     let manager = get_manager().await?;
     let reader = EconomicMongoStorageReader::new(manager);
 
-    let tool = BeaDataTool::new(Arc::new(reader.clone()));
+    let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
-        "dataset": "regional", "table_name":"CAINC1", "year": "LAST5",
-        "geo_type": "COUNTY", "state_prefix": "06"
+        "code":"CAINC1", "line_codes": ["1"],  "year": "LAST5", "geo_type": "COUNTY", "state_prefix": "06"
     }); 
 
     let result = tool.execute(value).await?;
@@ -99,21 +114,39 @@ async fn test_tool_bea_regional_cainc1_county() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_tool_bea_regional_cainc5n() -> Result<()> {
+async fn test_tool_bea_regional_cainc5n_state() -> Result<()> {
     set_logger("economic-tool=debug".to_string());
     let manager = get_manager().await?;
     let reader = EconomicMongoStorageReader::new(manager);
 
-    let tool = BeaDataTool::new(Arc::new(reader.clone()));
+    let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
-        "dataset": "regional", "table_name":"CAINC5N", "year": "LAST5",
+        "code":"CAINC5N", "line_codes": ["701", "704", "521"], "year": "LAST5",  "geo_fips": ["06000", "04000" ]
+    }); 
+
+    let result = tool.execute(value).await?;
+    // save to fixture
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    fs::write("tests/fixtures/tool_bea_regional_cainc5n_state.json", &json).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_tool_bea_regional_cainc5n_county() -> Result<()> {
+    set_logger("economic-tool=debug".to_string());
+    let manager = get_manager().await?;
+    let reader = EconomicMongoStorageReader::new(manager);
+
+    let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
+    let value = json!({
+        "code":"CAINC5N", "line_codes": ["700", "704", "521"],  "year": "LAST5",
         "geo_type": "COUNTY", "state_prefix": "06"
     }); 
 
     let result = tool.execute(value).await?;
     // save to fixture
     let json = serde_json::to_string_pretty(&result).unwrap();
-    fs::write("tests/fixtures/tool_bea_regional_cainc5n.json", &json).await?;
+    fs::write("tests/fixtures/tool_bea_regional_cainc5n_county.json", &json).await?;
     Ok(())
 }
 
@@ -128,7 +161,7 @@ async fn test_tool_census() -> Result<()> {
     let value = json!(
         {   
             "dataset": "acs5", "variables": ["B19013_001E", "B25077_001E", "B25003_002E", "B01002_001E"], "year": "LAST5", 
-            "geo_type": "state"
+            "geo_fips": ["06045", "04000" ]
         }
     );
 

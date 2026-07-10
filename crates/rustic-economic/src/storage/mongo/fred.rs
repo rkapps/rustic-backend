@@ -3,8 +3,7 @@ use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
 
 use crate::{
-    domain::EconomicSeries,
-    storage::{
+    domain::fred::FredSeries, storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::FredStorageReader,
         writer::FredStorageWriter,
@@ -13,7 +12,7 @@ use crate::{
 
 #[async_trait]
 impl FredStorageReader for EconomicMongoStorageReader {
-    async fn get_series(&self, series_id: &str) -> Result<EconomicSeries> {
+    async fn get_series(&self, series_id: &str) -> Result<FredSeries> {
         match self.manager.economic_series().await {
             Ok(repo) => {
                 let mut repo = repo.lock().await;
@@ -25,7 +24,7 @@ impl FredStorageReader for EconomicMongoStorageReader {
         }              
     }
 
-    async fn list_active(&self) -> Result<Vec<EconomicSeries>> {
+    async fn list_active(&self) -> Result<Vec<FredSeries>> {
         let Ok(repo) = self.manager.economic_series().await else {
             return Err(anyhow::anyhow!("Error getting EconomicSeries Repository"));
         };
@@ -46,7 +45,7 @@ impl FredStorageWriter for EconomicMongoStorageWriter {
         repo.delete_many(Some(SearchCriteria::new())).await?;
         Ok(())
     }
-    async fn upsert_fred_series(&self, series: EconomicSeries) -> Result<()> {
+    async fn upsert_fred_series(&self, series: FredSeries) -> Result<()> {
         let Ok(repo) = self.manager.economic_series().await else {
             return Err(anyhow::anyhow!("Error getting EconomicSeries Repository"));
         };

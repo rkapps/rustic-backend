@@ -1,0 +1,3329 @@
+{
+  "bea_regional": [
+    {
+      "code": "CAINC5N-521",
+      "description": "Furniture and Related Product Manufacturing Earnings by State",
+      "geos": [
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Inyo, CA",
+          "geo_fips": "06027",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lake, CA",
+          "geo_fips": "06033",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1488.0
+            },
+            {
+              "year": "2023",
+              "value": 1494.0
+            },
+            {
+              "year": "2024",
+              "value": 1606.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Placer, CA",
+          "geo_fips": "06061",
+          "data": [
+            {
+              "year": "2022",
+              "value": 22030.0
+            },
+            {
+              "year": "2023",
+              "value": 21060.0
+            },
+            {
+              "year": "2024",
+              "value": 24711.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sierra, CA",
+          "geo_fips": "06091",
+          "data": [
+            {
+              "year": "2022",
+              "value": 4.0
+            },
+            {
+              "year": "2023",
+              "value": 2.0
+            },
+            {
+              "year": "2024",
+              "value": 2.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Imperial, CA",
+          "geo_fips": "06025",
+          "data": [
+            {
+              "year": "2022",
+              "value": 454.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kings, CA",
+          "geo_fips": "06031",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 2959.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lassen, CA",
+          "geo_fips": "06035",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Benito, CA",
+          "geo_fips": "06069",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3105.0
+            },
+            {
+              "year": "2023",
+              "value": 3099.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Siskiyou, CA",
+          "geo_fips": "06093",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 26.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Solano, CA",
+          "geo_fips": "06095",
+          "data": [
+            {
+              "year": "2022",
+              "value": 13565.0
+            },
+            {
+              "year": "2023",
+              "value": 12150.0
+            },
+            {
+              "year": "2024",
+              "value": 13257.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Diego, CA",
+          "geo_fips": "06073",
+          "data": [
+            {
+              "year": "2022",
+              "value": 146760.0
+            },
+            {
+              "year": "2023",
+              "value": 157129.0
+            },
+            {
+              "year": "2024",
+              "value": 161097.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Humboldt, CA",
+          "geo_fips": "06023",
+          "data": [
+            {
+              "year": "2022",
+              "value": 4375.0
+            },
+            {
+              "year": "2023",
+              "value": 5174.0
+            },
+            {
+              "year": "2024",
+              "value": 6105.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Shasta, CA",
+          "geo_fips": "06089",
+          "data": [
+            {
+              "year": "2022",
+              "value": 4604.0
+            },
+            {
+              "year": "2023",
+              "value": 4578.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alameda, CA",
+          "geo_fips": "06001",
+          "data": [
+            {
+              "year": "2022",
+              "value": 117995.0
+            },
+            {
+              "year": "2023",
+              "value": 116416.0
+            },
+            {
+              "year": "2024",
+              "value": 121761.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yolo, CA",
+          "geo_fips": "06113",
+          "data": [
+            {
+              "year": "2022",
+              "value": 15237.0
+            },
+            {
+              "year": "2023",
+              "value": 3971.0
+            },
+            {
+              "year": "2024",
+              "value": 4289.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Amador, CA",
+          "geo_fips": "06005",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 1.0
+            },
+            {
+              "year": "2024",
+              "value": -1.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Barbara, CA",
+          "geo_fips": "06083",
+          "data": [
+            {
+              "year": "2022",
+              "value": 17270.0
+            },
+            {
+              "year": "2023",
+              "value": 18716.0
+            },
+            {
+              "year": "2024",
+              "value": 19864.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Marin, CA",
+          "geo_fips": "06041",
+          "data": [
+            {
+              "year": "2022",
+              "value": 6087.0
+            },
+            {
+              "year": "2023",
+              "value": 7102.0
+            },
+            {
+              "year": "2024",
+              "value": 8199.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Colusa, CA",
+          "geo_fips": "06011",
+          "data": [
+            {
+              "year": "2022",
+              "value": 52.0
+            },
+            {
+              "year": "2023",
+              "value": 76.0
+            },
+            {
+              "year": "2024",
+              "value": 75.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sacramento, CA",
+          "geo_fips": "06067",
+          "data": [
+            {
+              "year": "2022",
+              "value": 60868.0
+            },
+            {
+              "year": "2023",
+              "value": 56523.0
+            },
+            {
+              "year": "2024",
+              "value": 56825.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alpine, CA",
+          "geo_fips": "06003",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Plumas, CA",
+          "geo_fips": "06063",
+          "data": [
+            {
+              "year": "2022",
+              "value": 644.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Madera, CA",
+          "geo_fips": "06039",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3842.0
+            },
+            {
+              "year": "2023",
+              "value": 4981.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mariposa, CA",
+          "geo_fips": "06043",
+          "data": [
+            {
+              "year": "2022",
+              "value": 69.0
+            },
+            {
+              "year": "2023",
+              "value": 54.0
+            },
+            {
+              "year": "2024",
+              "value": 53.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Nevada, CA",
+          "geo_fips": "06057",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2114.0
+            },
+            {
+              "year": "2023",
+              "value": 2144.0
+            },
+            {
+              "year": "2024",
+              "value": 2489.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Del Norte, CA",
+          "geo_fips": "06015",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Francisco, CA",
+          "geo_fips": "06075",
+          "data": [
+            {
+              "year": "2022",
+              "value": 52576.0
+            },
+            {
+              "year": "2023",
+              "value": 32408.0
+            },
+            {
+              "year": "2024",
+              "value": 26367.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Butte, CA",
+          "geo_fips": "06007",
+          "data": [
+            {
+              "year": "2022",
+              "value": 10059.0
+            },
+            {
+              "year": "2023",
+              "value": 10422.0
+            },
+            {
+              "year": "2024",
+              "value": 10686.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mono, CA",
+          "geo_fips": "06051",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Clara, CA",
+          "geo_fips": "06085",
+          "data": [
+            {
+              "year": "2022",
+              "value": 98729.0
+            },
+            {
+              "year": "2023",
+              "value": 92086.0
+            },
+            {
+              "year": "2024",
+              "value": 93563.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Contra Costa, CA",
+          "geo_fips": "06013",
+          "data": [
+            {
+              "year": "2022",
+              "value": 62388.0
+            },
+            {
+              "year": "2023",
+              "value": 65102.0
+            },
+            {
+              "year": "2024",
+              "value": 63379.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yuba, CA",
+          "geo_fips": "06115",
+          "data": [
+            {
+              "year": "2022",
+              "value": 47.0
+            },
+            {
+              "year": "2023",
+              "value": 45.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Napa, CA",
+          "geo_fips": "06055",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2088.0
+            },
+            {
+              "year": "2023",
+              "value": 2203.0
+            },
+            {
+              "year": "2024",
+              "value": 1916.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Los Angeles, CA",
+          "geo_fips": "06037",
+          "data": [
+            {
+              "year": "2022",
+              "value": 816853.0
+            },
+            {
+              "year": "2023",
+              "value": 790720.0
+            },
+            {
+              "year": "2024",
+              "value": 760303.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Trinity, CA",
+          "geo_fips": "06105",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 4.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Calaveras, CA",
+          "geo_fips": "06009",
+          "data": [
+            {
+              "year": "2022",
+              "value": 783.0
+            },
+            {
+              "year": "2023",
+              "value": 792.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tehama, CA",
+          "geo_fips": "06103",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Mateo, CA",
+          "geo_fips": "06081",
+          "data": [
+            {
+              "year": "2022",
+              "value": 27888.0
+            },
+            {
+              "year": "2023",
+              "value": 28262.0
+            },
+            {
+              "year": "2024",
+              "value": 33722.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tuolumne, CA",
+          "geo_fips": "06109",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1842.0
+            },
+            {
+              "year": "2023",
+              "value": 1469.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sonoma, CA",
+          "geo_fips": "06097",
+          "data": [
+            {
+              "year": "2022",
+              "value": 32509.0
+            },
+            {
+              "year": "2023",
+              "value": 31742.0
+            },
+            {
+              "year": "2024",
+              "value": 32090.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Riverside, CA",
+          "geo_fips": "06065",
+          "data": [
+            {
+              "year": "2022",
+              "value": 117702.0
+            },
+            {
+              "year": "2023",
+              "value": 131130.0
+            },
+            {
+              "year": "2024",
+              "value": 135032.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sutter, CA",
+          "geo_fips": "06101",
+          "data": [
+            {
+              "year": "2022",
+              "value": 869.0
+            },
+            {
+              "year": "2023",
+              "value": 585.0
+            },
+            {
+              "year": "2024",
+              "value": 440.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kern, CA",
+          "geo_fips": "06029",
+          "data": [
+            {
+              "year": "2022",
+              "value": 10055.0
+            },
+            {
+              "year": "2023",
+              "value": 9646.0
+            },
+            {
+              "year": "2024",
+              "value": 10130.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Joaquin, CA",
+          "geo_fips": "06077",
+          "data": [
+            {
+              "year": "2022",
+              "value": 43302.0
+            },
+            {
+              "year": "2023",
+              "value": 37008.0
+            },
+            {
+              "year": "2024",
+              "value": 39548.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Bernardino, CA",
+          "geo_fips": "06071",
+          "data": [
+            {
+              "year": "2022",
+              "value": 167722.0
+            },
+            {
+              "year": "2023",
+              "value": 156147.0
+            },
+            {
+              "year": "2024",
+              "value": 159207.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Luis Obispo, CA",
+          "geo_fips": "06079",
+          "data": [
+            {
+              "year": "2022",
+              "value": 10558.0
+            },
+            {
+              "year": "2023",
+              "value": 10419.0
+            },
+            {
+              "year": "2024",
+              "value": 10786.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Orange, CA",
+          "geo_fips": "06059",
+          "data": [
+            {
+              "year": "2022",
+              "value": 402256.0
+            },
+            {
+              "year": "2023",
+              "value": 414554.0
+            },
+            {
+              "year": "2024",
+              "value": 432847.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Glenn, CA",
+          "geo_fips": "06021",
+          "data": [
+            {
+              "year": "2022",
+              "value": 322.0
+            },
+            {
+              "year": "2023",
+              "value": 397.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tulare, CA",
+          "geo_fips": "06107",
+          "data": [
+            {
+              "year": "2022",
+              "value": 5366.0
+            },
+            {
+              "year": "2023",
+              "value": 5525.0
+            },
+            {
+              "year": "2024",
+              "value": 5627.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Fresno, CA",
+          "geo_fips": "06019",
+          "data": [
+            {
+              "year": "2022",
+              "value": 21783.0
+            },
+            {
+              "year": "2023",
+              "value": 24206.0
+            },
+            {
+              "year": "2024",
+              "value": 23306.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Merced, CA",
+          "geo_fips": "06047",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2821.0
+            },
+            {
+              "year": "2023",
+              "value": 2865.0
+            },
+            {
+              "year": "2024",
+              "value": 2296.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Cruz, CA",
+          "geo_fips": "06087",
+          "data": [
+            {
+              "year": "2022",
+              "value": 12359.0
+            },
+            {
+              "year": "2023",
+              "value": 13337.0
+            },
+            {
+              "year": "2024",
+              "value": 13517.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Stanislaus, CA",
+          "geo_fips": "06099",
+          "data": [
+            {
+              "year": "2022",
+              "value": 30256.0
+            },
+            {
+              "year": "2023",
+              "value": 30615.0
+            },
+            {
+              "year": "2024",
+              "value": 31428.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "El Dorado, CA",
+          "geo_fips": "06017",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1973.0
+            },
+            {
+              "year": "2023",
+              "value": 2122.0
+            },
+            {
+              "year": "2024",
+              "value": 3076.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Ventura, CA",
+          "geo_fips": "06111",
+          "data": [
+            {
+              "year": "2022",
+              "value": 33991.0
+            },
+            {
+              "year": "2023",
+              "value": 37723.0
+            },
+            {
+              "year": "2024",
+              "value": 40381.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mendocino, CA",
+          "geo_fips": "06045",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1365.0
+            },
+            {
+              "year": "2023",
+              "value": 1396.0
+            },
+            {
+              "year": "2024",
+              "value": 1549.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Modoc, CA",
+          "geo_fips": "06049",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3.0
+            },
+            {
+              "year": "2023",
+              "value": 4.0
+            },
+            {
+              "year": "2024",
+              "value": 4.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Monterey, CA",
+          "geo_fips": "06053",
+          "data": [
+            {
+              "year": "2022",
+              "value": 6352.0
+            },
+            {
+              "year": "2023",
+              "value": 6336.0
+            },
+            {
+              "year": "2024",
+              "value": 5068.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CAINC5N-704",
+      "description": "Building Material and Garden Equipment Dealers Earnings by State",
+      "geos": [
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mendocino, CA",
+          "geo_fips": "06045",
+          "data": [
+            {
+              "year": "2022",
+              "value": 35848.0
+            },
+            {
+              "year": "2023",
+              "value": 35252.0
+            },
+            {
+              "year": "2024",
+              "value": 34490.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kern, CA",
+          "geo_fips": "06029",
+          "data": [
+            {
+              "year": "2022",
+              "value": 152314.0
+            },
+            {
+              "year": "2023",
+              "value": 152868.0
+            },
+            {
+              "year": "2024",
+              "value": 158766.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Los Angeles, CA",
+          "geo_fips": "06037",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1627766.0
+            },
+            {
+              "year": "2023",
+              "value": 1709151.0
+            },
+            {
+              "year": "2024",
+              "value": 1768836.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Bernardino, CA",
+          "geo_fips": "06071",
+          "data": [
+            {
+              "year": "2022",
+              "value": 346550.0
+            },
+            {
+              "year": "2023",
+              "value": 362401.0
+            },
+            {
+              "year": "2024",
+              "value": 390305.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mariposa, CA",
+          "geo_fips": "06043",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2518.0
+            },
+            {
+              "year": "2023",
+              "value": 2669.0
+            },
+            {
+              "year": "2024",
+              "value": 2510.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Luis Obispo, CA",
+          "geo_fips": "06079",
+          "data": [
+            {
+              "year": "2022",
+              "value": 89163.0
+            },
+            {
+              "year": "2023",
+              "value": 92181.0
+            },
+            {
+              "year": "2024",
+              "value": 98621.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Fresno, CA",
+          "geo_fips": "06019",
+          "data": [
+            {
+              "year": "2022",
+              "value": 180805.0
+            },
+            {
+              "year": "2023",
+              "value": 184488.0
+            },
+            {
+              "year": "2024",
+              "value": 190924.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Trinity, CA",
+          "geo_fips": "06105",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3401.0
+            },
+            {
+              "year": "2023",
+              "value": 2928.0
+            },
+            {
+              "year": "2024",
+              "value": 2962.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alpine, CA",
+          "geo_fips": "06003",
+          "data": [
+            {
+              "year": "2022",
+              "value": 6.0
+            },
+            {
+              "year": "2023",
+              "value": 6.0
+            },
+            {
+              "year": "2024",
+              "value": 6.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Ventura, CA",
+          "geo_fips": "06111",
+          "data": [
+            {
+              "year": "2022",
+              "value": 244199.0
+            },
+            {
+              "year": "2023",
+              "value": 260043.0
+            },
+            {
+              "year": "2024",
+              "value": 265143.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Shasta, CA",
+          "geo_fips": "06089",
+          "data": [
+            {
+              "year": "2022",
+              "value": 59605.0
+            },
+            {
+              "year": "2023",
+              "value": 60988.0
+            },
+            {
+              "year": "2024",
+              "value": 60258.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Marin, CA",
+          "geo_fips": "06041",
+          "data": [
+            {
+              "year": "2022",
+              "value": 90069.0
+            },
+            {
+              "year": "2023",
+              "value": 91643.0
+            },
+            {
+              "year": "2024",
+              "value": 92991.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Inyo, CA",
+          "geo_fips": "06027",
+          "data": [
+            {
+              "year": "2022",
+              "value": 6777.0
+            },
+            {
+              "year": "2023",
+              "value": 7765.0
+            },
+            {
+              "year": "2024",
+              "value": 7858.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Napa, CA",
+          "geo_fips": "06055",
+          "data": [
+            {
+              "year": "2022",
+              "value": 36047.0
+            },
+            {
+              "year": "2023",
+              "value": 41737.0
+            },
+            {
+              "year": "2024",
+              "value": 41367.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Humboldt, CA",
+          "geo_fips": "06023",
+          "data": [
+            {
+              "year": "2022",
+              "value": 46726.0
+            },
+            {
+              "year": "2023",
+              "value": 46214.0
+            },
+            {
+              "year": "2024",
+              "value": 47092.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Clara, CA",
+          "geo_fips": "06085",
+          "data": [
+            {
+              "year": "2022",
+              "value": 396966.0
+            },
+            {
+              "year": "2023",
+              "value": 396048.0
+            },
+            {
+              "year": "2024",
+              "value": 388992.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Modoc, CA",
+          "geo_fips": "06049",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Nevada, CA",
+          "geo_fips": "06057",
+          "data": [
+            {
+              "year": "2022",
+              "value": 45634.0
+            },
+            {
+              "year": "2023",
+              "value": 47609.0
+            },
+            {
+              "year": "2024",
+              "value": 49180.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Orange, CA",
+          "geo_fips": "06059",
+          "data": [
+            {
+              "year": "2022",
+              "value": 815496.0
+            },
+            {
+              "year": "2023",
+              "value": 877625.0
+            },
+            {
+              "year": "2024",
+              "value": 824624.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Glenn, CA",
+          "geo_fips": "06021",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3643.0
+            },
+            {
+              "year": "2023",
+              "value": 4088.0
+            },
+            {
+              "year": "2024",
+              "value": 3694.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Siskiyou, CA",
+          "geo_fips": "06093",
+          "data": [
+            {
+              "year": "2022",
+              "value": 9772.0
+            },
+            {
+              "year": "2023",
+              "value": 10139.0
+            },
+            {
+              "year": "2024",
+              "value": 9925.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sierra, CA",
+          "geo_fips": "06091",
+          "data": [
+            {
+              "year": "2022",
+              "value": 0.0
+            },
+            {
+              "year": "2023",
+              "value": 0.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Madera, CA",
+          "geo_fips": "06039",
+          "data": [
+            {
+              "year": "2022",
+              "value": 31267.0
+            },
+            {
+              "year": "2023",
+              "value": 33170.0
+            },
+            {
+              "year": "2024",
+              "value": 35076.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Placer, CA",
+          "geo_fips": "06061",
+          "data": [
+            {
+              "year": "2022",
+              "value": 122415.0
+            },
+            {
+              "year": "2023",
+              "value": 139225.0
+            },
+            {
+              "year": "2024",
+              "value": 124668.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mono, CA",
+          "geo_fips": "06051",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2070.0
+            },
+            {
+              "year": "2023",
+              "value": 2254.0
+            },
+            {
+              "year": "2024",
+              "value": 2474.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Diego, CA",
+          "geo_fips": "06073",
+          "data": [
+            {
+              "year": "2022",
+              "value": 631439.0
+            },
+            {
+              "year": "2023",
+              "value": 660268.0
+            },
+            {
+              "year": "2024",
+              "value": 673125.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alameda, CA",
+          "geo_fips": "06001",
+          "data": [
+            {
+              "year": "2022",
+              "value": 403783.0
+            },
+            {
+              "year": "2023",
+              "value": 414861.0
+            },
+            {
+              "year": "2024",
+              "value": 424376.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tehama, CA",
+          "geo_fips": "06103",
+          "data": [
+            {
+              "year": "2022",
+              "value": 11129.0
+            },
+            {
+              "year": "2023",
+              "value": 11341.0
+            },
+            {
+              "year": "2024",
+              "value": 12359.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yuba, CA",
+          "geo_fips": "06115",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2558.0
+            },
+            {
+              "year": "2023",
+              "value": 2471.0
+            },
+            {
+              "year": "2024",
+              "value": 9108.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lake, CA",
+          "geo_fips": "06033",
+          "data": [
+            {
+              "year": "2022",
+              "value": 14142.0
+            },
+            {
+              "year": "2023",
+              "value": 13449.0
+            },
+            {
+              "year": "2024",
+              "value": 14175.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Merced, CA",
+          "geo_fips": "06047",
+          "data": [
+            {
+              "year": "2022",
+              "value": 42094.0
+            },
+            {
+              "year": "2023",
+              "value": 44839.0
+            },
+            {
+              "year": "2024",
+              "value": 48217.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Calaveras, CA",
+          "geo_fips": "06009",
+          "data": [
+            {
+              "year": "2022",
+              "value": 12704.0
+            },
+            {
+              "year": "2023",
+              "value": 12741.0
+            },
+            {
+              "year": "2024",
+              "value": 12330.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Amador, CA",
+          "geo_fips": "06005",
+          "data": [
+            {
+              "year": "2022",
+              "value": 11306.0
+            },
+            {
+              "year": "2023",
+              "value": 11639.0
+            },
+            {
+              "year": "2024",
+              "value": 11833.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Cruz, CA",
+          "geo_fips": "06087",
+          "data": [
+            {
+              "year": "2022",
+              "value": 72857.0
+            },
+            {
+              "year": "2023",
+              "value": 73861.0
+            },
+            {
+              "year": "2024",
+              "value": 76682.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Francisco, CA",
+          "geo_fips": "06075",
+          "data": [
+            {
+              "year": "2022",
+              "value": 144529.0
+            },
+            {
+              "year": "2023",
+              "value": 135347.0
+            },
+            {
+              "year": "2024",
+              "value": 132955.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Barbara, CA",
+          "geo_fips": "06083",
+          "data": [
+            {
+              "year": "2022",
+              "value": 111010.0
+            },
+            {
+              "year": "2023",
+              "value": 115409.0
+            },
+            {
+              "year": "2024",
+              "value": 117064.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Del Norte, CA",
+          "geo_fips": "06015",
+          "data": [
+            {
+              "year": "2022",
+              "value": 9297.0
+            },
+            {
+              "year": "2023",
+              "value": 9829.0
+            },
+            {
+              "year": "2024",
+              "value": 10780.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tulare, CA",
+          "geo_fips": "06107",
+          "data": [
+            {
+              "year": "2022",
+              "value": 73064.0
+            },
+            {
+              "year": "2023",
+              "value": 80329.0
+            },
+            {
+              "year": "2024",
+              "value": 84290.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tuolumne, CA",
+          "geo_fips": "06109",
+          "data": [
+            {
+              "year": "2022",
+              "value": 17904.0
+            },
+            {
+              "year": "2023",
+              "value": 18893.0
+            },
+            {
+              "year": "2024",
+              "value": 23025.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Solano, CA",
+          "geo_fips": "06095",
+          "data": [
+            {
+              "year": "2022",
+              "value": 85302.0
+            },
+            {
+              "year": "2023",
+              "value": 87001.0
+            },
+            {
+              "year": "2024",
+              "value": 87596.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Imperial, CA",
+          "geo_fips": "06025",
+          "data": [
+            {
+              "year": "2022",
+              "value": 26664.0
+            },
+            {
+              "year": "2023",
+              "value": 29103.0
+            },
+            {
+              "year": "2024",
+              "value": 30816.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Contra Costa, CA",
+          "geo_fips": "06013",
+          "data": [
+            {
+              "year": "2022",
+              "value": 231133.0
+            },
+            {
+              "year": "2023",
+              "value": 243023.0
+            },
+            {
+              "year": "2024",
+              "value": 253065.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Riverside, CA",
+          "geo_fips": "06065",
+          "data": [
+            {
+              "year": "2022",
+              "value": 511262.0
+            },
+            {
+              "year": "2023",
+              "value": 586720.0
+            },
+            {
+              "year": "2024",
+              "value": 618788.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Mateo, CA",
+          "geo_fips": "06081",
+          "data": [
+            {
+              "year": "2022",
+              "value": 189701.0
+            },
+            {
+              "year": "2023",
+              "value": 201037.0
+            },
+            {
+              "year": "2024",
+              "value": 200602.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Joaquin, CA",
+          "geo_fips": "06077",
+          "data": [
+            {
+              "year": "2022",
+              "value": 165874.0
+            },
+            {
+              "year": "2023",
+              "value": 168679.0
+            },
+            {
+              "year": "2024",
+              "value": 179672.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kings, CA",
+          "geo_fips": "06031",
+          "data": [
+            {
+              "year": "2022",
+              "value": 18357.0
+            },
+            {
+              "year": "2023",
+              "value": 18869.0
+            },
+            {
+              "year": "2024",
+              "value": 19464.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "El Dorado, CA",
+          "geo_fips": "06017",
+          "data": [
+            {
+              "year": "2022",
+              "value": 35048.0
+            },
+            {
+              "year": "2023",
+              "value": 33287.0
+            },
+            {
+              "year": "2024",
+              "value": 37061.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lassen, CA",
+          "geo_fips": "06035",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2506.0
+            },
+            {
+              "year": "2023",
+              "value": 2583.0
+            },
+            {
+              "year": "2024",
+              "value": 2485.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Plumas, CA",
+          "geo_fips": "06063",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3595.0
+            },
+            {
+              "year": "2023",
+              "value": 3786.0
+            },
+            {
+              "year": "2024",
+              "value": 4036.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sacramento, CA",
+          "geo_fips": "06067",
+          "data": [
+            {
+              "year": "2022",
+              "value": 332215.0
+            },
+            {
+              "year": "2023",
+              "value": 346025.0
+            },
+            {
+              "year": "2024",
+              "value": 352257.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Benito, CA",
+          "geo_fips": "06069",
+          "data": [
+            {
+              "year": "2022",
+              "value": 4526.0
+            },
+            {
+              "year": "2023",
+              "value": 4569.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Monterey, CA",
+          "geo_fips": "06053",
+          "data": [
+            {
+              "year": "2022",
+              "value": 85621.0
+            },
+            {
+              "year": "2023",
+              "value": 91819.0
+            },
+            {
+              "year": "2024",
+              "value": 91617.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sonoma, CA",
+          "geo_fips": "06097",
+          "data": [
+            {
+              "year": "2022",
+              "value": 186112.0
+            },
+            {
+              "year": "2023",
+              "value": 179552.0
+            },
+            {
+              "year": "2024",
+              "value": 183899.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Butte, CA",
+          "geo_fips": "06007",
+          "data": [
+            {
+              "year": "2022",
+              "value": 58072.0
+            },
+            {
+              "year": "2023",
+              "value": 52487.0
+            },
+            {
+              "year": "2024",
+              "value": 52476.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yolo, CA",
+          "geo_fips": "06113",
+          "data": [
+            {
+              "year": "2022",
+              "value": 44031.0
+            },
+            {
+              "year": "2023",
+              "value": 48111.0
+            },
+            {
+              "year": "2024",
+              "value": 55304.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Stanislaus, CA",
+          "geo_fips": "06099",
+          "data": [
+            {
+              "year": "2022",
+              "value": 160158.0
+            },
+            {
+              "year": "2023",
+              "value": 163138.0
+            },
+            {
+              "year": "2024",
+              "value": 159749.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sutter, CA",
+          "geo_fips": "06101",
+          "data": [
+            {
+              "year": "2022",
+              "value": 30795.0
+            },
+            {
+              "year": "2023",
+              "value": 33727.0
+            },
+            {
+              "year": "2024",
+              "value": 31554.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Colusa, CA",
+          "geo_fips": "06011",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1442.0
+            },
+            {
+              "year": "2023",
+              "value": 2176.0
+            },
+            {
+              "year": "2024",
+              "value": 3190.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CAINC5N-700",
+      "description": "Retail Trade Total Earnings by State",
+      "geos": [
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Orange, CA",
+          "geo_fips": "06059",
+          "data": [
+            {
+              "year": "2022",
+              "value": 10322794.0
+            },
+            {
+              "year": "2023",
+              "value": 10788585.0
+            },
+            {
+              "year": "2024",
+              "value": 11055129.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tulare, CA",
+          "geo_fips": "06107",
+          "data": [
+            {
+              "year": "2022",
+              "value": 849022.0
+            },
+            {
+              "year": "2023",
+              "value": 891609.0
+            },
+            {
+              "year": "2024",
+              "value": 943030.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sonoma, CA",
+          "geo_fips": "06097",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1534733.0
+            },
+            {
+              "year": "2023",
+              "value": 1507903.0
+            },
+            {
+              "year": "2024",
+              "value": 1514490.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Bernardino, CA",
+          "geo_fips": "06071",
+          "data": [
+            {
+              "year": "2022",
+              "value": 5157447.0
+            },
+            {
+              "year": "2023",
+              "value": 5353536.0
+            },
+            {
+              "year": "2024",
+              "value": 5670997.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Madera, CA",
+          "geo_fips": "06039",
+          "data": [
+            {
+              "year": "2022",
+              "value": 250526.0
+            },
+            {
+              "year": "2023",
+              "value": 260466.0
+            },
+            {
+              "year": "2024",
+              "value": 272167.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Del Norte, CA",
+          "geo_fips": "06015",
+          "data": [
+            {
+              "year": "2022",
+              "value": 55501.0
+            },
+            {
+              "year": "2023",
+              "value": 56101.0
+            },
+            {
+              "year": "2024",
+              "value": 57631.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Mateo, CA",
+          "geo_fips": "06081",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2459798.0
+            },
+            {
+              "year": "2023",
+              "value": 2544907.0
+            },
+            {
+              "year": "2024",
+              "value": 2605825.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Cruz, CA",
+          "geo_fips": "06087",
+          "data": [
+            {
+              "year": "2022",
+              "value": 648463.0
+            },
+            {
+              "year": "2023",
+              "value": 664642.0
+            },
+            {
+              "year": "2024",
+              "value": 676771.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alpine, CA",
+          "geo_fips": "06003",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1020.0
+            },
+            {
+              "year": "2023",
+              "value": 944.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Siskiyou, CA",
+          "geo_fips": "06093",
+          "data": [
+            {
+              "year": "2022",
+              "value": 94021.0
+            },
+            {
+              "year": "2023",
+              "value": 95241.0
+            },
+            {
+              "year": "2024",
+              "value": 97558.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lake, CA",
+          "geo_fips": "06033",
+          "data": [
+            {
+              "year": "2022",
+              "value": 118122.0
+            },
+            {
+              "year": "2023",
+              "value": 119723.0
+            },
+            {
+              "year": "2024",
+              "value": 125001.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mono, CA",
+          "geo_fips": "06051",
+          "data": [
+            {
+              "year": "2022",
+              "value": 36818.0
+            },
+            {
+              "year": "2023",
+              "value": 37244.0
+            },
+            {
+              "year": "2024",
+              "value": 39337.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Napa, CA",
+          "geo_fips": "06055",
+          "data": [
+            {
+              "year": "2022",
+              "value": 391051.0
+            },
+            {
+              "year": "2023",
+              "value": 404171.0
+            },
+            {
+              "year": "2024",
+              "value": 421237.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Trinity, CA",
+          "geo_fips": "06105",
+          "data": [
+            {
+              "year": "2022",
+              "value": 17585.0
+            },
+            {
+              "year": "2023",
+              "value": 16546.0
+            },
+            {
+              "year": "2024",
+              "value": 16689.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tehama, CA",
+          "geo_fips": "06103",
+          "data": [
+            {
+              "year": "2022",
+              "value": 112917.0
+            },
+            {
+              "year": "2023",
+              "value": 118316.0
+            },
+            {
+              "year": "2024",
+              "value": 125372.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Nevada, CA",
+          "geo_fips": "06057",
+          "data": [
+            {
+              "year": "2022",
+              "value": 275918.0
+            },
+            {
+              "year": "2023",
+              "value": 297066.0
+            },
+            {
+              "year": "2024",
+              "value": 308632.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Luis Obispo, CA",
+          "geo_fips": "06079",
+          "data": [
+            {
+              "year": "2022",
+              "value": 985375.0
+            },
+            {
+              "year": "2023",
+              "value": 957448.0
+            },
+            {
+              "year": "2024",
+              "value": 991400.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sierra, CA",
+          "geo_fips": "06091",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1269.0
+            },
+            {
+              "year": "2023",
+              "value": 1832.0
+            },
+            {
+              "year": "2024",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yolo, CA",
+          "geo_fips": "06113",
+          "data": [
+            {
+              "year": "2022",
+              "value": 501860.0
+            },
+            {
+              "year": "2023",
+              "value": 526317.0
+            },
+            {
+              "year": "2024",
+              "value": 542672.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mendocino, CA",
+          "geo_fips": "06045",
+          "data": [
+            {
+              "year": "2022",
+              "value": 267860.0
+            },
+            {
+              "year": "2023",
+              "value": 274309.0
+            },
+            {
+              "year": "2024",
+              "value": 267975.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Monterey, CA",
+          "geo_fips": "06053",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1029735.0
+            },
+            {
+              "year": "2023",
+              "value": 1099964.0
+            },
+            {
+              "year": "2024",
+              "value": 1123891.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Marin, CA",
+          "geo_fips": "06041",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1118715.0
+            },
+            {
+              "year": "2023",
+              "value": 1182903.0
+            },
+            {
+              "year": "2024",
+              "value": 1142586.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Calaveras, CA",
+          "geo_fips": "06009",
+          "data": [
+            {
+              "year": "2022",
+              "value": 78355.0
+            },
+            {
+              "year": "2023",
+              "value": 83337.0
+            },
+            {
+              "year": "2024",
+              "value": 82007.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Clara, CA",
+          "geo_fips": "06085",
+          "data": [
+            {
+              "year": "2022",
+              "value": 5715554.0
+            },
+            {
+              "year": "2023",
+              "value": 5889328.0
+            },
+            {
+              "year": "2024",
+              "value": 5900717.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Alameda, CA",
+          "geo_fips": "06001",
+          "data": [
+            {
+              "year": "2022",
+              "value": 5025224.0
+            },
+            {
+              "year": "2023",
+              "value": 5198430.0
+            },
+            {
+              "year": "2024",
+              "value": 5369511.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Butte, CA",
+          "geo_fips": "06007",
+          "data": [
+            {
+              "year": "2022",
+              "value": 570483.0
+            },
+            {
+              "year": "2023",
+              "value": 564105.0
+            },
+            {
+              "year": "2024",
+              "value": 565122.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kings, CA",
+          "geo_fips": "06031",
+          "data": [
+            {
+              "year": "2022",
+              "value": 227176.0
+            },
+            {
+              "year": "2023",
+              "value": 234989.0
+            },
+            {
+              "year": "2024",
+              "value": 240945.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Humboldt, CA",
+          "geo_fips": "06023",
+          "data": [
+            {
+              "year": "2022",
+              "value": 362629.0
+            },
+            {
+              "year": "2023",
+              "value": 359109.0
+            },
+            {
+              "year": "2024",
+              "value": 367099.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Yuba, CA",
+          "geo_fips": "06115",
+          "data": [
+            {
+              "year": "2022",
+              "value": 74537.0
+            },
+            {
+              "year": "2023",
+              "value": 81986.0
+            },
+            {
+              "year": "2024",
+              "value": 99830.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Colusa, CA",
+          "geo_fips": "06011",
+          "data": [
+            {
+              "year": "2022",
+              "value": 39526.0
+            },
+            {
+              "year": "2023",
+              "value": 41923.0
+            },
+            {
+              "year": "2024",
+              "value": 43020.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Shasta, CA",
+          "geo_fips": "06089",
+          "data": [
+            {
+              "year": "2022",
+              "value": 541594.0
+            },
+            {
+              "year": "2023",
+              "value": 559467.0
+            },
+            {
+              "year": "2024",
+              "value": 555464.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Imperial, CA",
+          "geo_fips": "06025",
+          "data": [
+            {
+              "year": "2022",
+              "value": 395423.0
+            },
+            {
+              "year": "2023",
+              "value": 404237.0
+            },
+            {
+              "year": "2024",
+              "value": 425054.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Kern, CA",
+          "geo_fips": "06029",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1878129.0
+            },
+            {
+              "year": "2023",
+              "value": 1934635.0
+            },
+            {
+              "year": "2024",
+              "value": 2002061.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Riverside, CA",
+          "geo_fips": "06065",
+          "data": [
+            {
+              "year": "2022",
+              "value": 5528497.0
+            },
+            {
+              "year": "2023",
+              "value": 5924854.0
+            },
+            {
+              "year": "2024",
+              "value": 6134862.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Glenn, CA",
+          "geo_fips": "06021",
+          "data": [
+            {
+              "year": "2022",
+              "value": 49940.0
+            },
+            {
+              "year": "2023",
+              "value": 51443.0
+            },
+            {
+              "year": "2024",
+              "value": 53136.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Modoc, CA",
+          "geo_fips": "06049",
+          "data": [
+            {
+              "year": "2022",
+              "value": 11908.0
+            },
+            {
+              "year": "2023",
+              "value": 10983.0
+            },
+            {
+              "year": "2024",
+              "value": 10716.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Merced, CA",
+          "geo_fips": "06047",
+          "data": [
+            {
+              "year": "2022",
+              "value": 441467.0
+            },
+            {
+              "year": "2023",
+              "value": 462783.0
+            },
+            {
+              "year": "2024",
+              "value": 475495.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Los Angeles, CA",
+          "geo_fips": "06037",
+          "data": [
+            {
+              "year": "2022",
+              "value": 27590428.0
+            },
+            {
+              "year": "2023",
+              "value": 28509344.0
+            },
+            {
+              "year": "2024",
+              "value": 29033681.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Plumas, CA",
+          "geo_fips": "06063",
+          "data": [
+            {
+              "year": "2022",
+              "value": 33136.0
+            },
+            {
+              "year": "2023",
+              "value": 36602.0
+            },
+            {
+              "year": "2024",
+              "value": 38657.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Amador, CA",
+          "geo_fips": "06005",
+          "data": [
+            {
+              "year": "2022",
+              "value": 80561.0
+            },
+            {
+              "year": "2023",
+              "value": 82019.0
+            },
+            {
+              "year": "2024",
+              "value": 84841.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Solano, CA",
+          "geo_fips": "06095",
+          "data": [
+            {
+              "year": "2022",
+              "value": 966501.0
+            },
+            {
+              "year": "2023",
+              "value": 993729.0
+            },
+            {
+              "year": "2024",
+              "value": 1027018.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Ventura, CA",
+          "geo_fips": "06111",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2316761.0
+            },
+            {
+              "year": "2023",
+              "value": 2432273.0
+            },
+            {
+              "year": "2024",
+              "value": 2493896.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Lassen, CA",
+          "geo_fips": "06035",
+          "data": [
+            {
+              "year": "2022",
+              "value": 42994.0
+            },
+            {
+              "year": "2023",
+              "value": 41655.0
+            },
+            {
+              "year": "2024",
+              "value": 43574.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Tuolumne, CA",
+          "geo_fips": "06109",
+          "data": [
+            {
+              "year": "2022",
+              "value": 134599.0
+            },
+            {
+              "year": "2023",
+              "value": 134498.0
+            },
+            {
+              "year": "2024",
+              "value": 140257.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Joaquin, CA",
+          "geo_fips": "06077",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1560732.0
+            },
+            {
+              "year": "2023",
+              "value": 1643662.0
+            },
+            {
+              "year": "2024",
+              "value": 1699327.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sacramento, CA",
+          "geo_fips": "06067",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3704622.0
+            },
+            {
+              "year": "2023",
+              "value": 3769153.0
+            },
+            {
+              "year": "2024",
+              "value": 3857312.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "El Dorado, CA",
+          "geo_fips": "06017",
+          "data": [
+            {
+              "year": "2022",
+              "value": 373006.0
+            },
+            {
+              "year": "2023",
+              "value": 387971.0
+            },
+            {
+              "year": "2024",
+              "value": 405323.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Santa Barbara, CA",
+          "geo_fips": "06083",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1189369.0
+            },
+            {
+              "year": "2023",
+              "value": 1251801.0
+            },
+            {
+              "year": "2024",
+              "value": 1292803.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Francisco, CA",
+          "geo_fips": "06075",
+          "data": [
+            {
+              "year": "2022",
+              "value": 3860973.0
+            },
+            {
+              "year": "2023",
+              "value": 3752833.0
+            },
+            {
+              "year": "2024",
+              "value": 3893906.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Diego, CA",
+          "geo_fips": "06073",
+          "data": [
+            {
+              "year": "2022",
+              "value": 8450443.0
+            },
+            {
+              "year": "2023",
+              "value": 8675458.0
+            },
+            {
+              "year": "2024",
+              "value": 8921564.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Stanislaus, CA",
+          "geo_fips": "06099",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1272474.0
+            },
+            {
+              "year": "2023",
+              "value": 1299580.0
+            },
+            {
+              "year": "2024",
+              "value": 1361875.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Placer, CA",
+          "geo_fips": "06061",
+          "data": [
+            {
+              "year": "2022",
+              "value": 1479725.0
+            },
+            {
+              "year": "2023",
+              "value": 1512112.0
+            },
+            {
+              "year": "2024",
+              "value": 1522207.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Mariposa, CA",
+          "geo_fips": "06043",
+          "data": [
+            {
+              "year": "2022",
+              "value": 24669.0
+            },
+            {
+              "year": "2023",
+              "value": 25151.0
+            },
+            {
+              "year": "2024",
+              "value": 25825.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Sutter, CA",
+          "geo_fips": "06101",
+          "data": [
+            {
+              "year": "2022",
+              "value": 273501.0
+            },
+            {
+              "year": "2023",
+              "value": 276707.0
+            },
+            {
+              "year": "2024",
+              "value": 276679.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Fresno, CA",
+          "geo_fips": "06019",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2254707.0
+            },
+            {
+              "year": "2023",
+              "value": 2373738.0
+            },
+            {
+              "year": "2024",
+              "value": 2397967.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "San Benito, CA",
+          "geo_fips": "06069",
+          "data": [
+            {
+              "year": "2022",
+              "value": 89072.0
+            },
+            {
+              "year": "2023",
+              "value": 94422.0
+            },
+            {
+              "year": "2024",
+              "value": 95092.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Inyo, CA",
+          "geo_fips": "06027",
+          "data": [
+            {
+              "year": "2022",
+              "value": 50615.0
+            },
+            {
+              "year": "2023",
+              "value": 53181.0
+            },
+            {
+              "year": "2024",
+              "value": 53398.0
+            }
+          ]
+        },
+        {
+          "geo_type": "COUNTY",
+          "geo_name": "Contra Costa, CA",
+          "geo_fips": "06013",
+          "data": [
+            {
+              "year": "2022",
+              "value": 2692207.0
+            },
+            {
+              "year": "2023",
+              "value": 2818990.0
+            },
+            {
+              "year": "2024",
+              "value": 2891186.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "provider": "bea"
+}

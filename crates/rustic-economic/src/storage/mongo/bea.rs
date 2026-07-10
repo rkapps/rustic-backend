@@ -1,5 +1,5 @@
 use crate::{
-    domain::{BeaNipaData, BeaRegionalData}, storage::{
+    domain::bea::{BeaNipa, BeaRegional}, storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::BeaStorageReader,
         writer::BeaStorageWriter,
@@ -9,11 +9,11 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
 use serde_json::json;
-use tracing::{debug, error};
+use tracing::{debug, error, info, trace};
 
 #[async_trait]
 impl BeaStorageReader for EconomicMongoStorageReader {
-    async fn get_bea_nipa(&self, id: &str) -> Result<BeaNipaData> {
+    async fn get_bea_nipa(&self, id: &str) -> Result<BeaNipa> {
         match self.manager.bea_nipa().await {
             Ok(repo) => {
                 let mut repo = repo.lock().await;
@@ -25,7 +25,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         }
     }
 
-    async fn get_bea_regional(&self, id: &str) -> Result<BeaRegionalData> {
+    async fn get_bea_regional(&self, id: &str) -> Result<BeaRegional> {
         match self.manager.bea_regional().await {
             Ok(repo) => {
                 let mut repo = repo.lock().await;
@@ -39,7 +39,8 @@ impl BeaStorageReader for EconomicMongoStorageReader {
 
     async fn get_bea_nipa_by_table_series(
         &self,
-        table_name: &str,
+        table_name: String,
+        series_codes: Vec<String>,
         years: Vec<String>,
     ) -> Result<Vec<BeaNipaEntity>> {
         let Ok(repo) = self.manager.bea_nipa().await else {
@@ -51,6 +52,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
             json!( {
                 "$match": {
                     "table_name": table_name,
+                    "series_code": { "$in": series_codes},
                     "time_period": { "$in": years }
                 }
             }),
@@ -90,7 +92,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
                     "_id": "$_id.table_name",
                     "series": {
                         "$push": {
-                            "code": "$_id.series_code",
+                            "code": "$_id.code",
                             "description": "$_id.description",
                             "data": "$data"
                         }
@@ -135,9 +137,9 @@ impl BeaStorageReader for EconomicMongoStorageReader {
 
     async fn get_bea_regional_by_table_series(
         &self,
-        table_name: &str,
+        codes: Vec<String>,
         years: Vec<String>,
-        geo_fips: Option<&str>,
+        geo_fips: Vec<String>,
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
     ) -> Result<Vec<BeaRegionalEntity>> {
@@ -147,7 +149,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         let mut repo = repo.lock().await;
 
         let mut match_conditions = vec![
-            json! ({ "code": table_name }),
+            json! ({ "code": { "$in": codes} }),
             json! ({ "time_period": { "$in": years } }),
         ];
 
@@ -155,8 +157,8 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         if let Some(geo_type) = geo_type {
             match_conditions.push(json!({ "geo_type": geo_type })); // Maps your raw field to the struct
         }
-        if let Some(geo_fips) = geo_fips {
-            match_conditions.push(json! ({ "geo_fips": geo_fips }));
+        if !geo_fips.is_empty(){
+            match_conditions.push(json! ({ "geo_fips": { "$in": geo_fips }}));
         }
 
         if let Some(prefix) = state_prefix {
@@ -168,7 +170,6 @@ impl BeaStorageReader for EconomicMongoStorageReader {
                 }
             }));
         }
-
         debug!(
             target: "economic-tool",
             "match_conditions: {:#?}", match_conditions
@@ -235,7 +236,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
             }),
         ];
         let results = repo.aggregate(pipeline).await?;
-        debug!(
+        trace!(
             target: "economic-tool",
             "results: {:#?}", results
         );
@@ -253,7 +254,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
                 }
             }
         }
-        debug!(
+        trace!(
             target: "economic-tool",
             "bea_regional: {:#?}", entities
         );
@@ -264,7 +265,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         &self,
         table_name: &str,
         year: &str,
-    ) -> Result<Vec<BeaRegionalData>> {
+    ) -> Result<Vec<BeaRegional>> {
         let Ok(repo) = self.manager.bea_regional().await else {
             return Err(anyhow::anyhow!("Error getting BeaRegional Repository"));
         };
@@ -284,7 +285,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         year: &str,
-    ) -> Result<Vec<BeaRegionalData>> {
+    ) -> Result<Vec<BeaRegional>> {
         let Ok(repo) = self.manager.bea_regional().await else {
             return Err(anyhow::anyhow!("Error getting BeaRegional Repository"));
         };
@@ -320,7 +321,7 @@ impl BeaStorageWriter for EconomicMongoStorageWriter {
         Ok(())
     }
 
-    async fn upsert_bea_nipa(&self, data: BeaNipaData) -> Result<()> {
+    async fn upsert_bea_nipa(&self, data: BeaNipa) -> Result<()> {
         let Ok(repo) = self.manager.bea_nipa().await else {
             return Err(anyhow::anyhow!("Error getting BeaNipa Repository"));
         };
@@ -328,7 +329,7 @@ impl BeaStorageWriter for EconomicMongoStorageWriter {
         repo.update(data).await
     }
 
-    async fn upsert_bea_nipa_bulk(&self, datas: Vec<BeaNipaData>) -> Result<()> {
+    async fn upsert_bea_nipa_bulk(&self, datas: Vec<BeaNipa>) -> Result<()> {
         let Ok(repo) = self.manager.bea_nipa().await else {
             return Err(anyhow::anyhow!("Error getting BeaNipa Repository"));
         };
@@ -346,7 +347,7 @@ impl BeaStorageWriter for EconomicMongoStorageWriter {
         Ok(())
     }
 
-    async fn upsert_bea_regional_bulk(&self, datas: Vec<BeaRegionalData>) -> Result<()> {
+    async fn upsert_bea_regional_bulk(&self, datas: Vec<BeaRegional>) -> Result<()> {
         let Ok(repo) = self.manager.bea_regional().await else {
             return Err(anyhow::anyhow!("Error getting BeaRegional Repository"));
         };

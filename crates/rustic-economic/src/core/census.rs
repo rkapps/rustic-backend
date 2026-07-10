@@ -18,7 +18,7 @@ pub async fn get_census_data(
     reader: Arc<EconomicMongoStorageReader>,
     variables: Vec<String>,
     dataset: &str,
-    geo_fips: Option<&str>,
+    geo_fips: Vec<String>,
     geo_type: Option<&str>,
     state_prefix: Option<&str>,
     year: &str,
@@ -41,17 +41,21 @@ pub async fn update_census(
     census: Arc<CensusClient>,
     dataset: &str,
     variables: &[&str],
-    years: Vec<&str>,
+    years: &[String],
 ) -> Result<()> {
     let mut vars = vec!["NAME"];
     vars.extend_from_slice(variables);
 
-    for year in &years {
+    for year in years {
         let mut all_records = Vec::new();
 
+        // One call for the county
+        let state_records = census.get_acs(year, "acs5", &vars, "us:1").await?;
+        process_census_records(&mut all_records, state_records, dataset, year);
+        
         // One call for all states
         let state_records = census.get_acs(year, "acs5", &vars, "state:*").await?;
-        process_census_records(&mut all_records, state_records, dataset, year, "state");
+        process_census_records(&mut all_records, state_records, dataset, year);
 
         tokio::time::sleep(Duration::from_millis(500)).await;
 
@@ -72,7 +76,7 @@ pub async fn update_census(
                 continue;
             }
         };
-        process_census_records(&mut all_records, county_records, dataset, year, "county");
+        process_census_records(&mut all_records, county_records, dataset, year);
 
         tokio::time::sleep(Duration::from_millis(500)).await;
 

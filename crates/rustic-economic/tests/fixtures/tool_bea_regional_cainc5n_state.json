@@ -1,26 +1,25 @@
 {
-  "census": [
+  "bea_regional": [
     {
-      "dataset": "acs5",
-      "variable": "B25003_002E",
-      "description": "Owner Units",
+      "code": "CAINC5N-704",
+      "description": "Building Material and Garden Equipment Dealers Earnings by State",
       "geos": [
         {
-          "geo_type": "COUNTY",
-          "geo_name": "Mendocino",
-          "geo_fips": "06045",
+          "geo_type": "STATE",
+          "geo_name": "California",
+          "geo_fips": "06000",
           "data": [
             {
               "year": "2022",
-              "value": "21044"
+              "value": 8080758.0
             },
             {
               "year": "2023",
-              "value": "21044"
+              "value": 8462961.0
             },
             {
               "year": "2024",
-              "value": "21500"
+              "value": 8621130.0
             }
           ]
         },
@@ -31,41 +30,40 @@
           "data": [
             {
               "year": "2022",
-              "value": "1815352"
+              "value": 1761192.0
             },
             {
               "year": "2023",
-              "value": "1873231"
+              "value": 1831440.0
             },
             {
               "year": "2024",
-              "value": "1924098"
+              "value": 1871807.0
             }
           ]
         }
       ]
     },
     {
-      "dataset": "acs5",
-      "variable": "B25077_001E",
-      "description": "Median Home Value",
+      "code": "CAINC5N-521",
+      "description": "Furniture and Related Product Manufacturing Earnings by State",
       "geos": [
         {
-          "geo_type": "COUNTY",
-          "geo_name": "Mendocino",
-          "geo_fips": "06045",
+          "geo_type": "STATE",
+          "geo_name": "California",
+          "geo_fips": "06000",
           "data": [
             {
               "year": "2022",
-              "value": "463700"
+              "value": 2399612.0
             },
             {
               "year": "2023",
-              "value": "486000"
+              "value": 2359672.0
             },
             {
               "year": "2024",
-              "value": "512200"
+              "value": 2376299.0
             }
           ]
         },
@@ -76,41 +74,40 @@
           "data": [
             {
               "year": "2022",
-              "value": "321400"
+              "value": 421080.0
             },
             {
               "year": "2023",
-              "value": "358900"
+              "value": 425274.0
             },
             {
               "year": "2024",
-              "value": "394500"
+              "value": 424749.0
             }
           ]
         }
       ]
     },
     {
-      "dataset": "acs5",
-      "variable": "B19013_001E",
-      "description": "Median Income",
+      "code": "CAINC5N-701",
+      "description": "Motor Vehicle and Parts Dealers Earnings by State",
       "geos": [
         {
-          "geo_type": "COUNTY",
-          "geo_name": "Mendocino",
-          "geo_fips": "06045",
+          "geo_type": "STATE",
+          "geo_name": "California",
+          "geo_fips": "06000",
           "data": [
             {
               "year": "2022",
-              "value": "61335"
+              "value": 19592158.0
             },
             {
               "year": "2023",
-              "value": "64688"
+              "value": 19694942.0
             },
             {
               "year": "2024",
-              "value": "68092"
+              "value": 19801076.0
             }
           ]
         },
@@ -121,24 +118,23 @@
           "data": [
             {
               "year": "2022",
-              "value": "72581"
+              "value": 4050481.0
             },
             {
               "year": "2023",
-              "value": "76872"
+              "value": 4149634.0
             },
             {
               "year": "2024",
-              "value": "79964"
+              "value": 4502405.0
             }
           ]
         }
       ]
     },
     {
-      "dataset": "acs5",
-      "variable": "B01002_001E",
-      "description": "Median Age",
+      "code": "CAINC5N-702",
+      "description": "Furniture and Home Furnishings Stores Earnings by State",
       "geos": [
         {
           "geo_type": "STATE",
@@ -147,39 +143,39 @@
           "data": [
             {
               "year": "2022",
-              "value": "38.4"
+              "value": 0.0
             },
             {
               "year": "2023",
-              "value": "38.8"
+              "value": 0.0
             },
             {
               "year": "2024",
-              "value": "39.0"
+              "value": 0.0
             }
           ]
         },
         {
-          "geo_type": "COUNTY",
-          "geo_name": "Mendocino",
-          "geo_fips": "06045",
+          "geo_type": "STATE",
+          "geo_name": "California",
+          "geo_fips": "06000",
           "data": [
             {
               "year": "2022",
-              "value": "43.7"
+              "value": 0.0
             },
             {
               "year": "2023",
-              "value": "43.9"
+              "value": 0.0
             },
             {
               "year": "2024",
-              "value": "44.1"
+              "value": 0.0
             }
           ]
         }
       ]
     }
   ],
-  "provider": "census"
+  "provider": "bea"
 }

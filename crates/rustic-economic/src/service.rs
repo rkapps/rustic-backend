@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use rustic_providers::{BeaClient, CensusClient, FredClient};
 
+use crate::domain::config::EconomicConfig;
 use crate::storage::mongo::reader::EconomicMongoStorageReader;
 use crate::storage::mongo::writer::EconomicMongoStorageWriter;
 use crate::{
@@ -20,10 +21,11 @@ pub struct EconomicService {
     fred: Option<Arc<FredClient>>,
     bea: Option<Arc<BeaClient>>,
     census: Option<Arc<CensusClient>>,
+    pub config: EconomicConfig
 }
 
 impl EconomicService {
-    pub async fn new_reader(mongo_uri: &str, mongo_db: &str) -> Result<Self> {
+    pub async fn new_reader(mongo_uri: &str, mongo_db: &str, config: EconomicConfig) -> Result<Self> {
         let storage = EconomicMongoStorageManager::new(mongo_uri, mongo_db).await?;
         Ok(Self {
             reader: Some(Arc::new(EconomicMongoStorageReader::new(storage))),
@@ -31,6 +33,7 @@ impl EconomicService {
             fred: None,
             bea: None,
             census: None,
+            config
         })
     }
 
@@ -40,6 +43,7 @@ impl EconomicService {
         fred_api_key: Option<String>,
         bea_api_key: Option<String>,
         census_api_key: Option<String>,
+        config: EconomicConfig
     ) -> Result<Self> {
         let storage = EconomicMongoStorageManager::new(mongo_uri, mongo_db).await?;
         let fred_api_key = fred_api_key.expect("fred api key is not set");
@@ -51,16 +55,19 @@ impl EconomicService {
             fred: Some(Arc::new(FredClient::new(fred_api_key)?)),
             bea: Some(Arc::new(BeaClient::new(bea_api_key)?)),
             census: Some(Arc::new(CensusClient::new(census_api_key)?)),
+            config
         })
     }
 
     #[cfg(feature = "reader")]
     pub fn tools(&self) -> Vec<Arc<dyn Tool>> {
-        use crate::tools::{bea::BeaDataTool, census::CensusDataTool, fred::FredDataTool};
+        use crate::tools::{bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool, fred::FredDataTool, taxonomy::EconomicTaxonomyTool};
         let reader = self.reader.as_ref().expect("reader not initialized");
 
         vec![
-            Arc::new(BeaDataTool::new(reader.clone())),
+            Arc::new(EconomicTaxonomyTool::new(self.config.clone())),
+            Arc::new(BeaNipaDataTool::new(reader.clone())),
+            Arc::new(BeaRegionalDataTool::new(reader.clone())),
             Arc::new(CensusDataTool::new(reader.clone())),
             Arc::new(FredDataTool::new(reader.clone())),
         ]
@@ -107,7 +114,6 @@ impl EconomicService {
         limit: usize,
         name: &str,
         category: &str,
-        sectors: &[String],
     ) -> Result<()> {
         let writer = self.writer.as_ref().expect("writer not initialized");
         let fred = self.fred.as_ref().expect("fred client not initialized");
@@ -120,7 +126,6 @@ impl EconomicService {
             limit,
             name,
             category,
-            sectors,
         )
         .await
     }
@@ -141,16 +146,17 @@ impl EconomicService {
     #[cfg(feature = "writer")]
     pub async fn update_bea_regional(
         &self,
-        tables: &[(&str, &str)],
+        code: &str,
+        line_code: &str,
         geo_fips: &str,
-        years: &[&str],
+        year: &str,
     ) -> Result<()> {
         use crate::core::bea::update_bea_regional;
 
         let writer = self.writer.as_ref().expect("writer not initialized");
         let bea = self.bea.as_ref().expect("bea client not initialized");
 
-        update_bea_regional(writer.clone(), bea.clone(), tables, geo_fips, years).await
+        update_bea_regional(writer.clone(), bea.clone(), code, line_code, geo_fips, year).await
     }
 
     #[cfg(feature = "writer")]
@@ -158,7 +164,7 @@ impl EconomicService {
         &self,
         dataset: &str,
         variables: &[&str],
-        years: Vec<&str>,
+        years: &[String],
     ) -> Result<()> {
         let writer = self.writer.as_ref().expect("writer not initialized");
         let census = self.census.as_ref().expect("census client not initialized");

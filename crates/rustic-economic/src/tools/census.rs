@@ -58,8 +58,7 @@ impl Tool for CensusDataTool {
             "properties": {
                 "year": {
                     "type": "string",
-                    "description": "Data year. Use 2023 (latest available).",
-                    "default": "2023"
+                    "description": "Year or range. Examples: 2025,2024,2023,2022, LAST5, LAST3, LAST2"
                 },
                 "dataset": {
                     "type": "string",
@@ -72,13 +71,13 @@ impl Tool for CensusDataTool {
                     "description": "ACS variable codes e.g. B19013_001E (median income), B01003_001E (population)"
                 },
                 "geo_fips": {
-                    "type": "string",
-                    "description": "Filter by specific geo. States: 04000=Arizona, 48000=Texas, 06000=California
-                            Counties: 04013=Maricopa AZ, 48453=Travis TX. Omit to return all available geos."
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "FIPS codes for filtering. National: 00000. States: 06000=California, 48000=Texas, 04000=Arizona. Counties: 06075=San Francisco, 04013=Maricopa."
                 },
                 "geo_type": {
                     "type": "string",
-                    "enum": ["state", "county"],
+                    "enum": ["US", "STATE", "COUNTY"],
                     "description": "Filter by geography type"
                 },
                 "state_prefix": {
@@ -92,24 +91,36 @@ impl Tool for CensusDataTool {
 
     async fn execute(&self, params: Value) -> Result<Value> {
         let variables: Vec<String> = params["variables"]
-        .as_array()
-        .ok_or_else(|| anyhow::anyhow!("variables required"))?
-        .iter()
-        // Extract the inner string slice instead of converting the JSON block to a string
-        .filter_map(|v| v.as_str().map(|s| s.to_string()))
-        .collect();
+            .as_array()
+            .ok_or_else(|| anyhow::anyhow!("variables required"))?
+            .iter()
+            // Extract the inner string slice instead of converting the JSON block to a string
+            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+            .collect();
 
         let dataset = params["dataset"].as_str().unwrap_or("acs5");
         let year = params["year"].as_str().unwrap_or("LAST5");
-        let geo_fips = params["geo_fips"].as_str();
         let geo_type = params["geo_type"].as_str();
         let state_prefix = params["state_prefix"].as_str();
+
+        let mut geo_fips: Vec<String> = params["geo_fips"]
+            .as_array()
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|v| v.as_str()) // Safely extracts Option<&str>
+                    .map(String::from) // Converts &str to owned String
+                    .collect()
+            })
+            .unwrap_or_default(); // Returns empty Vec if "geo_fips" is missing or not an array
+
+        if geo_fips.is_empty() && geo_type.is_none() && state_prefix.is_none() {
+            geo_fips = ["00000".to_string()].to_vec();
+        }
 
         info!(
             target: "economic-tool",
             "Census data - dataset: {} variables: {:?} year: {:?} geo_type: {:?} geo_fips: {:?}", dataset, variables, year, geo_type, geo_fips
         );
-
 
         let records = get_census_data(
             self.reader.clone(),

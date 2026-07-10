@@ -6,6 +6,25 @@
       "geos": [
         {
           "geo_type": "STATE",
+          "geo_name": "Arizona",
+          "geo_fips": "04000",
+          "data": [
+            {
+              "year": "2022",
+              "value": 435718737.0
+            },
+            {
+              "year": "2023",
+              "value": 471040184.0
+            },
+            {
+              "year": "2024",
+              "value": 498903598.0
+            }
+          ]
+        },
+        {
+          "geo_type": "STATE",
           "geo_name": "California",
           "geo_fips": "06000",
           "data": [

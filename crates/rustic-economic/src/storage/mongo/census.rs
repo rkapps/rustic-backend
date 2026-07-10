@@ -5,18 +5,16 @@ use serde_json::json;
 use tracing::{debug, error, trace};
 
 use crate::{
-    domain::CensusData,
-    storage::{
+    domain::census::Census, storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::CensusStorageReader,
         writer::CensusStorageWriter,
-    },
-    tools::domain::CensusEntity,
+    }, tools::domain::CensusEntity,
 };
 
 #[async_trait]
 impl CensusStorageReader for EconomicMongoStorageReader {
-    async fn get_census(&self, id: &str) -> Result<CensusData> {
+    async fn get_census(&self, id: &str) -> Result<Census> {
         match self.manager.census().await {
             Ok(repo) => {
                 let mut repo = repo.lock().await;
@@ -32,7 +30,7 @@ impl CensusStorageReader for EconomicMongoStorageReader {
         &self,
         dataset: &str,
         variables: Vec<String>,
-        geo_fips: Option<&str>,
+        geo_fips: Vec<String>,
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         years: Vec<String>,
@@ -53,8 +51,8 @@ impl CensusStorageReader for EconomicMongoStorageReader {
         if let Some(geo_type) = geo_type {
             match_conditions.push(json!({ "geo_type": geo_type })); // Maps your raw field to the struct
         }
-        if let Some(geo_fips) = geo_fips {
-            match_conditions.push(json! ({ "geo_fips": geo_fips }));
+        if !geo_fips.is_empty(){
+            match_conditions.push(json! ({ "geo_fips": { "$in": geo_fips }}));
         }
 
         if let Some(prefix) = state_prefix {
@@ -156,7 +154,7 @@ impl CensusStorageReader for EconomicMongoStorageReader {
         geo_type: Option<&str>,
         state_prefix: Option<&str>,
         year: &str,
-    ) -> Result<Vec<CensusData>> {
+    ) -> Result<Vec<Census>> {
         let Ok(repo) = self.manager.census().await else {
             return Err(anyhow::anyhow!("Error getting Census Repository"));
         };
@@ -191,7 +189,7 @@ impl CensusStorageWriter for EconomicMongoStorageWriter {
         repo.delete_many(Some(SearchCriteria::new())).await?;
         Ok(())
     }
-    async fn upsert_census_bulk(&self, datas: Vec<CensusData>) -> Result<()> {
+    async fn upsert_census_bulk(&self, datas: Vec<Census>) -> Result<()> {
         let Ok(repo) = self.manager.census().await else {
             return Err(anyhow::anyhow!("Error getting Census Repository"));
         };
@@ -199,7 +197,7 @@ impl CensusStorageWriter for EconomicMongoStorageWriter {
         repo.bulk_update(datas).await
     }
 
-    async fn upsert_census(&self, data: CensusData) -> Result<()> {
+    async fn upsert_census(&self, data: Census) -> Result<()> {
         let Ok(repo) = self.manager.census().await else {
             return Err(anyhow::anyhow!("Error getting Census Repository"));
         };

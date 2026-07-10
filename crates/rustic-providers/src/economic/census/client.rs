@@ -113,11 +113,11 @@ impl CensusClient {
         let headers = &raw[0];
 
         let name_idx = headers.iter().position(|h| h == "NAME");
+        let state_idx = headers.iter().position(|h| h == "state");
+        let county_idx = headers.iter().position(|h| h == "county");
+        let country_idx = headers.iter().position(|h| h == "us");
 
-        // geo column is the last non-variable, non-NAME column
-        // could be "state", "county", "us" etc
-        let geo_col = headers.last().cloned().unwrap_or_default();
-        let geo_idx = headers.len() - 1;
+        let geo_col = headers.last().cloned().unwrap_or_default().to_uppercase();
 
         let variable_indices: Vec<(&str, usize)> = variables
             .iter()
@@ -127,6 +127,10 @@ impl CensusClient {
         let mut records = Vec::new();
         info!("Census headers: {:?}", headers);
         info!("Census first row: {:?}", raw.get(1));
+        // info!("geo_type: {}", geo_col.to_uppercase());
+
+        info!("geo_col raw: {:?}", headers.last());
+        info!("geo_col uppercased: {}", geo_col);
 
         for row in &raw[1..] {
             let geo_name = name_idx
@@ -134,13 +138,31 @@ impl CensusClient {
                 .cloned()
                 .unwrap_or_default();
 
-            let geo_fips = row.get(geo_idx).cloned().unwrap_or_default();
+            let geo_fips = if geo_col == "COUNTY" {
+                let state = state_idx
+                    .and_then(|i| row.get(i))
+                    .cloned()
+                    .unwrap_or_default();
+                let county = county_idx
+                    .and_then(|i| row.get(i))
+                    .cloned()
+                    .unwrap_or_default();
+                format!("{}{}", state, county)
+            } else if geo_col == "STATE" {
+                let state = state_idx
+                    .and_then(|i| row.get(i))
+                    .cloned()
+                    .unwrap_or_default();
+                format!("{}000", state)
+            } else {
+                format!("00000")
+            };
 
             for (variable, idx) in &variable_indices {
                 records.push(CensusRecord {
-                    geo_fips: geo_fips.clone(),      // actual fips value e.g. "04"
-                    geo_name: geo_name.clone(),      // "Arizona"
-                    geo_type: Some(geo_col.clone()), // "state" | "county" | "us"
+                    geo_fips: geo_fips.clone(),
+                    geo_name: geo_name.clone(),
+                    geo_type: Some(geo_col.clone()),
                     variable: variable.to_string(),
                     value: row.get(*idx).cloned().unwrap_or_default(),
                 });
