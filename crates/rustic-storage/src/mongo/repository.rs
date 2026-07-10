@@ -233,7 +233,7 @@ where
 
     async fn find_by_id(&mut self, id: K) -> Result<M> {
         let id = serialize_to_bson(&id)?;
-        let filter = doc! { "id":  id};
+        let filter = doc! { "id":  id.clone()};
         trace!("Repo: {} Filter: {:?}", self.collection.name(), filter);
         let Some(result) = self
             .collection
@@ -241,7 +241,7 @@ where
             .await
             .context("Failed to execute find query")?
         else {
-            return Err(anyhow::anyhow!("Could not find document"));
+            return Err(anyhow::anyhow!("Could not find document: {}", id));
         };
 
         Ok(result)
