@@ -23,6 +23,8 @@ tower-http.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 
+bin-shared = { path = "../shared" }
+
 rustic-agent.workspace=true
 rustic-boot.workspace=true
 rustic-core.workspace=true

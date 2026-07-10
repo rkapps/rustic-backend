@@ -23,7 +23,9 @@ enum AdminCommands {
         #[arg(short, long)]
         file: PathBuf,
     },
-    UpdateSchema,
+    UpdateEconomicSchema,
+    UpdateFinanceSchema,
+    UpdatePlatformSchema,
 }
 
 #[tokio::main]
@@ -51,10 +53,14 @@ async fn main() -> Result<()> {
             load_tickers(&mongo_uri, file).await?;
             info!("Load Tickers PipeLine done.");
         }
-        AdminCommands::UpdateSchema => {
-            update_rustic_platform(&mongo_uri, &rustic_platform_mongo_db).await?;
+        AdminCommands::UpdateEconomicSchema => {
             update_economic_db(&mongo_uri, &rustic_economic_mongo_db).await?;
+        }
+        AdminCommands::UpdateFinanceSchema => {
             update_finance_db(&mongo_uri, &rustic_finance_mongo_db).await?;
+        }
+        AdminCommands::UpdatePlatformSchema => {
+            update_rustic_platform(&mongo_uri, &rustic_platform_mongo_db).await?;
         }
     }
 

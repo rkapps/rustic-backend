@@ -1,5 +1,6 @@
 use anyhow::Result;
-use rustic_economic::service::EconomicService;
+use rustic_core::load_content;
+use rustic_economic::{domain::config::EconomicConfig, service::EconomicService};
 use std::{env, sync::Arc};
 
 use rustic_finance::service::FinanceService;
@@ -30,9 +31,29 @@ pub async fn get_finance_service(mongo_uri: &str) -> Result<FinanceService> {
     .await
 }
 
-pub async fn get_economic_service(mongo_uri: &str) -> Result<EconomicService> {
+pub async fn get_economic_reader_service(mongo_uri: &str, config_dir: &str, file_name: &str ) -> Result<EconomicService> {
     let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
+
+    let path = format!("{}/{}", config_dir, file_name);
+    let economic_config_content = load_content(path).await?;
+    let economic_config: EconomicConfig = serde_json::from_str(&economic_config_content)?;
+    
+    EconomicService::new_reader(
+        mongo_uri,
+        &mongo_db,
+        economic_config
+    ).await
+}
+
+
+pub async fn get_economic_writer_service(mongo_uri: &str, config_dir: &str, file_name: &str) -> Result<EconomicService> {
+    let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
+        .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
+
+    let path = format!("{}/{}", config_dir, file_name);
+    let economic_config_content = load_content(path).await?;
+    let economic_config: EconomicConfig = serde_json::from_str(&economic_config_content)?;
 
     EconomicService::new(
         mongo_uri,
@@ -40,6 +61,7 @@ pub async fn get_economic_service(mongo_uri: &str) -> Result<EconomicService> {
         env::var("FRED_API_KEY").ok(),
         env::var("BEA_API_KEY").ok(),
         env::var("CENSUS_API_KEY").ok(),
+        economic_config
     )
     .await
 }

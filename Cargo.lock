@@ -377,6 +377,7 @@ dependencies = [
  "rustic-ml",
  "rustic-providers",
  "rustic-storage",
+ "serde_json",
 ]
 
 [[package]]
@@ -4061,6 +4062,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.8.9",
+ "bin-shared",
  "futures",
  "jsonwebtoken",
  "reqwest 0.12.28",
@@ -4203,6 +4205,7 @@ dependencies = [
  "rustic-economic",
  "rustic-providers",
  "rustic-storage",
+ "serde_json",
  "tokio",
  "tracing",
 ]

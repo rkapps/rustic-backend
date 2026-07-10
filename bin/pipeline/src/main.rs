@@ -1,10 +1,10 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
-use bin_shared::{get_economic_service, get_finance_service};
+use bin_shared::{get_economic_writer_service, get_finance_service};
 use clap::{Parser, Subcommand};
 use rustic_core::set_logger;
-use rustic_economic::pipeline::EconomicDataPipeline;
+use rustic_economic::pipeline::{EconomicDataPipeline, EconomicDataPipelineConfig};
 use tracing::{error, info};
 
 #[derive(Parser)]
@@ -43,6 +43,10 @@ async fn main() -> Result<()> {
     let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
     info!("Mongo uri: {}", mongo_uri);
 
+    let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
+        .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
+
+
     match cli.command {
         PipelineCommands::BuildTickersPredictionModels { symbols }=> {
             let service = get_finance_service(&mongo_uri).await?;
@@ -54,11 +58,12 @@ async fn main() -> Result<()> {
         }
         PipelineCommands::CheckEnv => {}
         PipelineCommands::UpdateEconomicData => {
-            let economic_service = get_economic_service(&mongo_uri).await?;
+
+            let economic_service = get_economic_writer_service(&mongo_uri, &config_dir, "economic_all.json" ).await?;
+            let config = economic_service.config.clone();
             let pipeline = EconomicDataPipeline::new(Arc::new(economic_service));
-            let _ = pipeline.run_fred(false).await;
-            let _ = pipeline.run_bea(false).await;
-            let _ = pipeline.run_census(false).await;
+            let pipeline_config = EconomicDataPipelineConfig::new_bea(config, true);
+            let _ = pipeline.run(pipeline_config).await;
         }
         PipelineCommands::UpdateTickersEod => {
             info!("Tickers EOD PipeLine started...");

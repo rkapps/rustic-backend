@@ -1,6 +1,7 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
+use bin_shared::get_economic_reader_service;
 use rustic_ai_api::state::AppState;
 use rustic_boot::{
     boot,
@@ -10,7 +11,6 @@ use rustic_boot::{
     },
 };
 use rustic_core::{Tool, logger::set_logger_with_telemetry};
-use rustic_economic::service::EconomicService;
 use rustic_finance::service::FinanceService;
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 use tracing::info;
@@ -51,7 +51,8 @@ async fn main() -> Result<()> {
         "Economic data Mongo uri: {:?} db: {:?}",
         mongo_uri, mongo_db
     );
-    let economic_service = EconomicService::new_reader(&mongo_uri, &mongo_db).await?;
+
+    let economic_service = get_economic_reader_service(&mongo_uri, &config_dir, "economic_furniture.json" ).await?;
 
     let mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
