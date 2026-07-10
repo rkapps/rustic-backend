@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use crate::{
     CompletionResponseTokenUsage, providers::gemini::response::GeminiInteractionsResponseTokenUsage,
 };
@@ -69,5 +71,29 @@ pub fn to_completion_reponse_token_usage(
                                  + cusage.total_tool_use_tokens                                       // tools
                                  + cusage.total_output_tokens                                         // visible output
                                  + cusage.total_thought_tokens, // reasoning
+    }
+}
+
+
+/// Recursively removes "additionalProperties" from the JSON schema to prevent 
+/// Gemini API validation errors, while keeping the source schema OpenAI-compliant.
+pub fn sanitize_schema_for_gemini(value: &mut Value) {
+    match value {
+        Value::Object(map) => {
+            // Remove the key at the current object level
+            map.remove("additionalProperties");
+            
+            // Recurse down into properties, items, or any nested structures
+            for (_, val) in map.iter_mut() {
+                sanitize_schema_for_gemini(val);
+            }
+        }
+        Value::Array(arr) => {
+            // Recurse through arrays (like 'required' fields or array item definitions)
+            for val in arr.iter_mut() {
+                sanitize_schema_for_gemini(val);
+            }
+        }
+        _ => {} // Base case: Strings, Numbers, Booleans, Nulls do nothing
     }
 }

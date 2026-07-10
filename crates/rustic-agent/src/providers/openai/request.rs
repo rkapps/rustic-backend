@@ -24,7 +24,7 @@ pub struct OpenAICompletionRequest {
     max_output_tokens: i32,
     reasoning: Option<OpenAICompletionRequestReasoning>,
     pub tools: Vec<ToolDefinition>,
-    pub text: Option<OpenAICompletionRequestText>
+    pub text: Option<OpenAICompletionRequestText>,
 }
 
 impl OpenAICompletionRequest {
@@ -61,7 +61,6 @@ impl OpenAICompletionRequest {
         );
     }
 }
-
 
 /// A single input item in the OpenAI request, serialized without an enum tag.
 #[derive(Serialize, Debug)]
@@ -204,13 +203,15 @@ impl OpenAICompletionRequest {
         };
 
         // if response format schema is available, use it
-        let text  = if let Some(response_format_schema) = request.response_format_schema {
+        let text = if let Some(response_format_schema) = request.response_format_schema {
             let response_format = json!({
                 "type": "json_schema",
-                "name" : "ticker_info",    
-                "schema": response_format_schema                
+                "name" : "ticker_info",
+                "schema": response_format_schema
             });
-            Some(OpenAICompletionRequestText{ format: response_format})
+            Some(OpenAICompletionRequestText {
+                format: response_format,
+            })
         } else {
             None
         };
@@ -225,7 +226,7 @@ impl OpenAICompletionRequest {
             max_output_tokens: request.max_tokens,
             reasoning: OpenAICompletionRequestReasoning::new(request.reasoning_effort),
             tools: request.definitions,
-            text
+            text,
         })
     }
 }
@@ -248,7 +249,6 @@ impl OpenAICompletionRequestReasoning {
         Some(OpenAICompletionRequestReasoning { effort })
     }
 }
-
 
 /// Maps [`ReasoningEffort`] to the OpenAI `reasoning.effort` string field.
 #[derive(Serialize, Debug)]

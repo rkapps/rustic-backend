@@ -10,9 +10,8 @@ use crate::{
         message::Message,
         request::{CompletionRequest, ReasoningEffort},
         tools::ToolDefinition,
-    },
-    providers::gemini::{
-        MODEL_GEMINI_3_FLASH_PREVIEW, helper::clean_for_gemini, response::GeminiTextContent,
+    }, providers::gemini::{
+        MODEL_GEMINI_3_FLASH_PREVIEW, helper::{clean_for_gemini, sanitize_schema_for_gemini}, response::GeminiTextContent,
     },
 };
 
@@ -369,6 +368,13 @@ impl GeminiInteractionsRequest {
 
         // if response format schema is available, use it
         let response_format = if let Some(response_format_schema) = request.response_format_schema {
+
+            // 1. Fetch your LLM-agnostic schema (which contains "additionalProperties": false for OpenAI)
+            let mut gemini_schema = response_format_schema.clone();
+
+            // 2. Mutate it in-place for Google's API compiler requirements
+            sanitize_schema_for_gemini(&mut gemini_schema);
+
             Some(json!({
                 "type": "text",
                 "mime_type": "application/json",
