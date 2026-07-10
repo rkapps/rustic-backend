@@ -114,7 +114,8 @@ impl Runnable for SingleAgent {
         fields(
             _agent_id = %self.agent.id,
             _max_tokens= ?self.get_agent().max_tokens,
-            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _prompt=%prompt,
+            _reasoning_effort= ?self.get_agent().reasoning_effort,
             _strategy= ?self.get_strategy(),
             _temperature= ?self.get_agent().temperature,
             _turns = turns.len()
@@ -135,7 +136,8 @@ impl Runnable for SingleAgent {
         fields(
             _agent_id = %self.agent.id,
             _max_tokens= ?self.get_agent().max_tokens,
-            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _prompt=%prompt,
+            _reasoning_effort= ?self.get_agent().reasoning_effort,
             _strategy= ?self.get_strategy(),
             _temperature= ?self.get_agent().temperature,
             _turns = turns.len()
@@ -175,7 +177,8 @@ impl Runnable for PipeLineAgent {
         fields(
             _agent_id = %self.agent.id,
             _max_tokens= ?self.get_agent().max_tokens,
-            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _prompt=%prompt,
+            _reasoning_effort= ?self.get_agent().reasoning_effort,
             _strategy= ?self.get_strategy(),
             _temperature= ?self.get_agent().temperature,
             _turns = turns.len()
@@ -204,11 +207,12 @@ impl Runnable for PipeLineAgent {
     ///    merges their JSON responses, appends a [`CompletionTurn`] to `pipeline_turns`, and loops.
     ///
     #[tracing::instrument(
-        skip(self, turns, prompt),
+        skip(self, turns),
         fields(
             _agent_id = %self.agent.id,
             _max_tokens= ?self.get_agent().max_tokens,
-            __reasoning_effort= ?self.get_agent().reasoning_effort,
+            _prompt=%prompt,
+            _reasoning_effort= ?self.get_agent().reasoning_effort,
             _strategy= ?self.get_strategy(),
             _temperature= ?self.get_agent().temperature,
             _turns = turns.len()

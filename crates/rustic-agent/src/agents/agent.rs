@@ -80,6 +80,7 @@ impl Agent {
         fields(
             otel.name = %format!("complete_with_streaming agent: {}", self.id),
             _last_response_id = ?last_response_id,
+            _last_message= ?messages.last(),
             _max_tokens = %self.max_tokens,
             _messages.count = %messages.len(),
             _model = %self.model,
