@@ -1,11 +1,11 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
-use bin_shared::{get_economic_writer_service, get_finance_service};
+use bin_shared::{get_economic_writer_service, get_finance_writer_service};
 use clap::{Parser, Subcommand};
 use rustic_core::set_logger;
 use rustic_economic::pipeline::{EconomicDataPipeline, EconomicDataPipelineConfig};
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 #[derive(Parser)]
 #[command(name = "pipeline")]
@@ -17,7 +17,7 @@ struct Cli {
 #[derive(Subcommand)]
 #[allow(clippy::enum_variant_names)]
 enum PipelineCommands {
-    BuildTickersPredictionModels  {
+    BuildTickersPredictionModels {
         #[arg(short, long)]
         symbols: Option<String>,
     },
@@ -33,8 +33,9 @@ enum PipelineCommands {
 #[tokio::main]
 
 async fn main() -> Result<()> {
-    let filter = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "rustic_core=info,rustic_economic=info,rustic_finance=info".to_string());
+    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        "rustic_core=info,rustic_economic=info,rustic_finance=info".to_string()
+    });
 
     set_logger(filter);
     let cli = Cli::parse();
@@ -46,10 +47,9 @@ async fn main() -> Result<()> {
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
 
-
     match cli.command {
-        PipelineCommands::BuildTickersPredictionModels { symbols }=> {
-            let service = get_finance_service(&mongo_uri).await?;
+        PipelineCommands::BuildTickersPredictionModels { symbols } => {
+            let service = get_finance_writer_service(&mongo_uri).await?;
             let symbols_str = symbols.as_deref().unwrap_or("");
             match service.build_ticker_prediction_models(symbols_str).await {
                 Ok(_) => info!("Tickers Build Prediction Models completed successfully."),
@@ -58,17 +58,24 @@ async fn main() -> Result<()> {
         }
         PipelineCommands::CheckEnv => {}
         PipelineCommands::UpdateEconomicData => {
-
-            let economic_service = get_economic_writer_service(&mongo_uri, &config_dir, "economic_all.json" ).await?;
-            let config = economic_service.config.clone();
-            let pipeline = EconomicDataPipeline::new(Arc::new(economic_service));
-            let pipeline_config = EconomicDataPipelineConfig::new_bea(config, true);
-            let _ = pipeline.run(pipeline_config).await;
+            match env::var("RUSTIC_AI_ECONOMIC_CONFIG_LOAD_FILE") {
+                Ok(c) => {
+                    let economic_service =
+                        get_economic_writer_service(&mongo_uri, &config_dir, &c).await?;
+                    let config = economic_service.config.clone();
+                    let pipeline = EconomicDataPipeline::new(Arc::new(economic_service));
+                    let pipeline_config = EconomicDataPipelineConfig::new_bea(config, true);
+                    let _ = pipeline.run(pipeline_config).await;
+                }
+                Err(_) => {
+                    warn!("RUSTIC_AI_ECONOMIC_CONFIG_LOAD_FILE environment variable not set");
+                }
+            }
         }
         PipelineCommands::UpdateTickersEod => {
             info!("Tickers EOD PipeLine started...");
 
-            let service = get_finance_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&mongo_uri).await?;
             match service.update_eod_tickers("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
@@ -77,21 +84,24 @@ async fn main() -> Result<()> {
         PipelineCommands::UpdateTickersSentimentsEmbeddings => {
             info!("Tickers EOD PipeLine started...");
 
-            let service = get_finance_service(&mongo_uri).await?;
-            match service.update_eod_tickers_sentiments_embeddings("", true).await {
+            let service = get_finance_writer_service(&mongo_uri).await?;
+            match service
+                .update_eod_tickers_sentiments_embeddings("", true)
+                .await
+            {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }
         }
         PipelineCommands::UpdateStocksEtfsRealtime => {
-            let service = get_finance_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&mongo_uri).await?;
             match service.update_realtime_stocks_etfs("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }
         }
         PipelineCommands::UpdateCryptosRealtime => {
-            let service = get_finance_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&mongo_uri).await?;
             match service.update_realtime_cryptos("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
@@ -99,7 +109,7 @@ async fn main() -> Result<()> {
         }
         PipelineCommands::UpdateTickersNews => {
             info!("Tickers News PipeLine started...");
-            let service = get_finance_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&mongo_uri).await?;
             match service.update_tickers_news().await {
                 Ok(_) => info!("Tickers News update completed successfully."),
                 Err(e) => error!("Tickers News update failed: {:?}", e),

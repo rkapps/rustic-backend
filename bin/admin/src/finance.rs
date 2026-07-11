@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use bin_shared::get_finance_service;
+use bin_shared::get_finance_writer_service;
 use calamine::{Reader, Xlsx, open_workbook};
 use rustic_core::config::load::download_gcs_to_file;
 use std::path::PathBuf;
@@ -14,7 +14,7 @@ pub async fn load_tickers(mongo_uri: &str, file: PathBuf) -> Result<()> {
     };
     let ticker_seeds = load_ticker_seeds_from_file(file_path)?;
 
-    let service = get_finance_service(mongo_uri).await?;
+    let service = get_finance_writer_service(mongo_uri).await?;
     service.load_tickers(&ticker_seeds, true).await?;
 
     Ok(())

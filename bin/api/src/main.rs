@@ -1,7 +1,7 @@
 use std::{env, sync::Arc};
 
 use anyhow::Result;
-use bin_shared::get_economic_reader_service;
+use bin_shared::{get_economic_reader_service, get_finance_reader_service};
 use rustic_ai_api::state::AppState;
 use rustic_boot::{
     boot,
@@ -11,9 +11,7 @@ use rustic_boot::{
     },
 };
 use rustic_core::{Tool, logger::set_logger_with_telemetry};
-use rustic_finance::service::FinanceService;
-use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
-use tracing::info;
+use tracing::{info, warn};
 
 #[tokio::main]
 
@@ -26,33 +24,31 @@ async fn main() -> Result<()> {
         .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
     let endpoint = std::env::var("OTEL_ENDPOINT")?;
-    let _ = set_logger_with_telemetry(filter, "rustic-ai-api", &firebase_project_id, &endpoint).await?;
-
-    // Get Embedding client
-    let openai_api_key: String =
-        env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
-    let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
+    let _ =
+        set_logger_with_telemetry(filter, "rustic-ai-api", &firebase_project_id, &endpoint).await?;
 
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
 
     let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
 
-    let mongo_db = env::var("RUSTIC_FINANCE_DB_NAME")
-        .expect("RUSTIC_FINANCE_DB_NAME envrionment variable not set");
-    info!("Finance Data Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
-    let finance_service =
-        FinanceService::new_reader(&mongo_uri, &mongo_db, embedding_client).await?;
+    // define tools array
+    let mut tools: Vec<Arc<dyn Tool>> = vec![];
 
-    // economic data
-    let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
-        .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
-    info!(
-        "Economic data Mongo uri: {:?} db: {:?}",
-        mongo_uri, mongo_db
-    );
+    // finance reader service
+    let finance_reader_service = get_finance_reader_service(&mongo_uri).await?;
+    tools.extend(finance_reader_service.tools());
 
-    let economic_service = get_economic_reader_service(&mongo_uri, &config_dir, "economic_furniture.json" ).await?;
+    match env::var("RUSTIC_AI_ECONOMIC_CONFIG_USAGE_FILE") {
+        Ok(c) => {
+            // economic reader service
+            let economic_service = get_economic_reader_service(&mongo_uri, &config_dir, &c).await?;
+            tools.extend(economic_service.tools());
+        }
+        Err(_) => {
+            warn!("RUSTIC_AI_ECONOMIC_CONFIG_USAGE_FILE environment variable not set");
+        }
+    };
 
     let mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
@@ -60,9 +56,6 @@ async fn main() -> Result<()> {
         "Platform Data Mongo uri: {:?} db: {:?}",
         mongo_uri, mongo_db
     );
-    let mut tools: Vec<Arc<dyn Tool>> = vec![];
-    tools.extend(economic_service.tools());
-    tools.extend(finance_service.tools());
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);

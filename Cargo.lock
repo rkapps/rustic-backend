@@ -378,6 +378,7 @@ dependencies = [
  "rustic-providers",
  "rustic-storage",
  "serde_json",
+ "tracing",
 ]
 
 [[package]]
