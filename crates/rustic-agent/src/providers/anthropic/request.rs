@@ -4,7 +4,7 @@ use crate::client::{
 };
 use anyhow::{Context, Result};
 use serde::Serialize;
-use serde_json::{Value, json};
+use serde_json::Value;
 use tracing::{debug, info, trace};
 
 /// Serialized body sent to `POST /v1/messages`.

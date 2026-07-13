@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use anyhow::Result;
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -10,8 +8,10 @@ use crate::{
         message::Message,
         request::{CompletionRequest, ReasoningEffort},
         tools::ToolDefinition,
-    }, providers::gemini::{
-        MODEL_GEMINI_3_FLASH_PREVIEW, helper::{clean_for_gemini, sanitize_schema_for_gemini}, response::GeminiTextContent,
+    },
+    providers::gemini::{
+        helper::{clean_for_gemini, sanitize_schema_for_gemini},
+        response::GeminiTextContent,
     },
 };
 
@@ -180,7 +180,7 @@ impl GeminiInteractionsRequest {
         let crequest = request.clone();
         let mut inputs: Vec<GeminiStepRequestInput> = Vec::new();
         let mut function_result_contents: Vec<GeminiStepRequestInput> = Vec::new();
-        let mut function_call_contents: Vec<GeminiStepRequestInput> = Vec::new();
+        let function_call_contents: Vec<GeminiStepRequestInput> = Vec::new();
 
         let model_contents: Vec<GeminiStepRequestInput> = Vec::new();
         let mut user_input: Option<GeminiStepRequestInput> = None;
@@ -280,9 +280,9 @@ impl GeminiInteractionsRequest {
                 }
 
                 Message::ToolCall {
-                    arguments,
-                    call_id,
-                    name,
+                    arguments: _,
+                    call_id: _,
+                    name: _,
                 } => {
                     // let value = serde_json::Value::from_str(&arguments)?;
                     // function_call_contents.push(GeminiStepRequestInput::FunctionCall {
@@ -368,7 +368,6 @@ impl GeminiInteractionsRequest {
 
         // if response format schema is available, use it
         let response_format = if let Some(response_format_schema) = request.response_format_schema {
-
             // 1. Fetch your LLM-agnostic schema (which contains "additionalProperties": false for OpenAI)
             let mut gemini_schema = response_format_schema.clone();
 
@@ -378,7 +377,7 @@ impl GeminiInteractionsRequest {
             Some(json!({
                 "type": "text",
                 "mime_type": "application/json",
-                "schema": response_format_schema                
+                "schema": response_format_schema
             }))
         } else {
             None
