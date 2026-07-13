@@ -10,11 +10,12 @@
 //! | [`openai`]    | OpenAI             |
 //! | [`gemini`]    | Google Gemini      |
 //! | [`local`]     | Local / Ollama     |
-//! | [`groq`]      | Groq Gemini      |
+//! | [`groq`]      | Groq               |
+//! | [`together`]  | Together           |
 //! 
 pub mod anthropic;
 pub mod gemini;
 pub mod groq;
 pub mod local;
 pub mod openai;
-
+pub mod together;

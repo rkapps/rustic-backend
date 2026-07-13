@@ -370,7 +370,13 @@ impl AgentService {
                     .ok_or_else(|| anyhow::anyhow!("Groq API key not configured"))?,
                 model,
             )),
-
+            "together" => Ok(Provider::together(
+                provider
+                    .api_key
+                    .as_deref()
+                    .ok_or_else(|| anyhow::anyhow!("Together API key not configured"))?,
+                model,
+            )),
             _ => {
                 let base_url = provider.base_url.as_deref().ok_or_else(|| {
                     anyhow::anyhow!("Provider '{}' has no base_url configured", id)

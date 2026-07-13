@@ -11,14 +11,13 @@ use tokio_stream::wrappers::ReceiverStream;
 use tracing::{Instrument, debug, error, info, trace};
 
 use crate::{
-    client::{
+    agents::helper::unwrap_typed_value, client::{
         llm::LlmClient,
         message::Message,
         request::{CompletionRequest, ReasoningEffort},
         response::{CompletionChunkResponse, CompletionResponse, CompletionResponseContent},
         tools::{ToolCallRequest, ToolDefinition},
-    },
-    tools::{mcp::MCPRegistry, tool::ToolRegistry},
+    }, tools::{mcp::MCPRegistry, tool::ToolRegistry},
 };
 
 /// Orchestrates LLM completion calls and tool dispatching for a single configured model.
@@ -199,6 +198,7 @@ impl Agent {
                     // the full thought before appending it as a Thought message so the model receives
                     // a coherent block on the next turn.
                     let mut thought_content = String::new();
+                    let mut stream_error = false;
 
                     // 2. "Pump" the chunks through the channel as they arrive
                     while let Some(chunk_result) = llm_stream.next().await {
@@ -207,6 +207,7 @@ impl Agent {
                             Err(e) => {
                                 tracing::error!("Stream chunk error: {}", e);
                                 let _ = tx.send(Err(HttpError::NetworkError(e.to_string()))).await;
+                                stream_error = true;
                                 break;
                             }
                         };
@@ -223,7 +224,7 @@ impl Agent {
                                     _chunk= ?chunk,
                                 );
 
-                                usage += chunk.usage.unwrap();
+                                usage += chunk.usage.unwrap_or_default();
                                 last_response_id = Some(chunk.response_id);
                                 model = chunk.model;
                             } else if !chunk.content.is_empty() {
@@ -238,6 +239,11 @@ impl Agent {
                         }
                     }
 
+                    // break outer loop on stream error
+                    if stream_error {
+                        break;
+                    }
+                    
                     iter_span.in_scope(|| {
                         info!(
                             _tool_calls= %tool_calls.len(),
@@ -479,7 +485,7 @@ impl Agent {
             if tool_calls.is_empty() {
                 iter_span.in_scope(|| {
                     info!(
-                        response= %format_args!("{:#?}", response.text() ),
+                        // response= %format_args!("{:#?}", response.text() ),
                         usage= %format_args!("{:#?}", response.usage),
                         "Response Stats final"
                     );
@@ -590,7 +596,9 @@ impl Agent {
                     "Tool call: {:?}", call.name
                 );
 
-                tool.execute(call.arguments.clone()).await?
+                // tool.execute(call.arguments.clone()).await?
+                let arguments = unwrap_typed_value(call.arguments.clone());
+                tool.execute(arguments).await?
             }
             None => {
                 if self.mcp_registry.has_tool(&call.name) {

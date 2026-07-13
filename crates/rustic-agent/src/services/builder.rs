@@ -5,21 +5,12 @@ use std::sync::Arc;
 use tracing::debug;
 
 use crate::{
-    MCPRegistry, ToolRegistry,
-    agents::Agent,
-    client::{
+    MCPRegistry, ToolRegistry, agents::Agent, client::{
         llm::LlmClient, mcp::MCPServerAdapter, preset::Preset, provider::Provider,
         request::ReasoningEffort,
-    },
-    providers::{
-        anthropic::{self, completion::AnthropicClient},
-        gemini::{self, completion::GeminiClient},
-        groq::{self, completion::GroqClient},
-        local::completion::LocalClient,
-        openai::{self, completion::OpenAIClient},
-    },
-    services::{agent::AgentService, config::agent::CompletionStrategy},
-    tools::mcp::MCPServerSetting,
+    }, providers::{
+        anthropic::{self, completion::AnthropicClient}, gemini::{self, completion::GeminiClient}, groq::{self, completion::GroqClient}, local::completion::LocalClient, openai::{self, completion::OpenAIClient}, together::{self, completion::TogetherClient},
+    }, services::{agent::AgentService, config::agent::CompletionStrategy}, tools::mcp::MCPServerSetting,
 };
 
 const MODEL_TEMPERATURE: f32 = 0.5;
@@ -96,6 +87,7 @@ impl<'a> AgentBuilder<'a> {
             Provider::Gemini { api_key, model } => self.with_gemini(&api_key, &model).await,
             Provider::Anthropic { api_key, model } => self.with_anthropic(&api_key, &model).await,
             Provider::Groq { api_key, model } => self.with_groq(&api_key, &model).await,
+            Provider::Together { api_key, model } => self.with_together(&api_key, &model).await,
             Provider::Local { model, base_url } => {
                 self.with_local("local", &model, &base_url).await
             }
@@ -154,6 +146,19 @@ impl<'a> AgentBuilder<'a> {
         Ok(self)
     }
 
+    /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
+    pub async fn with_together(mut self, api_key: &str, model: &str) -> Result<Self> {
+        let mut clients = self.service.clients.write().await;
+        self.llm = Some(together::LLM.to_string());
+        self.model = Some(model.to_string());
+        let client_key = format! {"{}:{}", together::LLM, model};
+        let client = clients
+            .entry(client_key)
+            .or_insert(self.together_client(api_key)?);
+        self.client = Some(client.clone());
+        Ok(self)
+    }
+    
     /// Configure the builder to use a local Anthropic-compatible server, reusing a cached client if one exists.
     pub async fn with_local(mut self, llm: &str, model: &str, base_url: &str) -> Result<Self> {
         let mut clients = self.service.clients.write().await;
@@ -245,7 +250,7 @@ impl<'a> AgentBuilder<'a> {
     /// `data` — cache enabled, low reasoning, 0.1 temperature, 65536 max tokens.
     pub fn with_preset_data(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::Medium;
+        self.reasoning_effort = ReasoningEffort::Low;
         self.with_temperature(0.1).with_max_tokens(32768)
     }
 
@@ -300,6 +305,15 @@ impl<'a> AgentBuilder<'a> {
     fn groq_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
         let client = GroqClient::new(api_key.to_string())
             .with_context(|| anyhow::anyhow!("Error creating Groq client"))?;
+        Ok(Arc::new(client))
+    }
+
+
+    fn together_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
+        debug!("together client: {}", api_key);
+
+        let client = TogetherClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Together client"))?;
         Ok(Arc::new(client))
     }
 

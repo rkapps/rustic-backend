@@ -4,6 +4,7 @@ pub enum Provider {
     Gemini { api_key: String, model: String },
     Anthropic { api_key: String, model: String },
     Groq { api_key: String, model: String },
+    Together { api_key: String, model: String },
     Local { model: String, base_url: String },
 }
 
@@ -31,6 +32,13 @@ impl Provider {
 
     pub fn groq(api_key: impl Into<String>, model: impl Into<String>) -> Self {
         Self::Groq{
+            api_key: api_key.into(),
+            model: model.into(),
+        }
+    }
+
+    pub fn together(api_key: impl Into<String>, model: impl Into<String>) -> Self {
+        Self::Together{
             api_key: api_key.into(),
             model: model.into(),
         }
