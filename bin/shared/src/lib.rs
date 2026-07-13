@@ -14,7 +14,10 @@ pub async fn get_finance_reader_service(mongo_uri: &str) -> Result<FinanceServic
         env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
 
     let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
-
+    info!(
+        "Finance data Mongo uri: {:?} db: {:?}",
+        mongo_uri, mongo_db
+    );
     FinanceService::new_reader(
         mongo_uri,
         &mongo_db,
