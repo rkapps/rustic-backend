@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 
@@ -7,7 +9,8 @@ pub struct EconomicConfig {
     pub fred_series: Vec<FredConfig>,
     pub bea_nipa: Vec<BeaNipaConfig>,
     pub bea_regional: Vec<BeaRegionalConfig>,
-    pub census: Vec<CensusConfig>
+    pub census: Vec<CensusConfig>,
+    pub geo_reference: Option<GeoReferenceConfig>
 }
 
 
@@ -39,3 +42,24 @@ pub struct CensusConfig {
     pub variable: String,
     pub description: String
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GeoReferenceConfig {
+    pub national: GeoReferenceNationalConfig,
+    pub regions: HashMap<String, GeoReferenceRegionConfig>,
+    pub states: HashMap<String, String>
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GeoReferenceNationalConfig {
+    pub fips: String,
+    pub name: String
+}
+
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GeoReferenceRegionConfig {
+    pub fips: Vec<String>,
+    pub states: Vec<String>
+}
+
