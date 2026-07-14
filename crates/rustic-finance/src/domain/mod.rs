@@ -4,6 +4,7 @@ pub mod tickers;
 pub use dto::ticker_entity::TickerEntity;
 pub use dto::ticker_group::TickerGroup;
 pub use dto::ticker_news_entity::TickerNewsEntity;
+pub use dto::ticker_performance::TickerPerformance;
 pub use tickers::control::TickerControl;
 pub use tickers::embedding::TickerEmbedding;
 pub use tickers::history::TickerHistory;

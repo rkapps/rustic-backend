@@ -8,3 +8,4 @@ pub mod ticker_search_param;
 pub mod ticker_seed;
 pub mod ticker_sentiment_entity;
 pub mod ticker_snapshot;
+pub mod ticker_performance;

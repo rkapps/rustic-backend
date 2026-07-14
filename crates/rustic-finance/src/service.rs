@@ -74,6 +74,8 @@ impl FinanceService {
 
     #[cfg(feature = "reader")]
     pub fn tools(&self) -> Vec<Arc<dyn Tool>> {
+        use crate::tools::ticker_performance::TickerPerformanceTool;
+
         let reader = self.reader.as_ref().expect("reader not initialized");
 
         vec![
@@ -84,6 +86,7 @@ impl FinanceService {
                 self.embedding_client.clone(),
             )),
             Arc::new(TickerSnapshotTool::new(reader.clone())),
+            Arc::new(TickerPerformanceTool::new(reader.clone())),
             Arc::new(TickerTaxonomyTool::new(reader.clone())),
             Arc::new(TickerSentimentTool::new(
                 reader.clone(),
