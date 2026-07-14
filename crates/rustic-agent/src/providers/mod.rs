@@ -12,8 +12,10 @@
 //! | [`local`]     | Local / Ollama     |
 //! | [`groq`]      | Groq               |
 //! | [`together`]  | Together           |
-//! 
+//! | [`fireworks`]  | Fireworks          |
+//!
 pub mod anthropic;
+pub mod fireworks;
 pub mod gemini;
 pub mod groq;
 pub mod local;

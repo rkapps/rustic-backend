@@ -473,7 +473,7 @@ impl OpenAIClient {
                 for choice in choices {
 
                     let delta = choice.delta.clone();
-                    debug!(
+                    trace!(
                         target: "agent-openai",
                         _pending_tools = ?pending_tool_calls.len(),
                         "Choice: {:?}", choice
@@ -525,9 +525,8 @@ impl OpenAIClient {
                         //     "Choice: {:?}", choice
                         // );
 
-                    let content = delta.content.clone();
+                    let content = delta.content.unwrap_or_default();
                     // info!("Finish reason: {:?} content: {:?}", choice.finish_reason, content);
-
                     if !content.is_empty() {
                         yield Ok(CompletionChunkResponse::content(agent_id.clone(), content, String::new()))
                     } else  if let Some(tool_calls) = delta.tool_calls{

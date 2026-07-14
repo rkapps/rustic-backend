@@ -5,12 +5,23 @@ use std::sync::Arc;
 use tracing::debug;
 
 use crate::{
-    MCPRegistry, ToolRegistry, agents::Agent, client::{
+    MCPRegistry, ToolRegistry,
+    agents::Agent,
+    client::{
         llm::LlmClient, mcp::MCPServerAdapter, preset::Preset, provider::Provider,
         request::ReasoningEffort,
-    }, providers::{
-        anthropic::{self, completion::AnthropicClient}, gemini::{self, completion::GeminiClient}, groq::{self, completion::GroqClient}, local::completion::LocalClient, openai::{self, completion::OpenAIClient}, together::{self, completion::TogetherClient},
-    }, services::{agent::AgentService, config::agent::CompletionStrategy}, tools::mcp::MCPServerSetting,
+    },
+    providers::{
+        anthropic::{self, completion::AnthropicClient},
+        fireworks::{self, completion::FireworksClient},
+        gemini::{self, completion::GeminiClient},
+        groq::{self, completion::GroqClient},
+        local::completion::LocalClient,
+        openai::{self, completion::OpenAIClient},
+        together::{self, completion::TogetherClient},
+    },
+    services::{agent::AgentService, config::agent::CompletionStrategy},
+    tools::mcp::MCPServerSetting,
 };
 
 const MODEL_TEMPERATURE: f32 = 0.5;
@@ -45,7 +56,7 @@ pub struct AgentBuilder<'a> {
     pending_tools: Vec<Arc<dyn Tool>>,
     filtered_mcp: Option<MCPRegistry>,
     strategy: Option<CompletionStrategy>,
-    response_format_schema: Option<Value>
+    response_format_schema: Option<Value>,
 }
 
 impl<'a> AgentBuilder<'a> {
@@ -65,7 +76,7 @@ impl<'a> AgentBuilder<'a> {
             pending_tools: Vec::new(),
             filtered_mcp: None,
             strategy: None,
-            response_format_schema: None
+            response_format_schema: None,
         }
     }
 
@@ -88,6 +99,7 @@ impl<'a> AgentBuilder<'a> {
             Provider::Anthropic { api_key, model } => self.with_anthropic(&api_key, &model).await,
             Provider::Groq { api_key, model } => self.with_groq(&api_key, &model).await,
             Provider::Together { api_key, model } => self.with_together(&api_key, &model).await,
+            Provider::Fireworks { api_key, model } => self.with_fireworks(&api_key, &model).await,
             Provider::Local { model, base_url } => {
                 self.with_local("local", &model, &base_url).await
             }
@@ -158,7 +170,20 @@ impl<'a> AgentBuilder<'a> {
         self.client = Some(client.clone());
         Ok(self)
     }
-    
+
+    /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
+    pub async fn with_fireworks(mut self, api_key: &str, model: &str) -> Result<Self> {
+        let mut clients = self.service.clients.write().await;
+        self.llm = Some(fireworks::LLM.to_string());
+        self.model = Some(model.to_string());
+        let client_key = format! {"{}:{}", fireworks::LLM, model};
+        let client = clients
+            .entry(client_key)
+            .or_insert(self.fireworks_client(api_key)?);
+        self.client = Some(client.clone());
+        Ok(self)
+    }
+
     /// Configure the builder to use a local Anthropic-compatible server, reusing a cached client if one exists.
     pub async fn with_local(mut self, llm: &str, model: &str, base_url: &str) -> Result<Self> {
         let mut clients = self.service.clients.write().await;
@@ -308,12 +333,19 @@ impl<'a> AgentBuilder<'a> {
         Ok(Arc::new(client))
     }
 
-
     fn together_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
         debug!("together client: {}", api_key);
 
         let client = TogetherClient::new(api_key.to_string())
             .with_context(|| anyhow::anyhow!("Error creating Together client"))?;
+        Ok(Arc::new(client))
+    }
+
+    fn fireworks_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
+        debug!("fireworks client: {}", api_key);
+
+        let client = FireworksClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Fireworks client"))?;
         Ok(Arc::new(client))
     }
 
@@ -383,7 +415,7 @@ impl<'a> AgentBuilder<'a> {
             enable_cache,
             tool_registry,
             mcp_registry,
-            response_format_schema
+            response_format_schema,
         })
     }
 }

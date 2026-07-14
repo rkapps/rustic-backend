@@ -64,6 +64,7 @@ pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
 
     CompletionRequest {
         id: request.id.clone(),
+        provider: request.provider.clone(),
         model: request.model.clone(),
         system: request.system.clone(),
         messages: request.messages.clone(),

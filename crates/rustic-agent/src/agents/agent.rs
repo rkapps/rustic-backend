@@ -83,6 +83,7 @@ impl Agent {
             _max_tokens = %self.max_tokens,
             _messages.count = %messages.len(),
             _model = %self.model,
+            _provider = %self.llm,
             _reasoning_effort= ?self.reasoning_effort,
             _store = %self.store,
             _temperature = %self.temperature,
@@ -157,6 +158,7 @@ impl Agent {
 
                     let request = CompletionRequest {
                         id: agent_id.clone(),
+                        provider: agent.llm.clone(),
                         model: agent.model.clone(),
                         system: system_prompt.clone(),
                         messages: messages.clone(),
@@ -350,6 +352,7 @@ impl Agent {
             _max_tokens = %self.max_tokens,
             _messages.count = %messages.len(),
             _model = %self.model,
+            _provider = %self.llm,
             _reasoning_effort= ?self.reasoning_effort,
             _store = %self.store,
             _temperature = %self.temperature,
@@ -391,6 +394,7 @@ impl Agent {
 
         let request = CompletionRequest {
             id: self.id.clone(),
+            provider: self.llm.clone(),
             model: self.model.clone(),
             system: self.system_prompt.clone(),
             messages: messages.to_vec(),
@@ -485,7 +489,7 @@ impl Agent {
             if tool_calls.is_empty() {
                 iter_span.in_scope(|| {
                     info!(
-                        // response= %format_args!("{:#?}", response.text() ),
+                        response= %format_args!("{:#?}", response.text() ),
                         usage= %format_args!("{:#?}", response.usage),
                         "Response Stats final"
                     );

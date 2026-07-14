@@ -176,8 +176,8 @@ pub struct OpenAICompletionsChunkChoice {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct OpenAICompletionsChunkChoiceDelta {
-    pub role: String,
-    pub content: String,
+    pub role: Option<String>,
+    pub content: Option<String>,
     pub reasoning: Option<String>,
     pub tool_calls: Option<Vec<OpenAICompletionsTool>>,
 

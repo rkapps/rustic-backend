@@ -11,6 +11,8 @@ use crate::client::{message::Message, tools::ToolDefinition};
 #[derive(Debug, Clone)]
 pub struct CompletionRequest {
     pub id: String,
+    /// provider
+    pub provider: String,
     /// Provider-specific model identifier (e.g. `"claude-opus-4-7"`).
     pub model: String,
     /// Optional system prompt prepended before the conversation history.

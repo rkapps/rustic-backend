@@ -262,9 +262,9 @@ pub struct OpenAICompletionsRequest {
     model: String,
     pub messages: Vec<OpenAICompletionsMessage>,
     stream: bool,
-    max_output_tokens: i32,
-    reasoning: Option<OpenAIRequestReasoning>,
+    max_tokens: i32,
     pub tools: Vec<OpenAICompletionsToolDefinition>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<OpenAIRequestText>,
 }
 
@@ -277,12 +277,16 @@ pub enum OpenAICompletionsMessage {
     /// Assistant message with tool calls
     ToolCall {
         role: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        r#type: Option<String>,          
         content: Option<String>,
         tool_calls: Vec<OpenAICompletionsToolCall>,
     },
     /// Tool result
     ToolResult {
         role: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        r#type: Option<String>,   //       
         tool_call_id: String,
         content: String,
     },
@@ -292,7 +296,8 @@ pub enum OpenAICompletionsMessage {
 #[derive(Serialize, Debug)]
 pub struct OpenAICompletionsToolCall {
     pub id: String,
-    pub r#type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
     pub function: OpenAICompletionsToolFunction,
 }
 
@@ -307,8 +312,31 @@ pub struct OpenAICompletionsToolFunction {
 #[derive(Serialize, Debug)]
 pub struct OpenAICompletionsToolDefinition {
     pub r#type: String,
-    pub function: ToolDefinition,
+    pub function: OpenAICompletionsFunction,
 }
+
+#[derive(Serialize, Debug)]
+pub struct OpenAICompletionsFunction {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,  // Some("function") for Together, None for Fireworks
+    pub name: String,
+    pub description: String,
+    pub parameters: serde_json::Value,
+    // no type field
+}
+
+// impl From<&ToolDefinition> for OpenAICompletionsToolDefinition {
+//     fn from(tool: &ToolDefinition) -> Self {
+//         Self {
+//             r#type: "function".to_string(),
+//             function: OpenAICompletionsFunction {
+//                 name: tool.name.clone(),
+//                 description: tool.description.clone(),
+//                 parameters: tool.parameters.clone(),
+//             },
+//         }
+//     }
+// }
 
 impl OpenAICompletionsRequest {
     pub fn log_info(&self) {
@@ -326,7 +354,7 @@ impl OpenAICompletionsRequest {
         debug!(
             target: "agent-openai",
             model = %self.model,
-            max_tokens = self.max_output_tokens,
+            max_tokens = self.max_tokens,
             messages = %format!("{:#?}", self.messages),
             tools = self.tools.len(),
             "Openai request"
@@ -364,6 +392,35 @@ impl OpenAICompletionsRequest {
             .flat_map(|k| iterations.get(k).unwrap().clone())
             .collect();
 
+        let mut msg_type_assistant = None;
+        let mut msg_type_tool = None;
+        let mut function_type = None;
+        let mut text = None;
+
+
+        match request.provider.as_str() {
+            "Together" => {
+                msg_type_assistant = Some("assistant".to_string());
+                msg_type_tool = Some("tool".to_string());
+                function_type = Some("function".to_string());
+                        // if response format schema is available, use it
+                text = if let Some(response_format_schema) = request.response_format_schema {
+                    let response_format = json!({
+                        "type": "json_schema",
+                        "name" : "response_object",
+                        "schema": response_format_schema
+                    });
+                    Some(OpenAIRequestText {
+                        format: response_format,
+                    })
+                } else {
+                    None
+                };
+            }
+            _ => {}
+        };
+        
+
         for message in imessages {
             match message {
                 Message::Thought { content: _ } => {}
@@ -384,13 +441,9 @@ impl OpenAICompletionsRequest {
                     call_id,
                     name,
                 } => {
-                    // // parse string to Value for local models that expect an object
-                    // let args_value: Value = serde_json::from_str(&arguments)
-                    //     .unwrap_or(Value::Object(Default::default()));
-
                     tool_calls.push(OpenAICompletionsToolCall {
                         id: call_id,
-                        r#type: "function".to_string(),
+                        r#type: msg_type_assistant.clone(),
                         function: OpenAICompletionsToolFunction {
                             name,
                             arguments: arguments,
@@ -405,6 +458,7 @@ impl OpenAICompletionsRequest {
                     let arg_string = serde_json::to_string(&output)
                         .context("Failed to serialize arguments for OpenAI")?;
                     results.push(OpenAICompletionsMessage::ToolResult {
+                        r#type: msg_type_tool.clone(),
                         role: "tool".to_string(),
                         tool_call_id: call_id,
                         content: arg_string,
@@ -416,39 +470,37 @@ impl OpenAICompletionsRequest {
         if !tool_calls.is_empty() {
             messages.push(OpenAICompletionsMessage::ToolCall {
                 role: "assistant".to_string(),
+                r#type: msg_type_assistant,
                 content: None,
                 tool_calls,
             });
             messages.extend(results);
         }
 
+        info!(
+            target: "agent-openai",
+            "Function Type: {:?}", function_type
+        );
         let mut tools = Vec::new();
         for definition in request.definitions {
+
             let tool = OpenAICompletionsToolDefinition {
                 r#type: "function".to_string(),
-                function: definition.clone(),
+                // r#type: None,
+                function: OpenAICompletionsFunction{
+                    description: definition.description,
+                    name: definition.name,
+                    parameters: definition.parameters,
+                    r#type: function_type.clone()
+                },
             };
             tools.push(tool);
         }
 
-        // if response format schema is available, use it
-        let text = if let Some(response_format_schema) = request.response_format_schema {
-            let response_format = json!({
-                "type": "json_schema",
-                "name" : "response_object",
-                "schema": response_format_schema
-            });
-            Some(OpenAIRequestText {
-                format: response_format,
-            })
-        } else {
-            None
-        };
         Ok(Self {
-            max_output_tokens: request.max_tokens,
+            max_tokens: request.max_tokens,
             messages,
             model: request.model,
-            reasoning: OpenAIRequestReasoning::new(request.reasoning_effort),
             stream: request.stream,
             text,
             tools,
