@@ -40,6 +40,8 @@ pub struct ResolvedProvider {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ModelConfig {
     pub id: String,
+    /// When `false` the config is skipped during startup.
+    pub enabled: bool,
     pub input_cost_per_1k: f64,
     pub cached_read_cost_per_1k: f64,
     pub cached_write_cost_per_1k: f64,

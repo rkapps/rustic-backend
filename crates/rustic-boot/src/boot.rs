@@ -4,17 +4,11 @@ use anyhow::{Context, Result};
 use axum::{Router, extract::FromRef, http::{HeaderValue, Request}};
 use reqwest::{Method, StatusCode, header};
 use rustic_agent::{
-    client::mcp::MCPServerAdapter,
-    services::{
-        agent::AgentService,
-        config::{
-            agent::{AgentConfig, ExecutionType},
-            mcp::MCPServerConfig,
-            provider::{ProviderConfig, ResolvedProvider},
-        },
-        registry::{agent::AgentRegistry, provider::ProviderRegistry},
-    },
-    tools::{mcp::MCPRegistry, tool::ToolRegistry},
+    client::mcp::MCPServerAdapter, services::{
+        agent::AgentService, config::{
+            agent::{AgentConfig, ExecutionType}, mcp::MCPServerConfig, provider::{ModelConfig, ProviderConfig, ResolvedProvider},
+        }, registry::{agent::AgentRegistry, provider::ProviderRegistry},
+    }, tools::{mcp::MCPRegistry, tool::ToolRegistry},
 };
 use rustic_core::Tool;
 use tokio::{net::TcpListener, sync::RwLock};
@@ -432,12 +426,13 @@ pub fn build_resolved_providers(
         };
 
         let cconfig = config.clone();
+        let models: Vec<ModelConfig> = cconfig.models.into_iter().filter(|f| f.enabled.clone()).collect();
         resolved_providers.push(ResolvedProvider {
             id: cconfig.id,
             llm: cconfig.llm,
             api_key,
             base_url,
-            models: cconfig.models,
+            models: models,
             default_model: cconfig.default_model,
         });
     }
