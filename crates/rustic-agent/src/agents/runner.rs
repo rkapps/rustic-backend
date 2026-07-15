@@ -192,7 +192,7 @@ impl Runnable for PipeLineAgent {
 
         let (mut messages, last_response_id) = build_messages_from_turns(&turns);
         messages.push(Message::user(prompt.to_string()));
-        self.agent.complete(&Vec::new(), last_response_id).await
+        self.agent.complete(&messages, last_response_id).await
     }
 
     /// Run the pipeline and stream status + content chunks to the caller.
@@ -277,6 +277,12 @@ impl Runnable for PipeLineAgent {
                     _agents= ?format_args!("{:#?}", decision.agents),
                     "Decision: {:?} Stop: {}", decision.execution, decision.stop
                 );
+                if !decision.stop && decision.agents.is_empty() {
+                    let _ = tx
+                    .send(Err(HttpError::Other("Orchestrator decision did not return any agents to run".to_string())))
+                        .await;
+                    break;
+                }
 
                 // set the last resonse id.
                 last_response_id = if response.response_id.clone().is_empty() {
@@ -593,7 +599,7 @@ impl PipeLineAgent {
                     match result {
                         Ok(response) => {
                             debug!(
-                                "Response: {:?}", response.text()
+                                "Agent: {} Response: {:?}", response.id, response.text()
                             );
                             responses.push((response.id.clone(), response));
                         }
