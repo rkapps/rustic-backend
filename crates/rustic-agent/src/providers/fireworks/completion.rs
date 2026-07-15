@@ -47,7 +47,7 @@ impl LlmClient for FireworksClient {
             target: "agent-fireworks",
             "Fireworks request"
         );          
-        self.inner.complete(request).await
+        self.inner.complete(fireworks_request(request)).await
     }
 
     async fn complete_with_stream(
@@ -55,7 +55,29 @@ impl LlmClient for FireworksClient {
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
 
-        self.inner.complete_with_stream(request).await
+        self.inner.complete_with_stream(fireworks_request(request)).await
     }
 }
 
+
+pub fn fireworks_request(request: CompletionRequest) -> CompletionRequest {
+
+    CompletionRequest {
+        id: request.id.clone(),
+        provider: request.provider.clone(),
+        model: request.model.clone(),
+        system: request.system.clone(),
+        messages: request.messages.clone(),
+        iterations: request.iterations.clone(),
+        temperature: request.temperature,
+        max_tokens: request.max_tokens,
+        reasoning_effort: crate::ReasoningEffort::None,
+        enable_cache: request.enable_cache,
+        stream: request.stream,
+        store: false,
+        definitions: request.definitions.clone(),
+        last_response_id: None,
+        response_format_schema: request.response_format_schema
+    }
+
+}

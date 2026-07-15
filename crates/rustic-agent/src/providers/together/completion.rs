@@ -47,7 +47,7 @@ impl LlmClient for TogetherClient {
             target: "agent-together",
             "Together request"
         );          
-        self.inner.complete(request).await
+        self.inner.complete(together_request(request)).await
     }
 
     async fn complete_with_stream(
@@ -55,7 +55,30 @@ impl LlmClient for TogetherClient {
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
 
-        self.inner.complete_with_stream(request).await
+        self.inner.complete_with_stream(together_request(request)).await
     }
+}
+
+
+pub fn together_request(request: CompletionRequest) -> CompletionRequest {
+
+    CompletionRequest {
+        id: request.id.clone(),
+        provider: request.provider.clone(),
+        model: request.model.clone(),
+        system: request.system.clone(),
+        messages: request.messages.clone(),
+        iterations: request.iterations.clone(),
+        temperature: request.temperature,
+        max_tokens: request.max_tokens,
+        reasoning_effort: crate::ReasoningEffort::None,
+        enable_cache: request.enable_cache,
+        stream: request.stream,
+        store: false,
+        definitions: request.definitions.clone(),
+        last_response_id: None,
+        response_format_schema: request.response_format_schema
+    }
+
 }
 
