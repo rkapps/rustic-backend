@@ -159,7 +159,7 @@ impl HttpClient {
         body: serde_json::Value,
     ) -> HttpResult<HttpResponse<T>> {
         debug!("Url: {}", url);
-        let mut request = self.client.post(url);
+        let mut request = self.client.post(&url);
 
         if let Some(h) = headers {
             request = request.headers(h);
@@ -241,7 +241,7 @@ impl HttpClient {
                     .await
                     .map_err(|e| HttpError::NetworkError(e.to_string()))?;
                 error!("❌ HTTP {}: {}", status, error_body);
-                Err(HttpError::Other(format!("HTTP {}", status)))
+                Err(HttpError::Other(format!("Url: {} HTTP {}", &url, status)))
             }
         }
     }
@@ -262,7 +262,7 @@ impl HttpClient {
         headers: Option<reqwest::header::HeaderMap>,
         body: serde_json::Value,
     ) -> HttpResult<()> {
-        let mut request = self.client.post(url);
+        let mut request = self.client.post(&url);
 
         if let Some(h) = headers {
             request = request.headers(h);
@@ -297,7 +297,7 @@ impl HttpClient {
                     .await
                     .map_err(|e| HttpError::NetworkError(e.to_string()))?;
                 error!("❌ HTTP {}: {}", status, error_body);
-                Err(HttpError::Other(format!("HTTP {}", status)))
+                Err(HttpError::Other(format!("Url: {} HTTP {}", &url, status)))
             }
         }
     }
@@ -314,7 +314,7 @@ impl HttpClient {
         body: serde_json::Value,
     ) -> HttpResult<reqwest::Response> {
         debug!("Url: {}", url);
-        let mut request = self.client.post(url);
+        let mut request = self.client.post(&url);
 
         if let Some(h) = headers {
             request = request.headers(h);
@@ -366,7 +366,7 @@ impl HttpClient {
                     .await
                     .map_err(|e| HttpError::NetworkError(e.to_string()))?;
                 error!("❌ HTTP {}: {}", status, error_body);
-                Err(HttpError::Other(format!("HTTP {}", status)))
+                Err(HttpError::Other(format!("Url: {} HTTP {}", url, status)))
             }
         }
     }
