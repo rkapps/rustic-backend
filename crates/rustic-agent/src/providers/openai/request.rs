@@ -342,10 +342,10 @@ impl OpenAICompletionsRequest {
     pub fn log_info(&self) {
         info!(
             target: "agent-openai",
-            model = %self.model,
-            messages = self.messages.len(),
-            iterations = %format!("{:#?}", self.messages.last()),
-            tools = self.tools.len(),
+            _model = %self.model,
+            _messages = self.messages.len(),
+            _iterations = %format!("{:#?}", self.messages.last()),
+            _tools = self.tools.len(),
             "Openai request"
         );
     }
@@ -353,10 +353,10 @@ impl OpenAICompletionsRequest {
     pub fn log_debug(&self) {
         debug!(
             target: "agent-openai",
-            model = %self.model,
-            max_tokens = self.max_tokens,
-            messages = %format!("{:#?}", self.messages),
-            tools = self.tools.len(),
+            _model = %self.model,
+            _max_tokens = self.max_tokens,
+            _messages = %format!("{:#?}", self.messages),
+            _tools = self.tools.len(),
             "Openai request"
         );
     }
@@ -364,7 +364,7 @@ impl OpenAICompletionsRequest {
     pub fn log_trace(&self) {
         trace!(
             target: "agent-openai",
-            request = %format!("{:#?}", self),
+            _request = %format!("{:#?}", self),
             "Openai full request"
         );
     }
@@ -397,6 +397,20 @@ impl OpenAICompletionsRequest {
         let mut function_type = None;
         let mut text = None;
 
+        debug!(
+            target: "agent-openai",
+            _request_messages= ?request.messages.len(),
+            _iterations_messages = format_args!("{:#?}", imessages)
+        );
+
+        let pmessages = 
+            // stateless — all iterations or original messages
+            if imessages.is_empty() {
+                request.messages
+            } else {
+                imessages
+        };
+
 
         match request.provider.as_str() {
             "Together" => {
@@ -421,7 +435,7 @@ impl OpenAICompletionsRequest {
         };
         
 
-        for message in imessages {
+        for message in pmessages {
             match message {
                 Message::Thought { content: _ } => {}
                 Message::User { content } => {

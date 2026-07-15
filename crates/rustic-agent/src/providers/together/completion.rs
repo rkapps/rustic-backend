@@ -44,7 +44,7 @@ impl LlmClient for TogetherClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
 
         info!(
-            target: "agent-together",
+            target: "agent-openai",
             "Together request"
         );          
         self.inner.complete(together_request(request)).await

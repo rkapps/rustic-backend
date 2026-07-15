@@ -44,7 +44,7 @@ impl LlmClient for FireworksClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
 
         info!(
-            target: "agent-fireworks",
+            target: "agent-openai",
             "Fireworks request"
         );          
         self.inner.complete(fireworks_request(request)).await
