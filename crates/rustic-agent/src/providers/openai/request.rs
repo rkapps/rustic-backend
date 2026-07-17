@@ -403,14 +403,8 @@ impl OpenAICompletionsRequest {
             _iterations_messages = format_args!("{:#?}", imessages)
         );
 
-        let pmessages = 
-            // stateless — all iterations or original messages
-            if imessages.is_empty() {
-                request.messages
-            } else {
-                imessages
-        };
-
+        let mut pmessages = request.messages.clone();
+        pmessages.extend(imessages);
 
         match request.provider.as_str() {
             "Together" => {
