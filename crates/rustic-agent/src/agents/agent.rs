@@ -424,7 +424,8 @@ impl Agent {
                     otel.name = format!("iteration: {}", iteration),  // ← OTel specific attribute that overrides span name
                     n = %iteration,
                     _last_response_id = ?last_response_id,
-                    _messages= format_args!("{:#?}", iterations.get(&iteration)),
+                    _messages= format_args!("{:#?}", messages),
+                    _iterations= format_args!("{:#?}", iterations.get(&iteration)),
             );
             // let _enter = iter_span.enter();
 
@@ -451,6 +452,7 @@ impl Agent {
             // Call the llm with the request
             nrequest.last_response_id = last_response_id.clone();
             nrequest.iterations = iterations.clone();
+
 
             let response = self
                 .client
