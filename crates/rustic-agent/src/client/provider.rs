@@ -6,6 +6,7 @@ pub enum Provider {
     Groq { api_key: String, model: String },
     Together { api_key: String, model: String },
     Fireworks { api_key: String, model: String },
+    Mistral { api_key: String, model: String },
     Local { model: String, base_url: String },
 }
 
@@ -50,7 +51,12 @@ impl Provider {
             model: model.into(),
         }
     }
-
+    pub fn mistral(api_key: impl Into<String>, model: impl Into<String>) -> Self {
+        Self::Mistral{
+            api_key: api_key.into(),
+            model: model.into(),
+        }
+    }
     pub fn local(model: impl Into<String>, base_url: impl Into<String>) -> Self {
         Self::Local {
             model: model.into(),

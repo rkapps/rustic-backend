@@ -5,23 +5,12 @@ use std::sync::Arc;
 use tracing::debug;
 
 use crate::{
-    MCPRegistry, ToolRegistry,
-    agents::Agent,
-    client::{
+    MCPRegistry, ToolRegistry, agents::Agent, client::{
         llm::LlmClient, mcp::MCPServerAdapter, preset::Preset, provider::Provider,
         request::ReasoningEffort,
-    },
-    providers::{
-        anthropic::{self, completion::AnthropicClient},
-        fireworks::{self, completion::FireworksClient},
-        gemini::{self, completion::GeminiClient},
-        groq::{self, completion::GroqClient},
-        local::completion::LocalClient,
-        openai::{self, completion::OpenAIClient},
-        together::{self, completion::TogetherClient},
-    },
-    services::{agent::AgentService, config::agent::CompletionStrategy},
-    tools::mcp::MCPServerSetting,
+    }, providers::{
+        anthropic::{self, completion::AnthropicClient}, fireworks::{self, completion::FireworksClient}, gemini::{self, completion::GeminiClient}, groq::{self, completion::GroqClient}, local::completion::LocalClient, mistral::{self, completion::MistralClient}, openai::{self, completion::OpenAIClient}, together::{self, completion::TogetherClient},
+    }, services::{agent::AgentService, config::agent::CompletionStrategy}, tools::mcp::MCPServerSetting,
 };
 
 const MODEL_TEMPERATURE: f32 = 0.5;
@@ -100,6 +89,7 @@ impl<'a> AgentBuilder<'a> {
             Provider::Groq { api_key, model } => self.with_groq(&api_key, &model).await,
             Provider::Together { api_key, model } => self.with_together(&api_key, &model).await,
             Provider::Fireworks { api_key, model } => self.with_fireworks(&api_key, &model).await,
+            Provider::Mistral { api_key, model } => self.with_mistral(&api_key, &model).await,
             Provider::Local { model, base_url } => {
                 self.with_local("local", &model, &base_url).await
             }
@@ -183,6 +173,20 @@ impl<'a> AgentBuilder<'a> {
         self.client = Some(client.clone());
         Ok(self)
     }
+
+    /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
+    pub async fn with_mistral(mut self, api_key: &str, model: &str) -> Result<Self> {
+        let mut clients = self.service.clients.write().await;
+        self.llm = Some(mistral::LLM.to_string());
+        self.model = Some(model.to_string());
+        let client_key = format! {"{}:{}", mistral::LLM, model};
+        let client = clients
+            .entry(client_key)
+            .or_insert(self.mistral_client(api_key)?);
+        self.client = Some(client.clone());
+        Ok(self)
+    }
+
 
     /// Configure the builder to use a local Anthropic-compatible server, reusing a cached client if one exists.
     pub async fn with_local(mut self, llm: &str, model: &str, base_url: &str) -> Result<Self> {
@@ -346,6 +350,14 @@ impl<'a> AgentBuilder<'a> {
 
         let client = FireworksClient::new(api_key.to_string())
             .with_context(|| anyhow::anyhow!("Error creating Fireworks client"))?;
+        Ok(Arc::new(client))
+    }
+
+    fn mistral_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
+        debug!("mistral client: {}", api_key);
+
+        let client = MistralClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Mistral client"))?;
         Ok(Arc::new(client))
     }
 

@@ -21,3 +21,4 @@ pub mod groq;
 pub mod local;
 pub mod openai;
 pub mod together;
+pub mod mistral;
