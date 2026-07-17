@@ -263,6 +263,9 @@ pub struct OpenAICompletionsRequest {
     pub messages: Vec<OpenAICompletionsMessage>,
     stream: bool,
     max_tokens: i32,
+    temperature: f32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reasoning: Option<OpenAIRequestReasoning>,
     pub tools: Vec<OpenAICompletionsToolDefinition>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<OpenAIRequestText>,
@@ -325,18 +328,6 @@ pub struct OpenAICompletionsFunction {
     // no type field
 }
 
-// impl From<&ToolDefinition> for OpenAICompletionsToolDefinition {
-//     fn from(tool: &ToolDefinition) -> Self {
-//         Self {
-//             r#type: "function".to_string(),
-//             function: OpenAICompletionsFunction {
-//                 name: tool.name.clone(),
-//                 description: tool.description.clone(),
-//                 parameters: tool.parameters.clone(),
-//             },
-//         }
-//     }
-// }
 
 impl OpenAICompletionsRequest {
     pub fn log_info(&self) {
@@ -510,6 +501,8 @@ impl OpenAICompletionsRequest {
             messages,
             model: request.model,
             stream: request.stream,
+            temperature: request.temperature,
+            reasoning: OpenAIRequestReasoning::new(request.reasoning_effort),
             text,
             tools,
         })
