@@ -168,6 +168,7 @@ where
 
         // only the event's own fields — no span context
         ctx.field_format().format_fields(writer.by_ref(), event)?;
-        writeln!(writer)
+        writeln!(writer)?;
+        Ok(())
     }
 }
