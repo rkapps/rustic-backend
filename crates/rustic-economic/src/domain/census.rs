@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::CENSUS_COLLECTION;
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Census {
     pub id: String,               // "census_acs5_2023_B19013_001E_04000"

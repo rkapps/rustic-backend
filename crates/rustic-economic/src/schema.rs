@@ -9,7 +9,7 @@ pub async fn update_economic_db(mongo_uri: &str, mongo_db: &str) -> Result<()> {
     //     .expect("RUSTIC_ECONOMIC_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
 
-    let manager = EconomicMongoStorageManager::new(mongo_uri, &mongo_db).await?;
+    let manager = EconomicMongoStorageManager::new(mongo_uri, mongo_db).await?;
 
     // fred
     let repo = manager.economic_series().await?;

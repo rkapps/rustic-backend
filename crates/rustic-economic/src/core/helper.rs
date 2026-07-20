@@ -3,7 +3,6 @@ use rustic_providers::economic::census::model::CensusRecord;
 
 use crate::domain::census::Census;
 
-
 pub(crate) fn next_refresh(frequency: &str) -> chrono::DateTime<Utc> {
     let now = Utc::now();
     match frequency {
@@ -89,22 +88,29 @@ pub fn get_variable_description(variable_code: &str) -> String {
 
 pub fn get_bea_metric_description(code: &str) -> String {
     match code {
-        "CAINC1-1"    => "Personal Income by State".to_string(),
+        "CAINC1-1" => "Personal Income by State".to_string(),
         "CAINC5N-700" => "Retail Trade Total Earnings by State".to_string(),
         "CAINC5N-701" => "Motor Vehicle and Parts Dealers Earnings by State".to_string(),
         "CAINC5N-702" => "Furniture and Home Furnishings Stores Earnings by State".to_string(),
         "CAINC5N-703" => "Electronics and Appliance Stores Earnings by State".to_string(),
-        "CAINC5N-704" => "Building Material and Garden Equipment Dealers Earnings by State".to_string(),
+        "CAINC5N-704" => {
+            "Building Material and Garden Equipment Dealers Earnings by State".to_string()
+        }
         "CAINC5N-705" => "Food and Beverage Stores Earnings by State".to_string(),
         "CAINC5N-708" => "Clothing and Clothing Accessories Stores Earnings by State".to_string(),
-        "CAINC5N-709" => "Sporting Goods, Hobby, Musical Instrument and Book Stores Earnings by State".to_string(),
+        "CAINC5N-709" => {
+            "Sporting Goods, Hobby, Musical Instrument and Book Stores Earnings by State"
+                .to_string()
+        }
         "CAINC5N-711" => "General Merchandise Stores Earnings by State".to_string(),
-        "CAINC5N-521" => "Furniture and Related Product Manufacturing Earnings by State".to_string(),
+        "CAINC5N-521" => {
+            "Furniture and Related Product Manufacturing Earnings by State".to_string()
+        }
         "CAINC5N-535" => "Apparel Manufacturing Earnings by State".to_string(),
         "CAINC5N-1800" => "Accommodation and Food Services Earnings by State".to_string(),
         "CAINC5N-1802" => "Food Services and Drinking Places Earnings by State".to_string(),
         "CAINC5N-1700" => "Arts, Entertainment, and Recreation Earnings by State".to_string(),
-        "CAGDP1-1"    => "GDP by State".to_string(),
-        _             => "Unknown Metric".to_string(),
+        "CAGDP1-1" => "GDP by State".to_string(),
+        _ => "Unknown Metric".to_string(),
     }
 }

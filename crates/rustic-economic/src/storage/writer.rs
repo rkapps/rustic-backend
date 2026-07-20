@@ -3,8 +3,11 @@ use std::fmt::Debug;
 
 use async_trait::async_trait;
 
-use crate::domain::{bea::{BeaNipa, BeaRegional}, census::Census, fred::FredSeries};
-
+use crate::domain::{
+    bea::{BeaNipa, BeaRegional},
+    census::Census,
+    fred::FredSeries,
+};
 
 #[async_trait]
 pub trait StorageWriter:

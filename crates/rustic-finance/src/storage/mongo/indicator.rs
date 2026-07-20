@@ -35,9 +35,11 @@ impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
             .eq("symbol", symbol.to_uppercase())
             .gte("date", from_date)
             .sort_asc("date");
-        self.manager.get_ticker_indicators_by_criteria(&criteria).await
+        self.manager
+            .get_ticker_indicators_by_criteria(&criteria)
+            .await
     }
-        
+
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,

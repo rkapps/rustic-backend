@@ -82,7 +82,6 @@ impl ConversationService {
         uid: String,
         query: ConversationsQuery,
     ) -> Result<Vec<Conversation>> {
-
         let conversations = self
             .storage_manager
             .get_conversations(&uid, query)
@@ -275,7 +274,6 @@ impl ConversationService {
         let stream = runner.execute_streaming(cturns, &request.prompt).await?;
         Ok(Box::pin(stream))
     }
-
 
     pub async fn recalculate_conversation_usage_cost(&self, uid: &str, id: &str) -> Result<()> {
         let mut conversation = self.get_conversation(uid, id).await.map_err(|e| {

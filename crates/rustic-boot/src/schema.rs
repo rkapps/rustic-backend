@@ -4,12 +4,11 @@ use tracing::info;
 
 use crate::BootStorageManager;
 
-
 pub async fn update_rustic_platform(mongo_uri: &str, mongo_db: &str) -> Result<()> {
     // let mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")
     //     .expect("RUSTIC_PLATFORM_DB_NAME envrionment variable not set");
     info!("Updating schema for {} ...", mongo_db);
-    let manager = BootStorageManager::new(mongo_uri, &mongo_db).await?;
+    let manager = BootStorageManager::new(mongo_uri, mongo_db).await?;
 
     let repo = manager.conversations().await?;
     let indexes = get_conversation_index_definitions();

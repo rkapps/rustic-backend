@@ -14,7 +14,7 @@ use tracing::{info, warn};
 
 pub async fn build_ticker_prediction_models(
     reader: &Arc<FinanceMongoStorageReader>,
-    writer: &Arc<FinanceMongoStorageWriter>,
+    _writer: &Arc<FinanceMongoStorageWriter>,
     symbols: &str,
     from_date: DateTime<Utc>,
     periods: &[usize],
@@ -41,13 +41,13 @@ pub async fn build_ticker_prediction_models(
         }
 
         for period in periods {
-            let samples = build_labels(ticker, &indicators, *period as usize);
+            let samples = build_labels(ticker, &indicators, *period);
             info!(
                 target: "ml",
                 "  Period: {} samples: {}", period, samples.len()
             );
 
-            let result = LinearRegressionModel::train(samples)?;
+            LinearRegressionModel::train(samples)?;
         }
     }
 

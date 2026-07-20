@@ -1,7 +1,4 @@
-use crate::{
-    core::bea::get_bea_regional,
-    storage::mongo::reader::EconomicMongoStorageReader,
-};
+use crate::{core::bea::get_bea_regional, storage::mongo::reader::EconomicMongoStorageReader};
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
@@ -60,7 +57,7 @@ impl Tool for BeaRegionalDataTool {
                 "state_prefix": {
                     "type": "string",
                     "description": "2-digit state code to return all counties within that state. 06=California, 48=Texas, 04=Arizona. Use with geo_type=county."
-                }                    
+                }
             },
             "required": ["code", "line_codes", "year"]
         })

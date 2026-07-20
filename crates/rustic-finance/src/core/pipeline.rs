@@ -1,8 +1,11 @@
 use crate::{
-    core::{helper::get_tickers_for_symbols, tickers::update::{
-        update_all_ticker_overview_embeddings, update_all_ticker_sentiments_embeddings,
-        update_all_tickers, update_cryptos_realtime, update_stocks_etfs_realtime,
-    }},
+    core::{
+        helper::get_tickers_for_symbols,
+        tickers::update::{
+            update_all_ticker_overview_embeddings, update_all_ticker_sentiments_embeddings,
+            update_all_tickers, update_cryptos_realtime, update_stocks_etfs_realtime,
+        },
+    },
     domain::{Ticker, TickerControl, dto::ticker_seed::TickerSeed, tickers::AssetType},
     storage::{
         FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter,

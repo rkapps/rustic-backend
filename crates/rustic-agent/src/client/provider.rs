@@ -33,26 +33,26 @@ impl Provider {
     }
 
     pub fn groq(api_key: impl Into<String>, model: impl Into<String>) -> Self {
-        Self::Groq{
+        Self::Groq {
             api_key: api_key.into(),
             model: model.into(),
         }
     }
 
     pub fn together(api_key: impl Into<String>, model: impl Into<String>) -> Self {
-        Self::Together{
+        Self::Together {
             api_key: api_key.into(),
             model: model.into(),
         }
     }
     pub fn fireworks(api_key: impl Into<String>, model: impl Into<String>) -> Self {
-        Self::Fireworks{
+        Self::Fireworks {
             api_key: api_key.into(),
             model: model.into(),
         }
     }
     pub fn mistral(api_key: impl Into<String>, model: impl Into<String>) -> Self {
-        Self::Mistral{
+        Self::Mistral {
             api_key: api_key.into(),
             model: model.into(),
         }

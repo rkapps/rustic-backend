@@ -33,7 +33,10 @@ where
 
     for index in indexes {
         match repo.create_index(index.clone()).await {
-            Ok(_) => info!("Collection {:?} Index {:?} created", collection_name, index.name),
+            Ok(_) => info!(
+                "Collection {:?} Index {:?} created",
+                collection_name, index.name
+            ),
             Err(e) if e.to_string().contains("already exists") => {
                 warn!("Index already exists, skipping: {}", e);
             }

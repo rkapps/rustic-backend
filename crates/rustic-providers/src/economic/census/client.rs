@@ -1,6 +1,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::HttpClient;
+use std::format;
 use std::sync::Arc;
 use tracing::{info, warn};
 
@@ -115,7 +116,6 @@ impl CensusClient {
         let name_idx = headers.iter().position(|h| h == "NAME");
         let state_idx = headers.iter().position(|h| h == "state");
         let county_idx = headers.iter().position(|h| h == "county");
-        let country_idx = headers.iter().position(|h| h == "us");
 
         let geo_col = headers.last().cloned().unwrap_or_default().to_uppercase();
 
@@ -138,7 +138,7 @@ impl CensusClient {
                 .cloned()
                 .unwrap_or_default();
 
-            let geo_fips = if geo_col == "COUNTY" {
+            let geo_fips: String = if geo_col == "COUNTY" {
                 let state = state_idx
                     .and_then(|i| row.get(i))
                     .cloned()
@@ -155,7 +155,7 @@ impl CensusClient {
                     .unwrap_or_default();
                 format!("{}000", state)
             } else {
-                format!("00000")
+                "00000".to_string()
             };
 
             for (variable, idx) in &variable_indices {

@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
+use crate::{
+    domain::Ticker,
+    storage::{FinanceMongoStorageReader, TickerStorageReader},
+};
 use anyhow::Result;
-use crate::{domain::Ticker, storage::{FinanceMongoStorageReader, TickerStorageReader}};
-
 
 pub(crate) async fn get_tickers_for_symbols(
     reader: &Arc<FinanceMongoStorageReader>,

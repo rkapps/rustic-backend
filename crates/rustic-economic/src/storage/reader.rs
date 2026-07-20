@@ -1,5 +1,10 @@
 use crate::{
-    domain::{bea::{BeaNipa, BeaRegional}, census::Census, fred::FredSeries}, tools::domain::{BeaNipaEntity, BeaRegionalEntity, CensusEntity},
+    domain::{
+        bea::{BeaNipa, BeaRegional},
+        census::Census,
+        fred::FredSeries,
+    },
+    tools::domain::{BeaNipaEntity, BeaRegionalEntity, CensusEntity},
 };
 use anyhow::Result;
 use async_trait::async_trait;

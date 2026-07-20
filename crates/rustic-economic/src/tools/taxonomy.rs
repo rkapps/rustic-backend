@@ -3,11 +3,11 @@ use anyhow::Result;
 use async_trait::async_trait;
 use rustic_core::Tool;
 use serde_json::{Value, json};
-use tracing::{info};
+use tracing::info;
 
 #[derive(Debug)]
 pub struct EconomicTaxonomyTool {
-    config: EconomicConfig
+    config: EconomicConfig,
 }
 impl EconomicTaxonomyTool {
     pub fn new(config: EconomicConfig) -> EconomicTaxonomyTool {

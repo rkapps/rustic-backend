@@ -281,7 +281,7 @@ pub enum OpenAICompletionsMessage {
     ToolCall {
         role: String,
         #[serde(skip_serializing_if = "Option::is_none")]
-        r#type: Option<String>,          
+        r#type: Option<String>,
         content: Option<String>,
         tool_calls: Vec<OpenAICompletionsToolCall>,
     },
@@ -289,7 +289,7 @@ pub enum OpenAICompletionsMessage {
     ToolResult {
         role: String,
         #[serde(skip_serializing_if = "Option::is_none")]
-        r#type: Option<String>,   //       
+        r#type: Option<String>, //
         tool_call_id: String,
         content: String,
     },
@@ -321,13 +321,12 @@ pub struct OpenAICompletionsToolDefinition {
 #[derive(Serialize, Debug)]
 pub struct OpenAICompletionsFunction {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,  // Some("function") for Together, None for Fireworks
+    pub r#type: Option<String>, // Some("function") for Together, None for Fireworks
     pub name: String,
     pub description: String,
     pub parameters: serde_json::Value,
     // no type field
 }
-
 
 impl OpenAICompletionsRequest {
     pub fn log_info(&self) {
@@ -402,7 +401,7 @@ impl OpenAICompletionsRequest {
                 msg_type_assistant = Some("assistant".to_string());
                 msg_type_tool = Some("tool".to_string());
                 function_type = Some("function".to_string());
-                        // if response format schema is available, use it
+                // if response format schema is available, use it
                 text = if let Some(response_format_schema) = request.response_format_schema {
                     let response_format = json!({
                         "type": "json_schema",
@@ -418,7 +417,6 @@ impl OpenAICompletionsRequest {
             }
             _ => {}
         };
-        
 
         for message in pmessages {
             match message {
@@ -443,10 +441,7 @@ impl OpenAICompletionsRequest {
                     tool_calls.push(OpenAICompletionsToolCall {
                         id: call_id,
                         r#type: msg_type_assistant.clone(),
-                        function: OpenAICompletionsToolFunction {
-                            name,
-                            arguments: arguments,
-                        },
+                        function: OpenAICompletionsToolFunction { name, arguments },
                     });
                 }
                 Message::ToolOutput {
@@ -482,15 +477,14 @@ impl OpenAICompletionsRequest {
         );
         let mut tools = Vec::new();
         for definition in request.definitions {
-
             let tool = OpenAICompletionsToolDefinition {
                 r#type: "function".to_string(),
                 // r#type: None,
-                function: OpenAICompletionsFunction{
+                function: OpenAICompletionsFunction {
                     description: definition.description,
                     name: definition.name,
                     parameters: definition.parameters,
-                    r#type: function_type.clone()
+                    r#type: function_type.clone(),
                 },
             };
             tools.push(tool);

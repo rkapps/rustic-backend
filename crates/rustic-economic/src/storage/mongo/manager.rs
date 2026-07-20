@@ -42,9 +42,7 @@ impl EconomicMongoStorageManager {
             .await
     }
 
-    pub async fn bea_regional(
-        &self,
-    ) -> Result<Arc<Mutex<MongoRepository<String, BeaRegional>>>> {
+    pub async fn bea_regional(&self) -> Result<Arc<Mutex<MongoRepository<String, BeaRegional>>>> {
         self.db
             .collection::<String, BeaRegional>(BEA_REGIONAL_COLLECTION.to_string())
             .await

@@ -1,5 +1,8 @@
 use crate::ml::predictions::{
-    helper::{calculate_mean_and_deviation, scale_data}, input::PredictionInput, trainer::TrainingSample, traits::PredictionModel
+    helper::{calculate_mean_and_deviation, scale_data},
+    input::PredictionInput,
+    trainer::TrainingSample,
+    traits::PredictionModel,
 };
 use anyhow::Result;
 use tracing::{info, trace};

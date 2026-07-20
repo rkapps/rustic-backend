@@ -154,7 +154,7 @@ impl AgentService {
             .clone()
             .ok_or_else(|| anyhow::anyhow!("Agent '{}': preset not resolved", agent_id))?;
 
-        let provider = self.resolve_provider(agent_id, &llm, Some(&model))?;
+        let provider = self.resolve_provider(agent_id, llm, Some(model))?;
 
         // default the system prompt from agent config
         let system_prompt = system_prompt.or(Some(agent_config.system_prompt));
@@ -294,7 +294,8 @@ impl AgentService {
                     pipeline_config.available_agents
                 } else {
                     pipeline_config
-                        .stages.clone()
+                        .stages
+                        .clone()
                         .into_iter()
                         .flat_map(|s| s.sub_agents)
                         .collect()
@@ -324,8 +325,12 @@ impl AgentService {
                     subs.push(sub_agent);
                 }
 
-                let pipeline =
-                    PipeLineAgent::new(agent, pipeline_config.pipeline_type, pipeline_config.stages.clone(), subs);
+                let pipeline = PipeLineAgent::new(
+                    agent,
+                    pipeline_config.pipeline_type,
+                    pipeline_config.stages.clone(),
+                    subs,
+                );
 
                 Ok(Arc::new(pipeline) as Arc<dyn Runnable>)
             }

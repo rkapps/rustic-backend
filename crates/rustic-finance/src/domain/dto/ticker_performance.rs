@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::domain::Ticker;
 
@@ -7,7 +7,6 @@ use crate::domain::Ticker;
 pub struct TickerPerformance {
     pub symbol: String,
     pub diffs: HashMap<String, HashMap<String, f64>>,
-
 }
 
 impl From<Ticker> for TickerPerformance {

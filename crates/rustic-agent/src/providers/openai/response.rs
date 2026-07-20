@@ -114,15 +114,13 @@ pub struct OpenAIChunkResponseDataResponse {
     pub usage: Option<OpenAITokenUsage>,
 }
 
-
-
 /// Top-level response from `POST /v1/chat/completions`.
 #[derive(Deserialize, Debug)]
 pub struct OpenAICompletionsResponse {
     pub id: String,
     pub model: String,
     pub choices: Vec<OpenAICompletionsChoice>,
-    pub usage: OpenAICompletionsUsage
+    pub usage: OpenAICompletionsUsage,
 }
 
 #[derive(Deserialize, Debug)]
@@ -130,7 +128,7 @@ pub struct OpenAICompletionsChoice {
     pub index: i32,
     pub message: OpenAICompletionsMessage,
     pub finish_reason: String,
-}   
+}
 
 #[derive(Deserialize, Debug)]
 pub struct OpenAICompletionsMessage {
@@ -139,7 +137,6 @@ pub struct OpenAICompletionsMessage {
     pub reasoning: Option<String>,
     pub tool_calls: Option<Vec<OpenAICompletionsTool>>,
 }
-
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct OpenAICompletionsUsage {
@@ -164,14 +161,14 @@ pub struct OpenAICompletionsCompletionTokensDetails {
 pub struct OpenAICompletionsChunkResponse {
     pub id: String,
     pub choices: Vec<OpenAICompletionsChunkChoice>,
-    pub usage: Option<OpenAICompletionsUsage>
+    pub usage: Option<OpenAICompletionsUsage>,
 }
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct OpenAICompletionsChunkChoice {
     pub index: i32,
     pub finish_reason: Option<String>,
-    pub delta: OpenAICompletionsChunkChoiceDelta
+    pub delta: OpenAICompletionsChunkChoiceDelta,
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -180,7 +177,6 @@ pub struct OpenAICompletionsChunkChoiceDelta {
     pub content: Option<String>,
     pub reasoning: Option<String>,
     pub tool_calls: Option<Vec<OpenAICompletionsTool>>,
-
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -188,11 +184,11 @@ pub struct OpenAICompletionsTool {
     pub index: Option<i32>,
     pub id: Option<String>,
     pub r#type: Option<String>,
-    pub function: OpenAICompletionsToolFunction
+    pub function: OpenAICompletionsToolFunction,
 }
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct OpenAICompletionsToolFunction {
     pub name: Option<String>,
-    pub arguments: String
+    pub arguments: String,
 }

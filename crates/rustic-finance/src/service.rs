@@ -172,7 +172,11 @@ impl FinanceService {
     }
 
     #[cfg(feature = "writer")]
-    pub async fn update_eod_tickers_sentiments_embeddings(&self, symbols: &str, update: bool) -> Result<()> {
+    pub async fn update_eod_tickers_sentiments_embeddings(
+        &self,
+        symbols: &str,
+        update: bool,
+    ) -> Result<()> {
         use crate::core::pipeline::update_eod_tickers_sentiments_embeddings_pipeline;
 
         let reader = self.reader.as_ref().expect("reader not initialized");
@@ -195,8 +199,8 @@ impl FinanceService {
 
     #[cfg(feature = "writer")]
     pub async fn build_ticker_prediction_models(&self, symbols: &str) -> Result<()> {
-        use chrono::{Months, Utc};
         use crate::ml::build_ticker_prediction_models;
+        use chrono::{Months, Utc};
 
         // const PERIODS: [i32; 4] = [5, 10, 20, 60];
         const PERIODS: [usize; 1] = [5];
@@ -205,9 +209,17 @@ impl FinanceService {
         let reader = self.reader.as_ref().expect("reader not initialized");
         let writer = self.writer.as_ref().expect("writer not initialized");
 
-        let from_date = Utc::now().checked_sub_months(Months::new(36)).unwrap();
+        // let from_date = Utc::now().checked_sub_months(Months::new(36)).unwrap();
         let from_date = Utc::now().checked_sub_months(Months::new(1)).unwrap();
-        let _ = build_ticker_prediction_models(&reader.clone(), &writer.clone(), symbols, from_date, &PERIODS, MIN_SAMPLES).await?;
+        build_ticker_prediction_models(
+            &reader.clone(),
+            &writer.clone(),
+            symbols,
+            from_date,
+            &PERIODS,
+            MIN_SAMPLES,
+        )
+        .await?;
         Ok(())
     }
 

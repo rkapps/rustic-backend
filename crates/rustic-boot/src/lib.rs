@@ -20,8 +20,8 @@ pub mod boot;
 pub mod config;
 pub mod conversation;
 pub mod routes;
-pub mod storage;
 pub mod schema;
+pub mod storage;
 
 // Boot
 pub use boot::{AgenticBootBuilder, BootState, McpServerEntry};

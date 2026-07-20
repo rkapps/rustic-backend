@@ -1,4 +1,3 @@
-
 pub mod completion;
 
 pub const LLM: &str = "Groq";

@@ -3,9 +3,11 @@ use std::{env, sync::Arc};
 use anyhow::Result;
 use rustic_core::Tool;
 use rustic_finance::{
-    storage::{
-        FinanceMongoStorageReader, mongo::manager::FinanceMongoStorageManager,
-    }, tools::{ticker_peers::TickerPeersTool, ticker_screening::TickerScreeningTool, ticker_snapshot::TickerSnapshotTool},
+    storage::{FinanceMongoStorageReader, mongo::manager::FinanceMongoStorageManager},
+    tools::{
+        ticker_peers::TickerPeersTool, ticker_screening::TickerScreeningTool,
+        ticker_snapshot::TickerSnapshotTool,
+    },
 };
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
 use serde_json::json;
@@ -25,7 +27,6 @@ pub(crate) async fn get_manager() -> Result<FinanceMongoStorageManager> {
 
     manager
 }
-
 
 #[tokio::test]
 async fn test_tool_peers() -> Result<()> {

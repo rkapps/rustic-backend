@@ -3,7 +3,11 @@ use std::{env, sync::Arc};
 use anyhow::Result;
 use rustic_core::{Tool, set_logger};
 use rustic_economic::{
-    storage::mongo::{manager::EconomicMongoStorageManager, reader::EconomicMongoStorageReader}, tools::{bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool, fred::FredDataTool},
+    storage::mongo::{manager::EconomicMongoStorageManager, reader::EconomicMongoStorageReader},
+    tools::{
+        bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool,
+        fred::FredDataTool,
+    },
 };
 use serde_json::json;
 use tokio::fs;
@@ -48,7 +52,8 @@ async fn test_tool_bea_nipa() -> Result<()> {
     let reader = EconomicMongoStorageReader::new(manager);
 
     let tool = BeaNipaDataTool::new(Arc::new(reader.clone()));
-    let value = json!({"table_name": "T20100", "series_codes": ["DPCERC", "A065RC"], "year": "2023"});
+    let value =
+        json!({"table_name": "T20100", "series_codes": ["DPCERC", "A065RC"], "year": "2023"});
 
     let result = tool.execute(value).await?;
     // save to fixture
@@ -56,7 +61,6 @@ async fn test_tool_bea_nipa() -> Result<()> {
     fs::write("tests/fixtures/tool_bea_nipa.json", &json).await?;
     Ok(())
 }
-
 
 #[tokio::test]
 async fn test_tool_bea_regional_cainc1_national() -> Result<()> {
@@ -67,12 +71,16 @@ async fn test_tool_bea_regional_cainc1_national() -> Result<()> {
     let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
         "code":"CAINC1", "line_codes": ["1"], "year": "LAST5", "geo_fips": ["00000"]
-    }); 
+    });
 
     let result = tool.execute(value).await?;
     // save to fixture
     let json = serde_json::to_string_pretty(&result).unwrap();
-    fs::write("tests/fixtures/tool_bea_regional_cainc1_national.json", &json).await?;
+    fs::write(
+        "tests/fixtures/tool_bea_regional_cainc1_national.json",
+        &json,
+    )
+    .await?;
     Ok(())
 }
 
@@ -85,7 +93,7 @@ async fn test_tool_bea_regional_cainc1_state() -> Result<()> {
     let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
         "code":"CAINC1", "line_codes": ["1"], "year": "LAST5", "geo_fips": ["06000", "04000" ]
-    }); 
+    });
 
     let result = tool.execute(value).await?;
     // save to fixture
@@ -93,7 +101,6 @@ async fn test_tool_bea_regional_cainc1_state() -> Result<()> {
     fs::write("tests/fixtures/tool_bea_regional_cainc1_state.json", &json).await?;
     Ok(())
 }
-
 
 #[tokio::test]
 async fn test_tool_bea_regional_cainc1_county() -> Result<()> {
@@ -104,7 +111,7 @@ async fn test_tool_bea_regional_cainc1_county() -> Result<()> {
     let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
         "code":"CAINC1", "line_codes": ["1"],  "year": "LAST5", "geo_type": "COUNTY", "state_prefix": "06"
-    }); 
+    });
 
     let result = tool.execute(value).await?;
     // save to fixture
@@ -122,7 +129,7 @@ async fn test_tool_bea_regional_cainc5n_state() -> Result<()> {
     let tool = BeaRegionalDataTool::new(Arc::new(reader.clone()));
     let value = json!({
         "code":"CAINC5N", "line_codes": ["701", "704", "521"], "year": "LAST5",  "geo_fips": ["06000", "04000" ]
-    }); 
+    });
 
     let result = tool.execute(value).await?;
     // save to fixture
@@ -141,15 +148,18 @@ async fn test_tool_bea_regional_cainc5n_county() -> Result<()> {
     let value = json!({
         "code":"CAINC5N", "line_codes": ["700", "704", "521"],  "year": "LAST5",
         "geo_type": "COUNTY", "state_prefix": "06"
-    }); 
+    });
 
     let result = tool.execute(value).await?;
     // save to fixture
     let json = serde_json::to_string_pretty(&result).unwrap();
-    fs::write("tests/fixtures/tool_bea_regional_cainc5n_county.json", &json).await?;
+    fs::write(
+        "tests/fixtures/tool_bea_regional_cainc5n_county.json",
+        &json,
+    )
+    .await?;
     Ok(())
 }
-
 
 #[tokio::test]
 async fn test_tool_census() -> Result<()> {
@@ -159,8 +169,8 @@ async fn test_tool_census() -> Result<()> {
 
     let tool = CensusDataTool::new(Arc::new(reader.clone()));
     let value = json!(
-        {   
-            "dataset": "acs5", "variables": ["B19013_001E", "B25077_001E", "B25003_002E", "B01002_001E"], "year": "LAST5", 
+        {
+            "dataset": "acs5", "variables": ["B19013_001E", "B25077_001E", "B25003_002E", "B01002_001E"], "year": "LAST5",
             "geo_fips": ["06045", "04000" ]
         }
     );

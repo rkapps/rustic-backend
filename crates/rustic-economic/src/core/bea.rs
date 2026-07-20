@@ -6,9 +6,7 @@ use rustic_providers::{BeaClient, economic::bea::model::BeaParamValue};
 use tracing::{error, info};
 
 use crate::{
-    core::helper::{
-        get_bea_metric_description, next_refresh, resolve_years,
-    },
+    core::helper::{get_bea_metric_description, next_refresh, resolve_years},
     domain::bea::{BeaNipa, BeaRegional},
     storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
@@ -57,7 +55,7 @@ pub async fn get_bea_regional(
         let code = format!("{}-{}", code, line_code);
         codes.push(code);
     }
-    
+
     let mut results = reader
         .get_bea_regional_by_table_series(codes, years, geo_fips, geo_type, state_prefix)
         .await?;
@@ -129,7 +127,11 @@ pub async fn update_bea_regional(
             code, line_code, row.geo_fips, row.time_period
         );
 
-        let geo_type = if row.geo_fips.eq("00000") { "US"} else {geo_fips};
+        let geo_type = if row.geo_fips.eq("00000") {
+            "US"
+        } else {
+            geo_fips
+        };
         let new_row = BeaRegional {
             id,
             code: row.code.clone(),

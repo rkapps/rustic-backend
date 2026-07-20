@@ -315,9 +315,7 @@ impl PipeLineAgent {
         Ok((response, decision))
     }
 
-    #[tracing::instrument(
-        skip(self, turns),
-    )]
+    #[tracing::instrument(skip(self, turns))]
     async fn execute_streaming_deterministic(
         &self,
         turns: Vec<CompletionTurn>,
@@ -355,20 +353,30 @@ impl PipeLineAgent {
                 let mut new_prompt = original_prompt;
                 let length = self_clone.stages.len();
                 for (index, stage) in self_clone.stages.iter().enumerate() {
-
                     let execution = if stage.parallel {
                         ExecutionMode::Parallel
                     } else {
                         ExecutionMode::Sequential
                     };
 
-                    let new_decision = if index == 0 { decision.clone() } else {
-                        let sub_agents = stage.sub_agents.iter().map(|s| AgentGoal{
-                            id: s.id.clone(),
-                            goal: Some(new_prompt.clone())
-                        }).collect();
+                    let new_decision = if index == 0 {
+                        decision.clone()
+                    } else {
+                        let sub_agents = stage
+                            .sub_agents
+                            .iter()
+                            .map(|s| AgentGoal {
+                                id: s.id.clone(),
+                                goal: Some(new_prompt.clone()),
+                            })
+                            .collect();
 
-                        StageDecision { agents: sub_agents, execution, stop: false, reasoning: None }
+                        StageDecision {
+                            agents: sub_agents,
+                            execution,
+                            stop: false,
+                            reasoning: None,
+                        }
                     };
 
                     let start = std::time::Instant::now();
@@ -376,20 +384,28 @@ impl PipeLineAgent {
                     let _ = tx
                         .send(Ok(CompletionChunkResponse::status(status.clone())))
                         .await;
-    
+
                     // info!("Stage: {:?}", stage.name);
-                    if (index+1) == length {
-                        let turn = CompletionTurn{
+                    if (index + 1) == length {
+                        let turn = CompletionTurn {
                             response_content: new_prompt,
                             response_id: last_response_id.clone(),
                             sequence: 1,
-                            user_content: "Decide on the next action".to_string()
+                            user_content: "Decide on the next action".to_string(),
                         };
-                        self_clone.execute_synthesizer(&new_decision, last_response_id.clone(), vec![turn], tx, cusage).await;
+                        self_clone
+                            .execute_synthesizer(
+                                &new_decision,
+                                last_response_id.clone(),
+                                vec![turn],
+                                tx,
+                                cusage,
+                            )
+                            .await;
                         break;
-
                     } else {
-                        let (merged, sub_usage) = match self_clone.execute_subs(&new_decision).await {
+                        let (merged, sub_usage) = match self_clone.execute_subs(&new_decision).await
+                        {
                             Ok(c) => c,
                             Err(e) => {
                                 let error = format!("Executing sub agent error: {}", e);
@@ -406,7 +422,6 @@ impl PipeLineAgent {
                     let elapsed = start.elapsed();
                     let done = format!("  ✅ {:.1}s\n", elapsed.as_secs_f32());
                     let _ = tx.send(Ok(CompletionChunkResponse::status(done))).await;
-
                 }
             }
             .instrument(tracing::Span::current()),
@@ -536,7 +551,7 @@ impl PipeLineAgent {
 
     async fn execute_decide(
         &self,
-        turns: &Vec<CompletionTurn>,
+        turns: &[CompletionTurn],
         prompt: &str,
         last_response_id: Option<String>,
         store: bool,
@@ -552,7 +567,6 @@ impl PipeLineAgent {
             }
         }
     }
-
 
     /// Run the sub-agents nominated by `decision` and return the merged JSON string
     /// plus the total token usage across all sub-calls.
@@ -621,13 +635,10 @@ impl PipeLineAgent {
                     };
                 }
             }
-            
         }
-
 
         Ok(merge_responses(&responses))
     }
-
 
     async fn execute_synthesizer(
         &self,
@@ -637,7 +648,6 @@ impl PipeLineAgent {
         tx: Sender<Result<CompletionChunkResponse, HttpError>>,
         usage: CompletionResponseTokenUsage,
     ) {
-
         let start = std::time::Instant::now();
 
         if decision.agents.len() > 1 {

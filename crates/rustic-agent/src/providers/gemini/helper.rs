@@ -74,15 +74,14 @@ pub fn to_completion_reponse_token_usage(
     }
 }
 
-
-/// Recursively removes "additionalProperties" from the JSON schema to prevent 
+/// Recursively removes "additionalProperties" from the JSON schema to prevent
 /// Gemini API validation errors, while keeping the source schema OpenAI-compliant.
 pub fn sanitize_schema_for_gemini(value: &mut Value) {
     match value {
         Value::Object(map) => {
             // Remove the key at the current object level
             map.remove("additionalProperties");
-            
+
             // Recurse down into properties, items, or any nested structures
             for (_, val) in map.iter_mut() {
                 sanitize_schema_for_gemini(val);

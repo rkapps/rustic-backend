@@ -122,7 +122,7 @@ where
         Ok(())
     }
 
-     /// Return collection name
+    /// Return collection name
     fn collection_name(&self) -> &str {
         ""
     }

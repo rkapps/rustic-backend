@@ -19,6 +19,6 @@ pub mod fireworks;
 pub mod gemini;
 pub mod groq;
 pub mod local;
+pub mod mistral;
 pub mod openai;
 pub mod together;
-pub mod mistral;

@@ -41,7 +41,7 @@ pub struct AgentConfig {
     #[serde(default)]
     pub response_format_schema_path: String,
     #[serde(default)]
-    pub response_format_schema: Option<Value>
+    pub response_format_schema: Option<Value>,
 }
 
 impl AgentConfig {
@@ -74,9 +74,8 @@ pub struct PipelineStage {
     pub name: String,
     pub parallel: bool,
     pub relay: bool,
-    pub sub_agents: Vec<AvailableAgent>
+    pub sub_agents: Vec<AvailableAgent>,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AvailableAgent {
@@ -84,7 +83,6 @@ pub struct AvailableAgent {
     #[serde(default)]
     pub llm_config: Option<LlmConfig>,
 }
-
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ConversationConfig {

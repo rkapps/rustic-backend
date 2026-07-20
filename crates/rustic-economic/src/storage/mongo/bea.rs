@@ -1,15 +1,17 @@
 use crate::{
-    domain::bea::{BeaNipa, BeaRegional}, storage::{
+    domain::bea::{BeaNipa, BeaRegional},
+    storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::BeaStorageReader,
         writer::BeaStorageWriter,
-    }, tools::domain::{BeaNipaEntity, BeaRegionalEntity},
+    },
+    tools::domain::{BeaNipaEntity, BeaRegionalEntity},
 };
 use anyhow::Result;
 use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
 use serde_json::json;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, trace};
 
 #[async_trait]
 impl BeaStorageReader for EconomicMongoStorageReader {
@@ -157,7 +159,7 @@ impl BeaStorageReader for EconomicMongoStorageReader {
         if let Some(geo_type) = geo_type {
             match_conditions.push(json!({ "geo_type": geo_type })); // Maps your raw field to the struct
         }
-        if !geo_fips.is_empty(){
+        if !geo_fips.is_empty() {
             match_conditions.push(json! ({ "geo_fips": { "$in": geo_fips }}));
         }
 

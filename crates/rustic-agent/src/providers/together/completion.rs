@@ -3,7 +3,8 @@ use crate::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
         response::CompletionResponse,
-    }, providers::{openai::completion::OpenAIClient, together::TOGETHER_BASE_URL}
+    },
+    providers::{openai::completion::OpenAIClient, together::TOGETHER_BASE_URL},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -24,12 +25,11 @@ impl TogetherClient {
     ///
     /// The API key is set to `"ollama"` as Ollama does not require authentication.
     pub fn new(api_key: String) -> Result<TogetherClient> {
-
         info!(
             target: "agent-together",
             "Together request"
-        );        
-        
+        );
+
         Ok(Self {
             inner: Box::new(OpenAIClient::new_with_chat_completions(
                 TOGETHER_BASE_URL.to_string(),
@@ -42,11 +42,10 @@ impl TogetherClient {
 #[async_trait]
 impl LlmClient for TogetherClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-
         info!(
             target: "agent-openai",
             "Together request"
-        );          
+        );
         self.inner.complete(together_request(request)).await
     }
 
@@ -54,14 +53,13 @@ impl LlmClient for TogetherClient {
         &self,
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
-
-        self.inner.complete_with_stream(together_request(request)).await
+        self.inner
+            .complete_with_stream(together_request(request))
+            .await
     }
 }
 
-
 pub fn together_request(request: CompletionRequest) -> CompletionRequest {
-
     CompletionRequest {
         id: request.id.clone(),
         provider: request.provider.clone(),
@@ -77,8 +75,6 @@ pub fn together_request(request: CompletionRequest) -> CompletionRequest {
         store: false,
         definitions: request.definitions.clone(),
         last_response_id: None,
-        response_format_schema: request.response_format_schema
+        response_format_schema: request.response_format_schema,
     }
-
 }
-

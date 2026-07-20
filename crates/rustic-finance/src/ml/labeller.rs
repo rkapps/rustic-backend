@@ -26,7 +26,6 @@ pub fn build_labels(
         .iter()
         .enumerate()
         .filter_map(|(i, indicator)| {
-
             let prev_indicator = indicators.get(i + 1).unwrap();
             let current_price = indicator.values.get("price");
             let future_price = indicators[i + period].values.get("price");
@@ -42,7 +41,6 @@ pub fn build_labels(
                 sma_200=?&indicator.values.get("sma_200"),
             );
 
-
             if let Some(current_price) = current_price
                 && let Some(future_price) = future_price
             {
@@ -50,8 +48,7 @@ pub fn build_labels(
                 let return_pct = ((future_price - current_price) / current_price)
                     .to_f64()
                     .unwrap_or(0.0)
-                    * 100.0
-                    ;
+                    * 100.0;
                 let return_pct = round_to_precision_2(return_pct);
 
                 let values = features.values();

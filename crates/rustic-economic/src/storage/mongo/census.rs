@@ -5,11 +5,13 @@ use serde_json::json;
 use tracing::{debug, error, trace};
 
 use crate::{
-    domain::census::Census, storage::{
+    domain::census::Census,
+    storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::CensusStorageReader,
         writer::CensusStorageWriter,
-    }, tools::domain::CensusEntity,
+    },
+    tools::domain::CensusEntity,
 };
 
 #[async_trait]
@@ -46,12 +48,11 @@ impl CensusStorageReader for EconomicMongoStorageReader {
             json! ({ "year": { "$in": years } }),
         ];
 
-
         // Append optional fields only if they contain data
         if let Some(geo_type) = geo_type {
             match_conditions.push(json!({ "geo_type": geo_type })); // Maps your raw field to the struct
         }
-        if !geo_fips.is_empty(){
+        if !geo_fips.is_empty() {
             match_conditions.push(json! ({ "geo_fips": { "$in": geo_fips }}));
         }
 

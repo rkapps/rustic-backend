@@ -101,9 +101,9 @@ pub fn unwrap_typed_value(v: Value) -> Value {
                 let inner = map["value"].clone();
                 match inner {
                     Value::Object(_) => unwrap_typed_value(inner),
-                    Value::Array(arr) => Value::Array(
-                        arr.into_iter().map(unwrap_typed_value).collect()
-                    ),
+                    Value::Array(arr) => {
+                        Value::Array(arr.into_iter().map(unwrap_typed_value).collect())
+                    }
                     other => other,
                 }
             } else {
@@ -111,13 +111,13 @@ pub fn unwrap_typed_value(v: Value) -> Value {
                 Value::Object(
                     map.iter()
                         .map(|(k, v)| (k.clone(), unwrap_typed_value(v.clone())))
-                        .collect()
+                        .collect(),
                 )
             }
         }
-        Value::Array(arr) => Value::Array(
-            arr.iter().map(|v| unwrap_typed_value(v.clone())).collect()
-        ),
+        Value::Array(arr) => {
+            Value::Array(arr.iter().map(|v| unwrap_typed_value(v.clone())).collect())
+        }
         other => other.clone(),
     }
 }

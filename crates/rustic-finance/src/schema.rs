@@ -7,7 +7,7 @@ use crate::storage::mongo::manager::FinanceMongoStorageManager;
 pub async fn update_finance_db(mongo_uri: &str, mongo_db: &str) -> Result<()> {
     info!("Updating schema for {} ...", mongo_db);
 
-    let manager = FinanceMongoStorageManager::new(mongo_uri, &mongo_db).await?;
+    let manager = FinanceMongoStorageManager::new(mongo_uri, mongo_db).await?;
 
     // tickers
     let repo = manager.tickers().await?;

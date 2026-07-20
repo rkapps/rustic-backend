@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::{BEA_NIPA_COLLECTION, BEA_REGIONAL_COLLECTION};
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BeaNipa {
     pub id: String, // "bea_nipa_T20100_A191RC_2024"

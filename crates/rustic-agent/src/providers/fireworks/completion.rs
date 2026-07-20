@@ -3,7 +3,8 @@ use crate::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
         response::CompletionResponse,
-    }, providers::{fireworks::FIREWORKS_BASE_URL, openai::completion::OpenAIClient, }
+    },
+    providers::{fireworks::FIREWORKS_BASE_URL, openai::completion::OpenAIClient},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -24,12 +25,11 @@ impl FireworksClient {
     ///
     /// The API key is set to `"ollama"` as Ollama does not require authentication.
     pub fn new(api_key: String) -> Result<FireworksClient> {
-
         info!(
             target: "agent-fireworks",
             "Fireworks request"
-        );        
-        
+        );
+
         Ok(Self {
             inner: Box::new(OpenAIClient::new_with_chat_completions(
                 FIREWORKS_BASE_URL.to_string(),
@@ -42,11 +42,10 @@ impl FireworksClient {
 #[async_trait]
 impl LlmClient for FireworksClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-
         info!(
             target: "agent-openai",
             "Fireworks request"
-        );          
+        );
         self.inner.complete(fireworks_request(request)).await
     }
 
@@ -54,14 +53,13 @@ impl LlmClient for FireworksClient {
         &self,
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
-
-        self.inner.complete_with_stream(fireworks_request(request)).await
+        self.inner
+            .complete_with_stream(fireworks_request(request))
+            .await
     }
 }
 
-
 pub fn fireworks_request(request: CompletionRequest) -> CompletionRequest {
-
     CompletionRequest {
         id: request.id.clone(),
         provider: request.provider.clone(),
@@ -77,7 +75,6 @@ pub fn fireworks_request(request: CompletionRequest) -> CompletionRequest {
         store: false,
         definitions: request.definitions.clone(),
         last_response_id: None,
-        response_format_schema: request.response_format_schema
+        response_format_schema: request.response_format_schema,
     }
-
 }

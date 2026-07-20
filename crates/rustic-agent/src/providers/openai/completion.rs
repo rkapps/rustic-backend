@@ -167,24 +167,24 @@ impl OpenAIClient {
         let mut rcontents: Vec<CompletionResponseContent> = Vec::new();
 
         for choice in oresponse.choices {
-
             debug!(
                 target: "agent-openai",
                 "Choice: {:#?}", choice
             );
 
             if choice.finish_reason == "stop" {
-                let rcontent = CompletionResponseContent::Text(choice.message.content.unwrap_or_default());
+                let rcontent =
+                    CompletionResponseContent::Text(choice.message.content.unwrap_or_default());
                 rcontents.push(rcontent);
                 break;
             } else if choice.finish_reason == "length" {
-                return Err(HttpError::Other(format!(
-                    "Response truncated — model hit max_tokens limit. Consider using a model with higher output token limit or reducing data volume."
-                )));
+                return Err(HttpError::Other(
+                    "Response truncated — model hit max_tokens limit. Consider using a model with higher output token limit or reducing data volume.".to_string()
+                ));
             } else if choice.finish_reason == "tool_calls" {
                 for tool_call in choice.message.tool_calls.unwrap() {
-
-                    let arguments: Value = match serde_json::from_str(&tool_call.function.arguments) {
+                    let arguments: Value = match serde_json::from_str(&tool_call.function.arguments)
+                    {
                         Ok(c) => c,
                         Err(e) => {
                             return Err(HttpError::Other(format!(
@@ -196,9 +196,9 @@ impl OpenAIClient {
                     let rcontent = CompletionResponseContent::ToolCall(ToolCallRequest {
                         id: tool_call.id.unwrap(),
                         name: tool_call.function.name.unwrap(),
-                        arguments ,
+                        arguments,
                     });
-                    rcontents.push(rcontent);                    
+                    rcontents.push(rcontent);
                 }
             }
         }
@@ -448,10 +448,10 @@ impl OpenAIClient {
                                 debug!(target: "agent-openai", "Skipping tool call — missing id or name");
                                 continue;
                             }
-                            
+
                             let args = serde_json::from_str(arguments)
                                 .unwrap_or(Value::Object(Default::default()));
-                    
+
                             yield Ok(CompletionChunkResponse::tool_call(
                                 agent_id.clone(),
                                 Some(id.clone()),
@@ -483,7 +483,7 @@ impl OpenAIClient {
                     if let Some(reason) = &choice.finish_reason {
                         finish_reason = true;
 
-    
+
                         // If reason is tool_calls, then send the pending tools (Some source models - Qwen)
                         if reason == "tool_calls" {
                             // Qwen path — emit tool calls immediately on finish_reason
@@ -512,10 +512,10 @@ impl OpenAIClient {
                             ));
                         } else if reason == "length" {
                             // truncated — treat as error
-                            yield Err(HttpError::Other(format!(
+                            yield Err(HttpError::Other(
                                 "Response truncated — model hit max_tokens limit. \
-                                 Consider using a model with higher output token limit or reducing data volume."
-                            )));
+                                 Consider using a model with higher output token limit or reducing data volume.".to_string()
+                            ));
                             break;
                         }
                         continue

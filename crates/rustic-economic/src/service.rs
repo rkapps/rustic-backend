@@ -21,11 +21,15 @@ pub struct EconomicService {
     fred: Option<Arc<FredClient>>,
     bea: Option<Arc<BeaClient>>,
     census: Option<Arc<CensusClient>>,
-    pub config: EconomicConfig
+    pub config: EconomicConfig,
 }
 
 impl EconomicService {
-    pub async fn new_reader(mongo_uri: &str, mongo_db: &str, config: EconomicConfig) -> Result<Self> {
+    pub async fn new_reader(
+        mongo_uri: &str,
+        mongo_db: &str,
+        config: EconomicConfig,
+    ) -> Result<Self> {
         let storage = EconomicMongoStorageManager::new(mongo_uri, mongo_db).await?;
         Ok(Self {
             reader: Some(Arc::new(EconomicMongoStorageReader::new(storage))),
@@ -33,7 +37,7 @@ impl EconomicService {
             fred: None,
             bea: None,
             census: None,
-            config
+            config,
         })
     }
 
@@ -43,7 +47,7 @@ impl EconomicService {
         fred_api_key: Option<String>,
         bea_api_key: Option<String>,
         census_api_key: Option<String>,
-        config: EconomicConfig
+        config: EconomicConfig,
     ) -> Result<Self> {
         let storage = EconomicMongoStorageManager::new(mongo_uri, mongo_db).await?;
         let fred_api_key = fred_api_key.expect("fred api key is not set");
@@ -55,13 +59,16 @@ impl EconomicService {
             fred: Some(Arc::new(FredClient::new(fred_api_key)?)),
             bea: Some(Arc::new(BeaClient::new(bea_api_key)?)),
             census: Some(Arc::new(CensusClient::new(census_api_key)?)),
-            config
+            config,
         })
     }
 
     #[cfg(feature = "reader")]
     pub fn tools(&self) -> Vec<Arc<dyn Tool>> {
-        use crate::tools::{bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool, fred::FredDataTool, taxonomy::EconomicTaxonomyTool};
+        use crate::tools::{
+            bea_nipa::BeaNipaDataTool, bea_regional::BeaRegionalDataTool, census::CensusDataTool,
+            fred::FredDataTool, taxonomy::EconomicTaxonomyTool,
+        };
         let reader = self.reader.as_ref().expect("reader not initialized");
 
         vec![

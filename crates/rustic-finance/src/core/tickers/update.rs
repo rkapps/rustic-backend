@@ -81,14 +81,8 @@ pub async fn update_all_tickers(
                     info!("Updating Ticker: {} {}/{}", ticker.symbol, i + 1, total);
                 }
 
-                let result = update_ticker(
-                    writer,
-                    provider_service,
-                    &mut tc,
-                    &mut ticker,
-                    update,
-                )
-                .await;
+                let result =
+                    update_ticker(writer, provider_service, &mut tc, &mut ticker, update).await;
 
                 sleep(delay).await;
 
@@ -414,7 +408,6 @@ pub async fn update_all_ticker_sentiments_embeddings(
             let writer = writer.clone();
             let provider_service = provider_service.clone();
             let embedding_client = embedding_client.clone();
-            let update = update.clone();
 
             Some(tokio::spawn(async move {
                 let _permit = sem.acquire().await.unwrap();
@@ -422,7 +415,12 @@ pub async fn update_all_ticker_sentiments_embeddings(
                 let mut tc = tc;
 
                 if i % 20 == 0 {
-                    info!("Updating Ticker sentiments and embeddings: {} {}/{}", ticker.symbol, i + 1, total);
+                    info!(
+                        "Updating Ticker sentiments and embeddings: {} {}/{}",
+                        ticker.symbol,
+                        i + 1,
+                        total
+                    );
                 }
                 match update_ticker_sentiments_embeddings(
                     reader,
@@ -432,12 +430,16 @@ pub async fn update_all_ticker_sentiments_embeddings(
                     &mut tc,
                     &ticker,
                     update,
-                ).await
+                )
+                .await
                 {
                     Ok(c) => c,
                     Err(e) => {
-                        error!("Ticker {} sentiments and embeddings error: {:?}", ticker.symbol, e);
-                    },
+                        error!(
+                            "Ticker {} sentiments and embeddings error: {:?}",
+                            ticker.symbol, e
+                        );
+                    }
                 }
 
                 sleep(delay).await;
@@ -460,10 +462,9 @@ pub async fn update_ticker_sentiments_embeddings(
     ticker: &Ticker,
     update: bool,
 ) -> Result<()> {
-
     // update sentiments
     if !update || should_sync_sentiments(tc) {
-        match update_ticker_sentiments(provider_service, &tc, &ticker).await {
+        match update_ticker_sentiments(provider_service, tc, ticker).await {
             Ok(new_sentiments) => {
                 if !new_sentiments.is_empty() {
                     debug!(
@@ -484,8 +485,8 @@ pub async fn update_ticker_sentiments_embeddings(
         }
     }
 
-    if !update || should_sync_embeddings(&tc) {
-        match update_ticker_embeddings(reader, embedding_client, &tc, &ticker).await {
+    if !update || should_sync_embeddings(tc) {
+        match update_ticker_embeddings(reader, embedding_client, tc, ticker).await {
             Ok(new_embeddings) => {
                 if !new_embeddings.is_empty() {
                     debug!(

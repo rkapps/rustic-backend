@@ -3,7 +3,8 @@ use async_trait::async_trait;
 use rustic_storage::{Repository, SearchCriteria};
 
 use crate::{
-    domain::fred::FredSeries, storage::{
+    domain::fred::FredSeries,
+    storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::FredStorageReader,
         writer::FredStorageWriter,
@@ -21,7 +22,7 @@ impl FredStorageReader for EconomicMongoStorageReader {
             Err(e) => {
                 return Err(anyhow::anyhow!("Error getting CensusData: {}", e));
             }
-        }              
+        }
     }
 
     async fn list_active(&self) -> Result<Vec<FredSeries>> {

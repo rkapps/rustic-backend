@@ -1,8 +1,8 @@
 use anyhow::Result;
 use rustic_core::load_content;
 use rustic_economic::{domain::config::EconomicConfig, service::EconomicService};
-use tracing::info;
 use std::{env, sync::Arc};
+use tracing::info;
 
 use rustic_finance::service::FinanceService;
 use rustic_ml::embeddings::openai::OpenAIEmbeddingClient;
@@ -14,18 +14,9 @@ pub async fn get_finance_reader_service(mongo_uri: &str) -> Result<FinanceServic
         env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable not set");
 
     let embedding_client = Arc::new(OpenAIEmbeddingClient::new(&openai_api_key)?);
-    info!(
-        "Finance data Mongo uri: {:?} db: {:?}",
-        mongo_uri, mongo_db
-    );
-    FinanceService::new_reader(
-        mongo_uri,
-        &mongo_db,
-        embedding_client,
-    )
-    .await
+    info!("Finance data Mongo uri: {:?} db: {:?}", mongo_uri, mongo_db);
+    FinanceService::new_reader(mongo_uri, &mongo_db, embedding_client).await
 }
-
 
 pub async fn get_finance_writer_service(mongo_uri: &str) -> Result<FinanceService> {
     let mongo_db = env::var("RUSTIC_FINANCE_DB_NAME")
@@ -52,7 +43,11 @@ pub async fn get_finance_writer_service(mongo_uri: &str) -> Result<FinanceServic
     .await
 }
 
-pub async fn get_economic_reader_service(mongo_uri: &str, config_dir: &str, file_name: &str ) -> Result<EconomicService> {
+pub async fn get_economic_reader_service(
+    mongo_uri: &str,
+    config_dir: &str,
+    file_name: &str,
+) -> Result<EconomicService> {
     let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
 
@@ -65,16 +60,15 @@ pub async fn get_economic_reader_service(mongo_uri: &str, config_dir: &str, file
 
     let economic_config_content = load_content(path).await?;
     let economic_config: EconomicConfig = serde_json::from_str(&economic_config_content)?;
-    
-    EconomicService::new_reader(
-        mongo_uri,
-        &mongo_db,
-        economic_config
-    ).await
+
+    EconomicService::new_reader(mongo_uri, &mongo_db, economic_config).await
 }
 
-
-pub async fn get_economic_writer_service(mongo_uri: &str, config_dir: &str, file_name: &str) -> Result<EconomicService> {
+pub async fn get_economic_writer_service(
+    mongo_uri: &str,
+    config_dir: &str,
+    file_name: &str,
+) -> Result<EconomicService> {
     let mongo_db = env::var("RUSTIC_ECONOMIC_DB_NAME")
         .expect("RUSTIC_AI_DB_NAME envrionment variable not set");
 
@@ -88,7 +82,7 @@ pub async fn get_economic_writer_service(mongo_uri: &str, config_dir: &str, file
         env::var("FRED_API_KEY").ok(),
         env::var("BEA_API_KEY").ok(),
         env::var("CENSUS_API_KEY").ok(),
-        economic_config
+        economic_config,
     )
     .await
 }

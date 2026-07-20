@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::FRED_SERIES_COLLECTION;
 
-
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct FredSeries {
     pub id: String,        // same as series_id — MongoDB _id
@@ -39,7 +38,6 @@ pub enum FredSource {
     Bea,
     Census,
 }
-
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

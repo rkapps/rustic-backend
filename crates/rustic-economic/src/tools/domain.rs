@@ -48,7 +48,6 @@ pub struct BeaGeoEntity {
     pub data: Vec<BeaValueEntity>,
 }
 
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CensusEntity {
     pub dataset: String,

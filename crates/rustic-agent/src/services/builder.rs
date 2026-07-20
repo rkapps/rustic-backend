@@ -5,12 +5,24 @@ use std::sync::Arc;
 use tracing::debug;
 
 use crate::{
-    MCPRegistry, ToolRegistry, agents::Agent, client::{
+    MCPRegistry, ToolRegistry,
+    agents::Agent,
+    client::{
         llm::LlmClient, mcp::MCPServerAdapter, preset::Preset, provider::Provider,
         request::ReasoningEffort,
-    }, providers::{
-        anthropic::{self, completion::AnthropicClient}, fireworks::{self, completion::FireworksClient}, gemini::{self, completion::GeminiClient}, groq::{self, completion::GroqClient}, local::completion::LocalClient, mistral::{self, completion::MistralClient}, openai::{self, completion::OpenAIClient}, together::{self, completion::TogetherClient},
-    }, services::{agent::AgentService, config::agent::CompletionStrategy}, tools::mcp::MCPServerSetting,
+    },
+    providers::{
+        anthropic::{self, completion::AnthropicClient},
+        fireworks::{self, completion::FireworksClient},
+        gemini::{self, completion::GeminiClient},
+        groq::{self, completion::GroqClient},
+        local::completion::LocalClient,
+        mistral::{self, completion::MistralClient},
+        openai::{self, completion::OpenAIClient},
+        together::{self, completion::TogetherClient},
+    },
+    services::{agent::AgentService, config::agent::CompletionStrategy},
+    tools::mcp::MCPServerSetting,
 };
 
 const MODEL_TEMPERATURE: f32 = 0.5;
@@ -186,7 +198,6 @@ impl<'a> AgentBuilder<'a> {
         self.client = Some(client.clone());
         Ok(self)
     }
-
 
     /// Configure the builder to use a local Anthropic-compatible server, reusing a cached client if one exists.
     pub async fn with_local(mut self, llm: &str, model: &str, base_url: &str) -> Result<Self> {

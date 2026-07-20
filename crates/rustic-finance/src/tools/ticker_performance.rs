@@ -9,7 +9,6 @@ use tracing::{debug, info};
 
 use crate::{domain::TickerPerformance, storage::reader::StorageReader};
 
-
 #[derive(Debug)]
 pub struct TickerPerformanceTool {
     storage_service: Arc<dyn StorageReader>,
@@ -27,7 +26,8 @@ impl Tool for TickerPerformanceTool {
     }
 
     fn description(&self) -> String {
-        "Returns the performance of the stock in percentage over 1W, 1M, 3M, 6M, Ytd, 1Y...etc".to_string()
+        "Returns the performance of the stock in percentage over 1W, 1M, 3M, 6M, Ytd, 1Y...etc"
+            .to_string()
     }
 
     fn parameters(&self) -> serde_json::Value {

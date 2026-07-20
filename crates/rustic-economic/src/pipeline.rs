@@ -21,24 +21,21 @@ impl EconomicDataPipeline {
         info!("Economic Data Pipeline Config: {:#?}", pipeline_config);
 
         if pipeline_config.update_fred {
-            let _ = self
-                .run_fred(pipeline_config.config.clone(), pipeline_config.clean_fred)
+            self.run_fred(pipeline_config.config.clone(), pipeline_config.clean_fred)
                 .await?;
         }
 
         if pipeline_config.update_bea {
-            let _ = self
-                .run_bea(
-                    pipeline_config.config.bea_nipa,
-                    pipeline_config.config.bea_regional,
-                    pipeline_config.clean_bea,
-                )
-                .await?;
+            self.run_bea(
+                pipeline_config.config.bea_nipa,
+                pipeline_config.config.bea_regional,
+                pipeline_config.clean_bea,
+            )
+            .await?;
         }
 
         if pipeline_config.update_census {
-            let _ = self
-                .run_census(pipeline_config.config.census, pipeline_config.clean_census)
+            self.run_census(pipeline_config.config.census, pipeline_config.clean_census)
                 .await?;
         }
         Ok(())
@@ -156,12 +153,12 @@ impl EconomicDataPipeline {
             //     .await?;
 
             self.service
-                .update_bea_regional(&bea_regional.code, &bea_regional.line_code, "STATE", &year)
+                .update_bea_regional(&bea_regional.code, &bea_regional.line_code, "STATE", year)
                 .await?;
             tokio::time::sleep(Duration::from_millis(700)).await;
 
             self.service
-                .update_bea_regional(&bea_regional.code, &bea_regional.line_code, "COUNTY", &year)
+                .update_bea_regional(&bea_regional.code, &bea_regional.line_code, "COUNTY", year)
                 .await?;
         }
         Ok(())

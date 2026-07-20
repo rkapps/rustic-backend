@@ -24,8 +24,7 @@ async fn main() -> Result<()> {
         .expect("RUSTIC_AI_PROJECT_ID envrionment variable not set");
 
     let endpoint = std::env::var("OTEL_ENDPOINT")?;
-    let _ =
-        set_logger_with_telemetry(filter, "rustic-ai-api", &firebase_project_id, &endpoint).await?;
+    set_logger_with_telemetry(filter, "rustic-ai-api", &firebase_project_id, &endpoint).await?;
 
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");

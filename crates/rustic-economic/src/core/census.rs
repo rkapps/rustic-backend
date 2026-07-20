@@ -52,7 +52,7 @@ pub async fn update_census(
         // One call for the county
         let state_records = census.get_acs(year, "acs5", &vars, "us:1").await?;
         process_census_records(&mut all_records, state_records, dataset, year);
-        
+
         // One call for all states
         let state_records = census.get_acs(year, "acs5", &vars, "state:*").await?;
         process_census_records(&mut all_records, state_records, dataset, year);

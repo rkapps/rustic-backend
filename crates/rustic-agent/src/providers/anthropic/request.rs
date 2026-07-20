@@ -21,7 +21,7 @@ pub struct AnthropicCompletionRequest {
     pub tools: Vec<AnthropicToolDefinition>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub output_config: Option<AnthropicOutputConfig>
+    pub output_config: Option<AnthropicOutputConfig>,
 }
 
 impl AnthropicCompletionRequest {
@@ -150,7 +150,6 @@ impl AnthropicThinking {
     }
 }
 
-
 /// Tool schema in Anthropic's format (`input_schema` instead of `parameters`).
 #[derive(Debug, Serialize)]
 pub struct AnthropicOutputConfig {
@@ -162,7 +161,6 @@ pub struct AnthropicOutputConfig {
 //     r#type: String,
 //     schema: Value
 // }
-
 
 impl AnthropicCompletionRequest {
     /// Convert a provider-agnostic [`CompletionRequest`] into Anthropic's wire format.
@@ -291,7 +289,7 @@ impl AnthropicCompletionRequest {
         // let output_config  = if let Some(response_format_schema) = request.response_format_schema {
         //     let response_format = json!({
         //         "type": "json_schema",
-        //         "schema": response_format_schema                
+        //         "schema": response_format_schema
         //     });
         //     Some(AnthropicOutputConfig { format: response_format })
         // } else {
@@ -309,7 +307,7 @@ impl AnthropicCompletionRequest {
             thinking,
             stream: request.stream,
             tools: atools,
-            output_config
+            output_config,
         };
 
         Ok(arequest)

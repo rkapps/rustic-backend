@@ -1,9 +1,11 @@
 use crate::{
-    ReasoningEffort, client::{
+    ReasoningEffort,
+    client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
         response::CompletionResponse,
-    }, providers::{groq::GROQ_BASE_URL, openai::completion::OpenAIClient}
+    },
+    providers::{groq::GROQ_BASE_URL, openai::completion::OpenAIClient},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -36,7 +38,6 @@ impl GroqClient {
 #[async_trait]
 impl LlmClient for GroqClient {
     async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-
         self.inner.complete(groq_request(request)).await
     }
 
@@ -44,14 +45,11 @@ impl LlmClient for GroqClient {
         &self,
         request: CompletionRequest,
     ) -> HttpResult<CompletionStreamResponse> {
-
         self.inner.complete_with_stream(groq_request(request)).await
     }
 }
 
-
 pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
-
     let max_tokens = get_max_tokens(&request.model, &request.reasoning_effort);
     info!(
         target: "agent-groq",
@@ -59,8 +57,7 @@ pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
         request= ?request.reasoning_effort,
         max_tokens= ?max_tokens,
         "Groq request"
-    );        
-
+    );
 
     CompletionRequest {
         id: request.id.clone(),
@@ -70,18 +67,16 @@ pub fn groq_request(request: CompletionRequest) -> CompletionRequest {
         messages: request.messages.clone(),
         iterations: request.iterations.clone(),
         temperature: request.temperature,
-        max_tokens: max_tokens,
+        max_tokens,
         reasoning_effort: crate::ReasoningEffort::None,
         enable_cache: request.enable_cache,
         stream: request.stream,
         store: false,
         definitions: request.definitions.clone(),
         last_response_id: None,
-        response_format_schema: request.response_format_schema
+        response_format_schema: request.response_format_schema,
     }
-
 }
-
 
 fn get_max_tokens(model: &str, effort: &ReasoningEffort) -> i32 {
     let tpm_budget = match model {

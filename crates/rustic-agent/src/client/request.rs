@@ -37,8 +37,7 @@ pub struct CompletionRequest {
     pub definitions: Vec<ToolDefinition>,
 
     pub last_response_id: Option<String>,
-    pub response_format_schema: Option<Value>
-
+    pub response_format_schema: Option<Value>,
 }
 
 /// Controls the depth of chain-of-thought reasoning the model applies before responding.

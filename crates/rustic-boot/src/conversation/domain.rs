@@ -133,7 +133,7 @@ impl Conversation {
         if let Some(system_prompt) = request.system_prompt {
             self.system_prompt = Some(system_prompt);
         }
-        self.stream  = request.stream;
+        self.stream = request.stream;
         self.strategy = request.strategy;
         if self.strategy == CompletionStrategy::Stateless {
             self.history_mode = None;

@@ -1,11 +1,13 @@
-use std::{str::FromStr, sync::Arc};
 use anyhow::Result;
 use chrono::Utc;
 use rustic_providers::FredClient;
+use std::{str::FromStr, sync::Arc};
 use tracing::info;
 
 use crate::{
-    core::helper::next_refresh, domain::fred::{FredSource, FredSeries, Frequency}, storage::{
+    core::helper::next_refresh,
+    domain::fred::{FredSeries, FredSource, Frequency},
+    storage::{
         mongo::{reader::EconomicMongoStorageReader, writer::EconomicMongoStorageWriter},
         reader::FredStorageReader,
         writer::FredStorageWriter,

@@ -21,6 +21,6 @@ pub fn models() -> Vec<String> {
     vec![
         MODEL_GEMINI_3_FLASH_PREVIEW.to_string(),
         MODEL_GEMINI_3_1_FLASH_LITE_PREVIEW.to_string(),
-        MODEL_GEMINI_3_1_PRO_PREVIEW.to_string()
+        MODEL_GEMINI_3_1_PRO_PREVIEW.to_string(),
     ]
 }
