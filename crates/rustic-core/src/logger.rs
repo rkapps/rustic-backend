@@ -71,11 +71,10 @@ pub async fn set_logger_with_telemetry(
             .with(fmt_layer)
             .init();
     } else {
-        let fmt_layer = tracing_subscriber::fmt::layer()
-            .with_target(true)
-            .with_line_number(true)
-            .with_span_events(FmtSpan::NONE) // ← no span open/close events
-            .compact();
+        let mut fmt_layer = tracing_subscriber::fmt::layer()
+            .event_format(CleanFormatter)
+            .with_ansi(true);
+        fmt_layer.set_span_events(FmtSpan::NONE);
 
         let tracer = init_tracer(service_name, endpoint);
         let otel_layer = tracing_opentelemetry::layer().with_tracer(tracer);
@@ -129,4 +128,46 @@ pub async fn init_cloud_tracer(project_id: &str) -> Result<opentelemetry_sdk::tr
         .expect("Failed to create GCP exporter");
 
     Ok(tracer)
+}
+
+use tracing::Subscriber;
+use tracing_subscriber::fmt::FmtContext;
+use tracing_subscriber::fmt::format::{self, FormatEvent, FormatFields};
+
+struct CleanFormatter;
+
+impl<S, N> FormatEvent<S, N> for CleanFormatter
+where
+    S: Subscriber + for<'a> tracing_subscriber::registry::LookupSpan<'a>,
+    N: for<'a> FormatFields<'a> + 'static,
+{
+    fn format_event(
+        &self,
+        ctx: &FmtContext<'_, S, N>,
+        mut writer: format::Writer<'_>,
+        event: &tracing::Event<'_>,
+    ) -> std::fmt::Result {
+        // level and target:line
+        let meta = event.metadata();
+        let level = meta.level();
+        let level_str = match *level {
+            Level::ERROR => "\x1b[31mERROR\x1b[0m", // red
+            Level::WARN => "\x1b[33mWARN\x1b[0m",   // yellow
+            Level::INFO => "\x1b[32mINFO\x1b[0m",   // green
+            Level::DEBUG => "\x1b[34mDEBUG\x1b[0m", // blue
+            Level::TRACE => "\x1b[35mTRACE\x1b[0m", // magenta
+        };
+
+        write!(
+            writer,
+            "{} {}:{}: ",
+            level_str,
+            meta.target(),
+            meta.line().unwrap_or(0)
+        )?;
+
+        // only the event's own fields — no span context
+        ctx.field_format().format_fields(writer.by_ref(), event)?;
+        writeln!(writer)
+    }
 }

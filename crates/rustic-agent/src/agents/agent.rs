@@ -11,13 +11,15 @@ use tokio_stream::wrappers::ReceiverStream;
 use tracing::{Instrument, debug, error, info, trace};
 
 use crate::{
-    agents::helper::unwrap_typed_value, client::{
+    agents::helper::unwrap_typed_value,
+    client::{
         llm::LlmClient,
         message::Message,
         request::{CompletionRequest, ReasoningEffort},
         response::{CompletionChunkResponse, CompletionResponse, CompletionResponseContent},
         tools::{ToolCallRequest, ToolDefinition},
-    }, tools::{mcp::MCPRegistry, tool::ToolRegistry},
+    },
+    tools::{mcp::MCPRegistry, tool::ToolRegistry},
 };
 
 /// Orchestrates LLM completion calls and tool dispatching for a single configured model.
@@ -154,7 +156,14 @@ impl Agent {
                         _last_response_id = ?last_response_id,
                         _messages= ?iterations.get(&iteration),
                     );
-                    // let _enter = iter_span.enter();
+                    let _enter = iter_span.enter();
+                    iter_span.in_scope(|| {
+                        info!(
+                        _iteration = %iteration,
+                        _last_response_id = ?last_response_id,
+                        _messages= ?iterations.get(&iteration),
+                        );
+                    });
 
                     let request = CompletionRequest {
                         id: agent_id.clone(),
@@ -245,7 +254,7 @@ impl Agent {
                     if stream_error {
                         break;
                     }
-                    
+
                     iter_span.in_scope(|| {
                         info!(
                             _tool_calls= %tool_calls.len(),
@@ -417,7 +426,6 @@ impl Agent {
         let delay = Duration::from_millis(2000);
 
         loop {
-
             let iter_span = tracing::span!(
                     tracing::Level::INFO,
                     "iteration",
@@ -452,7 +460,6 @@ impl Agent {
             // Call the llm with the request
             nrequest.last_response_id = last_response_id.clone();
             nrequest.iterations = iterations.clone();
-
 
             let response = self
                 .client
@@ -524,7 +531,7 @@ impl Agent {
                 .into_iter()
                 .map(|call| {
                     let sem = semaphore.clone();
-                    let timeout_duration = Duration::from_secs(120);
+                    let timeout_duration = Duration::from_secs(60);
                     let span = tracing::info_span!(
                         parent: &iter_span,
                         "tool.execute",
@@ -549,9 +556,7 @@ impl Agent {
                 })
                 .collect();
 
-            let results = futures::future::join_all(tool_futures)
-                .instrument(tracing::Span::current())
-                .await;
+            let results = futures::future::join_all(tool_futures).await;
 
             //Add thoughts to the messages first
             let mut nmessages: Vec<Message> = Vec::new();

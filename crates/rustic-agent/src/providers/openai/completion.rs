@@ -531,11 +531,10 @@ impl OpenAIClient {
                         yield Ok(CompletionChunkResponse::content(agent_id.clone(), content, String::new()))
                     } else  if let Some(tool_calls) = delta.tool_calls{
 
-                        info!(
+                        trace!(
                             target: "agent-openai",
                             "tool_calls: {:?}", tool_calls
                         );
-
 
                         for tool_call in tool_calls {
                             let index = tool_call.index.unwrap_or(0);

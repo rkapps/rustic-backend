@@ -62,12 +62,21 @@ pub struct PipelineConfig {
     /// Sub-agent IDs this pipeline can delegate to.
     pub available_agents: Vec<AvailableAgent>,
     /// Ordered stage names for sequential pipelines.
-    pub stages: Vec<String>,
+    pub stages: Vec<PipelineStage>,
     /// Optional agent to invoke for follow-up turns after the pipeline completes.
     pub followup_agent: Option<String>,
     /// Blackboard keys that should survive across pipeline stages.
     pub persisted_blackboard_keys: Option<Vec<String>>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PipelineStage {
+    pub name: String,
+    pub parallel: bool,
+    pub relay: bool,
+    pub sub_agents: Vec<AvailableAgent>
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AvailableAgent {

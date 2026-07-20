@@ -1,7 +1,8 @@
 use anyhow::{Context, Result};
 use serde_json::Value;
 use std::{
-    collections::{HashMap, HashSet}, sync::Arc,
+    collections::{HashMap, HashSet},
+    sync::Arc,
 };
 use tracing::{debug, info, trace};
 
@@ -136,21 +137,23 @@ impl AgentService {
         llm_config: &LlmConfig,
         system_prompt: Option<String>,
         strategy: &CompletionStrategy,
-        response_format_schema: &Option<Value>
+        response_format_schema: &Option<Value>,
     ) -> Result<Agent> {
-        
         let agent_config = self.find_agent_config(agent_id).await?;
 
-        let llm = llm_config.llm.as_deref().ok_or_else(|| {
-            anyhow::anyhow!("Agent '{}': llm not resolved", agent_id)
-        })?;        
-        let model = llm_config.model.as_deref().ok_or_else(|| {
-            anyhow::anyhow!("Agent '{}': model not resolved", agent_id)
-        })?;        
-        let preset = llm_config.preset.clone().ok_or_else(|| {
-            anyhow::anyhow!("Agent '{}': preset not resolved", agent_id)
-        })?;        
-        
+        let llm = llm_config
+            .llm
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("Agent '{}': llm not resolved", agent_id))?;
+        let model = llm_config
+            .model
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("Agent '{}': model not resolved", agent_id))?;
+        let preset = llm_config
+            .preset
+            .clone()
+            .ok_or_else(|| anyhow::anyhow!("Agent '{}': preset not resolved", agent_id))?;
+
         let provider = self.resolve_provider(agent_id, &llm, Some(&model))?;
 
         // default the system prompt from agent config
@@ -259,7 +262,6 @@ impl AgentService {
             ));
         }
 
-        
         let agent_llm_config = config.llm_config.as_ref().ok_or_else(|| {
             anyhow::anyhow!("Agent '{:?}': llm_config not resolved", input.llm_config)
         })?;
@@ -274,7 +276,7 @@ impl AgentService {
                 &input_llm_config,
                 input.system_prompt.clone(),
                 &input.strategy,
-                &config.response_format_schema
+                &config.response_format_schema,
             )
             .await?;
 
@@ -288,7 +290,17 @@ impl AgentService {
                     input.agent_id
                 ));
                 let mut subs = Vec::new();
-                for sub_agent in pipeline_config.available_agents {
+                let available_agents = if pipeline_config.pipeline_type == "dynamic" {
+                    pipeline_config.available_agents
+                } else {
+                    pipeline_config
+                        .stages.clone()
+                        .into_iter()
+                        .flat_map(|s| s.sub_agents)
+                        .collect()
+                };
+
+                for sub_agent in available_agents {
                     let sub_config = self.find_agent_config(&sub_agent.id).await?;
                     let strategy = sub_config.get_strategy();
 
@@ -311,7 +323,10 @@ impl AgentService {
                         .context(format!("Sub Agent error: {}", sub_agent.id))?;
                     subs.push(sub_agent);
                 }
-                let pipeline = PipeLineAgent::new(agent, input.strategy.clone(), subs);
+
+                let pipeline =
+                    PipeLineAgent::new(agent, pipeline_config.pipeline_type, pipeline_config.stages.clone(), subs);
+
                 Ok(Arc::new(pipeline) as Arc<dyn Runnable>)
             }
         }
