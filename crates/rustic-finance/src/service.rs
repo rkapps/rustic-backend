@@ -130,10 +130,10 @@ impl FinanceService {
     }
 
     #[cfg(feature = "reader")]
-    pub async fn get_ticker_charts(&self, symbol: &str) -> Result<Vec<TickerChartEntity>> {
-        use crate::core::tickers::charts::get_ticker_charts;
+    pub async fn get_ticker_charts_from(&self, symbol: &str, date: DateTime<Utc>) -> Result<Vec<TickerChartEntity>> {
+        use crate::core::tickers::charts::get_ticker_charts_from;
         let reader = self.reader.as_ref().expect("reader not initialized");
-        get_ticker_charts(reader.clone(), symbol).await
+        get_ticker_charts_from(reader.clone(), symbol, date).await
     }
 
     #[cfg(feature = "reader")]

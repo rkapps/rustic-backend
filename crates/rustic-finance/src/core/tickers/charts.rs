@@ -1,21 +1,26 @@
 use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Result;
+use chrono::{DateTime, Utc};
 use rust_decimal::{Decimal, prelude::ToPrimitive};
+use tracing::debug;
 
 use crate::{
     domain::{TickerIndicator, dto::ticker_chart_entity::TickerChartEntity},
     storage::reader::StorageReader,
 };
 
-pub async fn get_ticker_charts(
+pub async fn get_ticker_charts_from(
     reader: Arc<dyn StorageReader>,
     symbol: &str,
+    date: DateTime<Utc>
 ) -> Result<Vec<TickerChartEntity>> {
     let indicators = reader
-        .get_ticker_indicators(symbol)
+        .get_ticker_indicators_by_symbol(symbol, date)
         .await
         .map_err(|e| anyhow::anyhow!(format!("Get Ticker error: {}", e)))?;
+
+    debug!("Symbol {} indicators: {}", symbol, indicators.len());
 
     let indicator_map: HashMap<String, TickerIndicator> = indicators
         .iter()
@@ -23,9 +28,11 @@ pub async fn get_ticker_charts(
         .collect();
 
     let history = reader
-        .get_ticker_history(symbol)
+        .get_ticker_history_by_date(symbol, date)
         .await
         .map_err(|e| anyhow::anyhow!(format!("Get Ticker error: {}", e)))?;
+
+    debug!("Symbol {} history: {}", symbol, history.len());
 
     let charts = history
         .into_iter()
