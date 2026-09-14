@@ -195,6 +195,7 @@ x        )
                     if iteration > MAX_ITERATIONS {
                         break;
                     }
+                    info!("Agent: {} Iteration: {:?}", agent.id, iteration);
 
                     let iter_span = tracing::span!(
                         tracing::Level::INFO,
@@ -273,6 +274,7 @@ x        )
                                 break;
                             }
                         };
+
                         if let Some(call) = chunk.tool_call {
                             debug!(agent= %agent_id, tool_call= ?call, "Tool Call");
                             tool_call_requests.push(call);
@@ -309,7 +311,8 @@ x        )
                     }
 
                     iter_span.in_scope(|| {
-                        debug!(
+                        info!(
+                            _final_content= ?final_content,
                             _tool_calls= %tool_call_requests.len(),
                             _new_response_id= ?last_response_id,
                         );
@@ -358,6 +361,7 @@ x        )
                                 otel.name = format!("tool: {}", call.name),
                                 _tool = %call.name,
                                 _call_id = %call.id,
+                                _arguments = ?call.arguments
                             );
                             agent.execute_tool_call(call.clone()).instrument(span)
                         })
@@ -564,7 +568,6 @@ x        )
             _output= format_args!("{:?}", serde_json::to_string_pretty(&output)),
             "Tool output: {:?}", call.name
         );
-
         let tool_output_message = Message::ToolOutput {
             call_id: call.id.clone(),
             output,

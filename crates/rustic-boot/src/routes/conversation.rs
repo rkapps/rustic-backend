@@ -217,7 +217,7 @@ pub async fn send_turn_streaming_handler(
                     if let TurnChunkResponse::Final { response } = &chunk {
                         // already handled above — send done event
                         let turn_response = response.clone();
-                        info!("Turn Response: {}", turn_response);
+                        debug!("Turn Response: {}", turn_response);
                         let elapsed = start.elapsed();
                         match conversation_service
                             .save_turn(

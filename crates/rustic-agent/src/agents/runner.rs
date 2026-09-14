@@ -427,6 +427,8 @@ impl PipeLineAgent {
         let self_clone = Arc::new(self.clone());
         let original_prompt = prompt.to_string();
 
+        info!("Agent: {:?}", self.get_agent_id());
+
         tokio::spawn(
             async move {
                 let (_, last_response_id) = build_messages_from_turns(&turns);
@@ -473,8 +475,10 @@ impl PipeLineAgent {
 
                     info!(
                         _agents= ?format_args!("{:#?}", new_decision.agents),
-                        "Decision: {:?}", new_decision.execution
+                        _decision = ?new_decision.execution,
+                        "Agent: {:?}", self_clone.get_agent_id()
                     );
+
                     let start = std::time::Instant::now();
                     let status = build_decision_status(&new_decision);
                     let _ = tx
@@ -526,7 +530,11 @@ impl PipeLineAgent {
                         };
                         turn_response.add_stage(stage_response);
 
-                        info!("Merged: {:#?}", merged);
+                        info!(
+                            _merged= ?format_args!("{:#?}", merged),
+                            "Agent: {:?}", self_clone.get_agent_id()
+                        );
+
                         new_content = merged;
                         // cusage += sub_usage;
                         // turn_response.usage = cusage.clone();
@@ -845,9 +853,15 @@ impl PipeLineAgent {
         let mut chunk_count = 0;
         let agent_id = self.get_agent_id().clone();
 
+        let streaming_start = std::time::Instant::now();
+
         while let Some(chunk_result) = stream.next().await {
             if chunk_count == 0 {
                 let status = format!("  ✅ {:.1}s\n", start.elapsed().as_secs_f32());
+                let _ = tx
+                    .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
+                    .await;
+                let status = format!("⚡ Streaming Response...");
                 let _ = tx
                     .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
                     .await;
@@ -877,10 +891,18 @@ impl PipeLineAgent {
                     turn_response.set_synthesizer(final_response);
 
                     info!(
-                        _turn_response = format_args!("{:#?}", turn_response),
+                        _turn_response = format_args!(
+                            "{:?} {:#?}",
+                            turn_response.agent_id, turn_response.content
+                        ),
                         "Synthesising done."
                     );
 
+                    let status = format!("  ✅ {:.1}s\n", streaming_start.elapsed().as_secs_f32());
+                    let _ = tx
+                        .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
+                        .await;
+                    
                     let _ = tx
                         .send(Ok(TurnChunkResponse::final_response(turn_response.clone())))
                         .await;
@@ -889,6 +911,9 @@ impl PipeLineAgent {
                 let _ = tx.send(Ok(chunk)).await;
             }
         }
+
+     
+
     }
 
     /// Resolve a list of [`AgentGoal`]s to `(Arc<dyn Runnable>, goal_string)` pairs.
