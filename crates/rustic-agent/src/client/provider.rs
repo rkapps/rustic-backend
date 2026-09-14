@@ -7,6 +7,9 @@ pub enum Provider {
     Together { api_key: String, model: String },
     Fireworks { api_key: String, model: String },
     Mistral { api_key: String, model: String },
+    AkashML { api_key: String, model: String },
+    AsiOne { api_key: String, model: String },
+    Cerebras { api_key: String, model: String },
     Local { model: String, base_url: String },
 }
 
@@ -51,6 +54,25 @@ impl Provider {
             model: model.into(),
         }
     }
+    pub fn akashml(api_key: impl Into<String>, model: impl Into<String>) -> Self {
+        Self::AkashML {
+            api_key: api_key.into(),
+            model: model.into(),
+        }
+    }
+    pub fn asione(api_key: impl Into<String>, model: impl Into<String>) -> Self {
+        Self::AsiOne {
+            api_key: api_key.into(),
+            model: model.into(),
+        }
+    }
+    pub fn cerebras(api_key: impl Into<String>, model: impl Into<String>) -> Self {
+        Self::Cerebras {
+            api_key: api_key.into(),
+            model: model.into(),
+        }
+    }
+
     pub fn mistral(api_key: impl Into<String>, model: impl Into<String>) -> Self {
         Self::Mistral {
             api_key: api_key.into(),

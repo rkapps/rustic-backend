@@ -14,7 +14,11 @@
 //! | [`together`]  | Together           |
 //! | [`fireworks`]  | Fireworks          |
 //!
+//!
+pub mod akashml;
 pub mod anthropic;
+pub mod asione;
+pub mod cerebras;
 pub mod fireworks;
 pub mod gemini;
 pub mod groq;

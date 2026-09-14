@@ -22,6 +22,7 @@ pub struct OpenAIRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub previous_response_id: Option<String>,
     max_output_tokens: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     reasoning: Option<OpenAIRequestReasoning>,
     pub tools: Vec<ToolDefinition>,
     pub text: Option<OpenAIRequestText>,
@@ -266,6 +267,7 @@ pub struct OpenAICompletionsRequest {
     temperature: f32,
     #[serde(skip_serializing_if = "Option::is_none")]
     reasoning: Option<OpenAIRequestReasoning>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tools: Vec<OpenAICompletionsToolDefinition>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<OpenAIRequestText>,
@@ -383,12 +385,14 @@ impl OpenAICompletionsRequest {
             .collect();
 
         let mut msg_type_assistant = None;
-        let mut msg_type_tool = None;
+        let mut msg_type_tool_call = None;
+        let mut msg_type_tool_output = None;
         let mut function_type = None;
         let mut text = None;
 
         debug!(
             target: "agent-openai",
+            _provider= ?request.provider,
             _request_messages= ?request.messages.len(),
             _iterations_messages = format_args!("{:#?}", imessages)
         );
@@ -399,7 +403,7 @@ impl OpenAICompletionsRequest {
         match request.provider.as_str() {
             "Together" => {
                 msg_type_assistant = Some("assistant".to_string());
-                msg_type_tool = Some("tool".to_string());
+                msg_type_tool_call = Some("tool".to_string());
                 function_type = Some("function".to_string());
                 // if response format schema is available, use it
                 text = if let Some(response_format_schema) = request.response_format_schema {
@@ -415,6 +419,52 @@ impl OpenAICompletionsRequest {
                     None
                 };
             }
+            "Cerebras" => {
+                msg_type_tool_call = Some("function".to_string());
+                text = if let Some(response_format_schema) = request.response_format_schema {
+                    let response_format = json!({
+                        "type": "json_schema",
+                        "json_schema": response_format_schema
+                    });
+                    Some(OpenAIRequestText {
+                        format: response_format,
+                    })
+                } else {
+                    None
+                };                
+
+            }
+            "AkashML" => {
+                msg_type_tool_call = Some("function".to_string());
+                text = if let Some(response_format_schema) = request.response_format_schema {
+                    let response_format = json!({
+                        "type": "json_schema",
+                        "json_schema": response_format_schema
+                    });
+                    Some(OpenAIRequestText {
+                        format: response_format,
+                    })
+                } else {
+                    None
+                };                
+
+            }
+            "AsiOne" => {
+                msg_type_tool_call = Some("function".to_string());
+                text = if let Some(response_format_schema) = request.response_format_schema {
+                    let response_format = json!({
+                        "type": "json_schema",
+                        "json_schema": response_format_schema
+                    });
+                    Some(OpenAIRequestText {
+                        format: response_format,
+                    })
+                } else {
+                    None
+                };                
+
+            }
+
             _ => {}
         };
 
@@ -440,7 +490,7 @@ impl OpenAICompletionsRequest {
                 } => {
                     tool_calls.push(OpenAICompletionsToolCall {
                         id: call_id,
-                        r#type: msg_type_assistant.clone(),
+                        r#type: msg_type_tool_call.clone(),
                         function: OpenAICompletionsToolFunction { name, arguments },
                     });
                 }
@@ -452,7 +502,7 @@ impl OpenAICompletionsRequest {
                     let arg_string = serde_json::to_string(&output)
                         .context("Failed to serialize arguments for OpenAI")?;
                     results.push(OpenAICompletionsMessage::ToolResult {
-                        r#type: msg_type_tool.clone(),
+                        r#type: msg_type_tool_output.clone(),
                         role: "tool".to_string(),
                         tool_call_id: call_id,
                         content: arg_string,

@@ -252,22 +252,38 @@ impl OpenAIClient {
                 }
 
                 for choice in choices {
-
                     let delta = choice.delta.clone();
                     trace!(
                         target: "agent-openai",
                         _pending_tools = ?pending_tool_calls.len(),
                         "Choice: {:?}", choice
                     );
-
-
+                
+                    // Accumulate any tool_calls present in THIS chunk first — some
+                    // providers (ASI:One) deliver id/name/arguments and finish_reason
+                    // together in a single chunk, with no prior partial deltas.
+                    if let Some(tool_calls) = &delta.tool_calls {
+                        for tool_call in tool_calls {
+                            let index = tool_call.index.unwrap_or(0);
+                            let entry = pending_tool_calls
+                                .entry(index)
+                                .or_insert((String::new(), String::new(), String::new()));
+                
+                            if let Some(id) = &tool_call.id { entry.0 = id.clone(); }
+                            if let Some(name) = &tool_call.function.name { entry.1 = name.clone(); }
+                
+                            if let Some(args) = &tool_call.function.arguments {
+                                if !args.is_empty() {
+                                    entry.2.push_str(args);
+                                }
+                            }
+                        }
+                    }
+                
                     if let Some(reason) = &choice.finish_reason {
                         finish_reason = true;
-
-
-                        // If reason is tool_calls, then send the pending tools (Some source models - Qwen)
+                
                         if reason == "tool_calls" {
-                            // Qwen path — emit tool calls immediately on finish_reason
                             for (_, (id, name, arguments)) in &pending_tool_calls {
                                 if id.is_empty() || name.is_empty() {
                                     continue;
@@ -282,59 +298,28 @@ impl OpenAIClient {
                                 ));
                             }
                             pending_tool_calls.clear();
-                            finish_reason = false; // reset for next iteration
+                            finish_reason = false;
                         } else if reason == "stop" {
-                            // Qwen stop — yield stop immediately with captured usage
                             yield Ok(CompletionChunkResponse::stop(
                                 agent_id.clone(),
-                                String::new(),
-                                String::new(),
-                                String::new(),
+                                String::new(), String::new(), String::new(),
                                 usage.clone(),
                             ));
                         } else if reason == "length" {
-                            // truncated — treat as error
                             yield Err(HttpError::Other(
-                                "Response truncated — model hit max_tokens limit. \
-                                 Consider using a model with higher output token limit or reducing data volume.".to_string()
+                                "Response truncated — model hit max_tokens limit...".to_string()
                             ));
                             break;
                         }
-                        continue
+                        continue;
                     }
-                        // debug!(
-                        //     target: "agent-openai",
-                        //     "Choice: {:?}", choice
-                        // );
-
+                
                     let content = delta.content.unwrap_or_default();
-                    // info!("Finish reason: {:?} content: {:?}", choice.finish_reason, content);
                     if !content.is_empty() {
                         yield Ok(CompletionChunkResponse::content(agent_id.clone(), content, String::new()))
-                    } else  if let Some(tool_calls) = delta.tool_calls{
-
-                        trace!(
-                            target: "agent-openai",
-                            "tool_calls: {:?}", tool_calls
-                        );
-
-                        for tool_call in tool_calls {
-                            let index = tool_call.index.unwrap_or(0);
-                            let entry = pending_tool_calls
-                                .entry(index)
-                                .or_insert((String::new(), String::new(), String::new()));
-
-                            // accumulate id and name when they arrive
-                            if let Some(id) = tool_call.id { entry.0 = id; }
-                            if let Some(name) = tool_call.function.name { entry.1 = name; }
-
-                            // accumulate arguments chunks
-                            entry.2.push_str(&tool_call.function.arguments);
-                        }
-
                     }
+                    // tool_calls already accumulated above — no more else-if needed here
                 }
-
             };
         };
 

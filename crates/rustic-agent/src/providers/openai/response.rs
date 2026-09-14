@@ -189,6 +189,8 @@ pub struct OpenAICompletionsTool {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct OpenAICompletionsToolFunction {
+    pub id: Option<String>,
     pub name: Option<String>,
-    pub arguments: String,
+    pub r#type: Option<String>,
+    pub arguments: Option<String>,
 }
