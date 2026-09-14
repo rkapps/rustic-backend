@@ -12,7 +12,10 @@ use crate::{
         request::ReasoningEffort,
     },
     providers::{
+        akashml::{self, completion::AkashMLClient},
         anthropic::{self, completion::AnthropicClient},
+        asione::{self, completion::AsiOneClient},
+        cerebras::{self, completion::CerebrasClient},
         fireworks::{self, completion::FireworksClient},
         gemini::{self, completion::GeminiClient},
         groq::{self, completion::GroqClient},
@@ -110,6 +113,9 @@ impl<'a> AgentBuilder<'a> {
             Provider::Together { api_key, model } => self.with_together(&api_key, &model).await,
             Provider::Fireworks { api_key, model } => self.with_fireworks(&api_key, &model).await,
             Provider::Mistral { api_key, model } => self.with_mistral(&api_key, &model).await,
+            Provider::AkashML { api_key, model } => self.with_akashml(&api_key, &model).await,
+            Provider::AsiOne { api_key, model } => self.with_asione(&api_key, &model).await,
+            Provider::Cerebras { api_key, model } => self.with_cerebras(&api_key, &model).await,
             Provider::Local { model, base_url } => {
                 self.with_local("local", &model, &base_url).await
             }
@@ -117,92 +123,93 @@ impl<'a> AgentBuilder<'a> {
     }
 
     /// Configure the builder to use Anthropic, reusing a cached client if one exists for this model.
-    pub async fn with_anthropic(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(anthropic::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", anthropic::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.anthropic_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_anthropic(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = AnthropicClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
+        self.with_client(anthropic::LLM, model, Arc::new(client))
+            .await
     }
 
     /// Configure the builder to use OpenAI, reusing a cached client if one exists for this model.
-    pub async fn with_openai(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(openai::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", openai::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.openai_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_openai(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = OpenAIClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating OpenAI client"))?;
+        self.with_client(openai::LLM, model, Arc::new(client)).await
     }
 
     /// Configure the builder to use Gemini, reusing a cached client if one exists for this model.
-    pub async fn with_gemini(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(gemini::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", gemini::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.gemini_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_gemini(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = GeminiClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Gemini client"))?;
+        self.with_client(gemini::LLM, model, Arc::new(client)).await
     }
 
     /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
-    pub async fn with_groq(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(groq::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", groq::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.groq_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_groq(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = GroqClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Groq client"))?;
+        self.with_client(groq::LLM, model, Arc::new(client)).await
     }
 
     /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
-    pub async fn with_together(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(together::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", together::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.together_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_together(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = TogetherClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Together client"))?;
+        self.with_client(together::LLM, model, Arc::new(client))
+            .await
     }
 
     /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
-    pub async fn with_fireworks(mut self, api_key: &str, model: &str) -> Result<Self> {
-        let mut clients = self.service.clients.write().await;
-        self.llm = Some(fireworks::LLM.to_string());
-        self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", fireworks::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.fireworks_client(api_key)?);
-        self.client = Some(client.clone());
-        Ok(self)
+    pub async fn with_fireworks(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = FireworksClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Fireworks client"))?;
+        self.with_client(fireworks::LLM, model, Arc::new(client))
+            .await
     }
 
     /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
-    pub async fn with_mistral(mut self, api_key: &str, model: &str) -> Result<Self> {
+    pub async fn with_mistral(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = MistralClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Mistral client"))?;
+        self.with_client(mistral::LLM, model, Arc::new(client))
+            .await
+    }
+
+    /// Configure the builder to use AkashML, reusing a cached client if one exists for this model.
+    pub async fn with_akashml(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = AkashMLClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating AkashML client"))?;
+        self.with_client(akashml::LLM, model, Arc::new(client))
+            .await
+    }
+
+    /// Configure the builder to use AsiOne, reusing a cached client if one exists for this model.
+    pub async fn with_asione(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = AsiOneClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating AsiOne client"))?;
+        self.with_client(asione::LLM, model, Arc::new(client)).await
+    }
+
+    /// Configure the builder to use Cerebras, reusing a cached client if one exists for this model.
+    pub async fn with_cerebras(self, api_key: &str, model: &str) -> Result<Self> {
+        let client = CerebrasClient::new(api_key.to_string())
+            .with_context(|| anyhow::anyhow!("Error creating Cerebras client"))?;
+        self.with_client(cerebras::LLM, model, Arc::new(client))
+            .await
+    }
+
+    /// Configure the builder to use Groq, reusing a cached client if one exists for this model.
+    pub async fn with_client(
+        mut self,
+        llm: &str,
+        model: &str,
+        client: Arc<dyn LlmClient>,
+    ) -> Result<Self> {
         let mut clients = self.service.clients.write().await;
-        self.llm = Some(mistral::LLM.to_string());
+        self.llm = Some(llm.to_string());
         self.model = Some(model.to_string());
-        let client_key = format! {"{}:{}", mistral::LLM, model};
-        let client = clients
-            .entry(client_key)
-            .or_insert(self.mistral_client(api_key)?);
+        let client_key = format! {"{}:{}", llm, model};
+        let client = clients.entry(client_key).or_insert(client);
         self.client = Some(client.clone());
         Ok(self)
     }
@@ -330,48 +337,6 @@ impl<'a> AgentBuilder<'a> {
     pub fn with_response_format_schema(mut self, response_format_schema: Option<Value>) -> Self {
         self.response_format_schema = response_format_schema;
         self
-    }
-
-    fn anthropic_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = AnthropicClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn openai_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = OpenAIClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn gemini_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = GeminiClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Anthropic client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn groq_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = GroqClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Groq client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn together_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = TogetherClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Together client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn fireworks_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = FireworksClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Fireworks client"))?;
-        Ok(Arc::new(client))
-    }
-
-    fn mistral_client(&self, api_key: &str) -> Result<Arc<dyn LlmClient>> {
-        let client = MistralClient::new(api_key.to_string())
-            .with_context(|| anyhow::anyhow!("Error creating Mistral client"))?;
-        Ok(Arc::new(client))
     }
 
     fn local_client(&self, base_url: &str) -> Result<Arc<dyn LlmClient>> {

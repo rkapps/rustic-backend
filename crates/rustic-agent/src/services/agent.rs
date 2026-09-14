@@ -409,6 +409,27 @@ impl AgentService {
                     .ok_or_else(|| anyhow::anyhow!("Mistral API key not configured"))?,
                 model,
             )),
+            "cerebras" => Ok(Provider::cerebras(
+                provider
+                    .api_key
+                    .as_deref()
+                    .ok_or_else(|| anyhow::anyhow!("Cerebras API key not configured"))?,
+                model,
+            )),
+            "akashml" => Ok(Provider::akashml(
+                provider
+                    .api_key
+                    .as_deref()
+                    .ok_or_else(|| anyhow::anyhow!("AkashML API key not configured"))?,
+                model,
+            )),
+            "asione" => Ok(Provider::asione(
+                provider
+                    .api_key
+                    .as_deref()
+                    .ok_or_else(|| anyhow::anyhow!("AsiOne API key not configured"))?,
+                model,
+            )),
             _ => {
                 let base_url = provider.base_url.as_deref().ok_or_else(|| {
                     anyhow::anyhow!("Provider '{}' has no base_url configured", id)
