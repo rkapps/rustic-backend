@@ -35,7 +35,7 @@ pub fn calculate_mean_and_deviation(inputs: &[TrainingSample]) -> (Vec<f64>, Vec
 }
 
 pub fn scale_data(inputs: &mut [TrainingSample], means: &[f64], sdevs: &[f64]) {
-    inputs.iter_mut().enumerate().for_each(|(_i, input)| {
+    inputs.iter_mut().for_each(|input| {
         input.values.iter_mut().enumerate().for_each(|(j, value)| {
             *value = (*value - means[j]) / sdevs[j];
         });
