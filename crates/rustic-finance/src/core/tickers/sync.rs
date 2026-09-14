@@ -2,13 +2,6 @@ use chrono::{Duration, Utc};
 
 use crate::domain::TickerControl;
 
-// sync_history return true if not updated in 24 hours
-pub(crate) fn should_sync_history(tc: &TickerControl) -> bool {
-    if let Some(last_sync) = tc.last_history_sync_at {
-        return Utc::now() - last_sync > Duration::hours(24);
-    }
-    true
-}
 
 // sync_sentiments return true if not updated in 24 hours
 pub(crate) fn should_sync_sentiments(tc: &TickerControl) -> bool {

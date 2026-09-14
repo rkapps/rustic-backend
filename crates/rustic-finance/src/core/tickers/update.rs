@@ -254,11 +254,7 @@ pub(crate) async fn update_ticker_history(
     // let ome(hist_start_date) = Utc.with_ymd_and_hms(2010, 11, 23, 14, 30, 0) else {
     //     return Err(anyhow::anyhow!("Error calcuating start date"));
     // };
-    let old_histories = match reader.get_ticker_history(&ticker.symbol).await {
-        Ok(c) => c,
-        Err(_) => Vec::new(),
-    };
-
+    let old_histories = reader.get_ticker_history(&ticker.symbol).await.unwrap_or_default();
     let hist_start_date = Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap();
 
     let mut histories = match ticker.asset_type {
@@ -670,11 +666,11 @@ pub async fn update_all_ticker_overview_embeddings(
     let tasks: Vec<_> = all_tickers
         .into_iter()
         .enumerate()
-        .filter_map(|(i, ticker)| {
+        .map(|(i, ticker)| {
             let sem = semaphore.clone();
             let embedding_client = embedding_client.clone();
 
-            Some(tokio::spawn(async move {
+            tokio::spawn(async move {
                 let _permit = sem.acquire().await.unwrap();
                 let mut ticker = ticker;
 
@@ -685,7 +681,7 @@ pub async fn update_all_ticker_overview_embeddings(
                 let result = update_ticker_overview_embedding(embedding_client, &mut ticker).await;
 
                 result.map(|_| ticker)
-            }))
+            })
         })
         .collect();
 
