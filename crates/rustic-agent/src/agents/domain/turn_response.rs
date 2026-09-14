@@ -20,7 +20,7 @@ pub enum TurnChunkResponse {
     /// Pipeline status update — UI only
     Status { agent_id: String, status: String },
     /// Agent execution complete — carries full agent response for storage
-    Final { response: TurnResponse },
+    Final { response: Box<TurnResponse> },
 }
 
 impl TurnChunkResponse {
@@ -37,7 +37,7 @@ impl TurnChunkResponse {
     }
 
     pub fn final_response(response: TurnResponse) -> Self {
-        Self::Final { response }
+        Self::Final { response: Box::new(response) }
     }
 
     pub fn is_final(&self) -> bool {
@@ -122,16 +122,16 @@ impl TurnResponse {
         }
     }
 
-    pub fn set_synthesizer(&mut self, final_response: TurnResponse) {
+    pub fn set_synthesizer(&mut self, final_response: Box<TurnResponse>) {
         self.content = final_response.content.clone();
         self.usage += final_response.usage.clone();
 
         match &mut self.execution {
             TurnExecution::Deterministic { synthesizer, .. } => {
-                *synthesizer = Some(Box::new(final_response));
+                *synthesizer = Some(final_response);
             }
             TurnExecution::Dynamic { synthesizer, .. } => {
-                *synthesizer = Some(Box::new(final_response));
+                *synthesizer = Some(final_response);
             }
             _ => {}
         }

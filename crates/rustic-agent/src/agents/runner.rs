@@ -199,7 +199,7 @@ impl Runnable for SingleAgent {
                             TurnResponse::for_single_agent(prompt_clone.clone(), response);
                         let _ = tx
                             .send(Ok(TurnChunkResponse::Final {
-                                response: turn_response,
+                                response: Box::new(turn_response),
                             }))
                             .await;
                     }
@@ -256,7 +256,7 @@ impl Runnable for PipeLineAgent {
         while let Some(chunk) = stream.next().await {
             match chunk {
                 Ok(TurnChunkResponse::Final { response }) => {
-                    return Ok(response);
+                    return Ok(*response);
                 }
                 Ok(_) => {
                     // skip content, thought, status chunks
@@ -861,7 +861,7 @@ impl PipeLineAgent {
                 let _ = tx
                     .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
                     .await;
-                let status = format!("⚡ Streaming Response...");
+                let status = "⚡ Streaming Response...".to_string();
                 let _ = tx
                     .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
                     .await;

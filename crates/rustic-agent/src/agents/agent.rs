@@ -278,27 +278,25 @@ x        )
                         if let Some(call) = chunk.tool_call {
                             debug!(agent= %agent_id, tool_call= ?call, "Tool Call");
                             tool_call_requests.push(call);
-                        } else {
-                            if chunk.is_final {
-                                debug!(
-                                    _chunk= ?chunk,
-                                );
+                        } else if chunk.is_final {
+                            debug!(
+                                _chunk= ?chunk,
+                            );
 
-                                usage = chunk.usage.unwrap_or_default();
-                                last_response_id = Some(chunk.response_id);
-                                model = chunk.model;
-                            } else if !chunk.content.is_empty() {
-                                final_content.push_str(&chunk.content);
-                                let agent_chunk =
-                                    AgentChunkResponse::content(agent_id.clone(), chunk.content);
-                                let _ = tx.send(Ok(agent_chunk)).await;
-                            } else if !chunk.thought.is_empty() {
-                                thought_content.push_str(&chunk.thought);
-                                // while antropic thoughts are text, gemini are random characters. we need to collect the thoughts because
-                                // gemini requires the thoughts to be sent back.
-                                // Do not send the chunks for now..
-                                // let _ = tx.send(Ok(chunk)).await;
-                            }
+                            usage = chunk.usage.unwrap_or_default();
+                            last_response_id = Some(chunk.response_id);
+                            model = chunk.model;
+                        } else if !chunk.content.is_empty() {
+                            final_content.push_str(&chunk.content);
+                            let agent_chunk =
+                                AgentChunkResponse::content(agent_id.clone(), chunk.content);
+                            let _ = tx.send(Ok(agent_chunk)).await;
+                        } else if !chunk.thought.is_empty() {
+                            thought_content.push_str(&chunk.thought);
+                            // while antropic thoughts are text, gemini are random characters. we need to collect the thoughts because
+                            // gemini requires the thoughts to be sent back.
+                            // Do not send the chunks for now..
+                            // let _ = tx.send(Ok(chunk)).await;
                         }
                     }
 

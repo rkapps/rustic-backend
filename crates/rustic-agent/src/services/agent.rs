@@ -284,10 +284,9 @@ impl AgentService {
                 Ok(Arc::new(SingleAgent::new(agent)))
             }
             ExecutionType::Pipeline => {
-                let pipeline_config = config.pipeline.expect(&format!(
-                    "Pipeline agent {} should have sub agents",
-                    input.agent_id
-                ));
+                let pipeline_config = config.pipeline.ok_or_else(|| {
+                    anyhow::anyhow!("Pipeline agent {} should have sub agents", input.agent_id)
+                })?;
                 let mut subs = Vec::new();
                 let available_agents = if pipeline_config.pipeline_type == "dynamic" {
                     pipeline_config.available_agents

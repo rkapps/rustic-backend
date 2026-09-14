@@ -223,7 +223,7 @@ impl OpenAIClient {
                             "Tool calls: {}", pending_tool_calls.len()
                         );
 
-                        for (_, (id, name, arguments)) in &pending_tool_calls {
+                        for (id, name, arguments) in pending_tool_calls.values() {
                             if id.is_empty() || name.is_empty() {
                                 debug!(target: "agent-openai", "Skipping tool call — missing id or name");
                                 continue;
@@ -272,10 +272,8 @@ impl OpenAIClient {
                             if let Some(id) = &tool_call.id { entry.0 = id.clone(); }
                             if let Some(name) = &tool_call.function.name { entry.1 = name.clone(); }
 
-                            if let Some(args) = &tool_call.function.arguments {
-                                if !args.is_empty() {
-                                    entry.2.push_str(args);
-                                }
+                            if let Some(args) = &tool_call.function.arguments && !args.is_empty() {
+                                entry.2.push_str(args);
                             }
                         }
                     }
@@ -284,7 +282,7 @@ impl OpenAIClient {
                         finish_reason = true;
 
                         if reason == "tool_calls" {
-                            for (_, (id, name, arguments)) in &pending_tool_calls {
+                            for (id, name, arguments) in pending_tool_calls.values() {
                                 if id.is_empty() || name.is_empty() {
                                     continue;
                                 }
