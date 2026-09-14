@@ -8,4 +8,3 @@ const CEREBRAS_BASE_URL: &str = "https://api.cerebras.ai/v1";
 pub fn models() -> Vec<String> {
     vec![MODEL_QWEN_3P8_27B.to_string()]
 }
-

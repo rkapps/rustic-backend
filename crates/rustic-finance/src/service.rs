@@ -94,11 +94,10 @@ impl FinanceService {
             )),
             Arc::new(TickerPriceHistoryTool::new(reader.clone())),
         ]
-        
     }
 
     #[cfg(feature = "writer")]
-    pub async fn delete_ticker_indicators_before(&self, date: DateTime<Utc>) -> Result<()>{
+    pub async fn delete_ticker_indicators_before(&self, date: DateTime<Utc>) -> Result<()> {
         use crate::storage::writer::TickerIndicatorStorageWriter;
         let writer = self.writer.as_ref().expect("writer not initialized");
         writer.delete_ticker_indicators_before(date).await
@@ -130,7 +129,11 @@ impl FinanceService {
     }
 
     #[cfg(feature = "reader")]
-    pub async fn get_ticker_charts_from(&self, symbol: &str, date: DateTime<Utc>) -> Result<Vec<TickerChartEntity>> {
+    pub async fn get_ticker_charts_from(
+        &self,
+        symbol: &str,
+        date: DateTime<Utc>,
+    ) -> Result<Vec<TickerChartEntity>> {
         use crate::core::tickers::charts::get_ticker_charts_from;
         let reader = self.reader.as_ref().expect("reader not initialized");
         get_ticker_charts_from(reader.clone(), symbol, date).await

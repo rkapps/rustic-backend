@@ -2,8 +2,8 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
-    }, providers::{akashml::AKASHML_BASE_URL, openai::completion::OpenAIClient},
+    },
+    providers::{akashml::AKASHML_BASE_URL, openai::completion::OpenAIClient},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -38,7 +38,6 @@ impl AkashMLClient {
 
 #[async_trait]
 impl LlmClient for AkashMLClient {
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

@@ -16,7 +16,6 @@ use crate::{
 
 #[async_trait]
 impl TickerSentimentStorageReader for FinanceMongoStorageReader {
-    
     async fn get_ticker_sentiments_by_ids(&self, ids: Vec<String>) -> Result<Vec<TickerSentiment>> {
         let criteria = SearchCriteria::new().in_values("id", ids);
         match self.manager.ticker_sentiments().await {
@@ -52,7 +51,6 @@ impl TickerSentimentStorageReader for FinanceMongoStorageReader {
 
 #[async_trait]
 impl TickerSentimentStorageWriter for FinanceMongoStorageWriter {
-
     async fn delete_ticker_sentiments_before(&self, date: DateTime<Utc>) -> Result<()> {
         let criteria = SearchCriteria::new().lt("date", date);
         // criteria.add_condition("date", SearchOp::Lt, SearchValue::DateTime(date));

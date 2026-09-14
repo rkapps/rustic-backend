@@ -8,7 +8,8 @@ use axum::{
 };
 use reqwest::{Method, StatusCode, header};
 use rustic_agent::{
-    client::mcp::MCPServerAdapter, services::{
+    client::mcp::MCPServerAdapter,
+    services::{
         agent::AgentService,
         config::{
             agent::{AgentConfig, ExecutionType},
@@ -16,7 +17,8 @@ use rustic_agent::{
             provider::{ModelConfig, ProviderConfig, ResolvedProvider},
         },
         registry::{agent::AgentRegistry, provider::ProviderRegistry},
-    }, tools::{mcp::MCPRegistry, tool::ToolRegistry},
+    },
+    tools::{mcp::MCPRegistry, tool::ToolRegistry},
 };
 use rustic_core::Tool;
 use tokio::{net::TcpListener, sync::RwLock};
@@ -123,7 +125,11 @@ impl AgenticBootBuilder {
         self
     }
 
-    pub fn mcp_server_adapter(mut self, server_name: String, adapter: Arc<dyn MCPServerAdapter>) -> Self {
+    pub fn mcp_server_adapter(
+        mut self,
+        server_name: String,
+        adapter: Arc<dyn MCPServerAdapter>,
+    ) -> Self {
         self.mcp_server_adapters.insert(server_name, adapter);
         self
     }
@@ -214,7 +220,9 @@ impl AgenticBootBuilder {
                 };
                 let adapter = self.mcp_server_adapters.get(&server.name);
                 let definitions = if let Some(adapter) = adapter {
-                    mcp_registry.register_server_with_adapter(mcp_server_config, adapter.clone()).await?
+                    mcp_registry
+                        .register_server_with_adapter(mcp_server_config, adapter.clone())
+                        .await?
                 } else {
                     mcp_registry.register_server(mcp_server_config).await?
                 };

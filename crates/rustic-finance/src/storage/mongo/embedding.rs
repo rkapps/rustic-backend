@@ -31,7 +31,6 @@ impl TickerEmbeddingStorageReader for FinanceMongoStorageReader {
 
 #[async_trait]
 impl TickerEmbeddingStorageWriter for FinanceMongoStorageWriter {
-
     async fn delete_ticker_embeddings_before(&self, date: DateTime<Utc>) -> Result<()> {
         let criteria = SearchCriteria::new().lt("date", date);
         match self.manager.ticker_embeddings().await {
@@ -44,7 +43,6 @@ impl TickerEmbeddingStorageWriter for FinanceMongoStorageWriter {
             }
         }
     }
-
 
     async fn save_ticker_embeddings(
         &self,

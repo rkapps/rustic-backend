@@ -47,15 +47,16 @@ async fn main() -> Result<()> {
     set_logger(filter);
     let cli = Cli::parse();
 
-
     // RUSTIC_CORE_MONGO_URI
     // Used for rustic_fiance and rustic_economic
-    let rustic_core_mongo_uri = env::var("RUSTIC_CORE_MONGO_URI").expect("RUSTIC_CORE_MONGO_URI envrionment variable not set");
+    let rustic_core_mongo_uri = env::var("RUSTIC_CORE_MONGO_URI")
+        .expect("RUSTIC_CORE_MONGO_URI envrionment variable not set");
     info!("Rustic Core Mongo uri: {:?}", rustic_core_mongo_uri);
 
-      // RUSTIC_CLIENT_MONGO_URI
+    // RUSTIC_CLIENT_MONGO_URI
     // Used for rustic_platform and client specific data
-    let rustic_client_mongo_uri = env::var("RUSTIC_CLIENT_MONGO_URI").expect("RUSTIC_CLIENT_MONGO_URI envrionment variable not set");
+    let rustic_client_mongo_uri = env::var("RUSTIC_CLIENT_MONGO_URI")
+        .expect("RUSTIC_CLIENT_MONGO_URI envrionment variable not set");
     info!("Rustic Client Mongo uri: {:?}", rustic_client_mongo_uri);
 
     let rustic_platform_mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")
@@ -74,14 +75,11 @@ async fn main() -> Result<()> {
             info!("Load Tickers PipeLine done.");
         }
         AdminCommands::PruneEmbeddings => {
-
             let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             info!("Pruning embeddings older than 30 days...");
             let cutoff = Utc::now() - chrono::Duration::days(30);
 
-            match service.delete_ticker_embeddings_before(cutoff)
-                .await
-            {
+            match service.delete_ticker_embeddings_before(cutoff).await {
                 Ok(_) => info!("Prune embeddings complete"),
                 Err(e) => error!("Prune embeddings failed: {:?}", e),
             }
@@ -92,10 +90,7 @@ async fn main() -> Result<()> {
             info!("Pruning indicators older than 5 years...");
             let cutoff = Utc::now() - chrono::Duration::days(365 * 5);
 
-            match service
-                .delete_ticker_indicators_before(cutoff)
-                .await
-            {
+            match service.delete_ticker_indicators_before(cutoff).await {
                 Ok(_) => info!("Prune indicators complete"),
                 Err(e) => error!("Prune indicators failed: {:?}", e),
             }
@@ -106,15 +101,11 @@ async fn main() -> Result<()> {
             info!("Pruning sentiments older than 30 days...");
             let cutoff = Utc::now() - chrono::Duration::days(30);
 
-            match service
-                .delete_ticker_sentiments_before(cutoff)
-                .await
-            {
+            match service.delete_ticker_sentiments_before(cutoff).await {
                 Ok(_) => info!("Prune sentiments complete"),
                 Err(e) => error!("Prune sentiments failed: {:?}", e),
             }
         }
-
 
         AdminCommands::UpdateEconomicSchema => {
             update_economic_db(&rustic_core_mongo_uri, &rustic_economic_mongo_db).await?;

@@ -4,7 +4,7 @@ use rustic_core::HttpClient;
 use serde_json::{Value, json};
 use std::{collections::HashMap, str::FromStr, sync::Arc};
 use tokio::sync::RwLock;
-use tracing::{debug, info};
+use tracing::debug;
 
 use crate::{
     client::{

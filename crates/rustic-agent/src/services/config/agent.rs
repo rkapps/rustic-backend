@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{agents::domain::LlmConfig, services::config::agent::HistoryMode::Full};
+use crate::agents::domain::LlmConfig;
 
 /// Controls how an agent participates in request handling.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -49,7 +49,7 @@ impl AgentConfig {
         self.conversation
             .as_ref()
             .map(|c| c.default_strategy.clone())
-            .unwrap_or_default()   // requires CompletionStrategy: Default
+            .unwrap_or_default() // requires CompletionStrategy: Default
     }
 
     pub fn get_history_mode(&self) -> HistoryMode {

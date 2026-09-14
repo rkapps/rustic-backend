@@ -74,10 +74,7 @@ impl TurnResponse {
             execution: TurnExecution::SingleAgent { response },
         }
     }
-    pub fn for_deterministic(
-        prompt: &str,
-        agent_id: &str,
-    ) -> Self {
+    pub fn for_deterministic(prompt: &str, agent_id: &str) -> Self {
         Self {
             agent_id: agent_id.to_string(),
             prompt: prompt.to_string(),
@@ -162,7 +159,6 @@ pub struct StageResponse {
     pub responses: Vec<TurnResponse>,
     pub duration_ms: u64,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DecisionResponse {

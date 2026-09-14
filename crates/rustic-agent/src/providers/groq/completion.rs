@@ -3,7 +3,6 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
     },
     providers::{groq::GROQ_BASE_URL, openai::completion::OpenAIClient},
 };

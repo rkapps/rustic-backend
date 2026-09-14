@@ -2,7 +2,6 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
     },
     providers::anthropic::completion::AnthropicClient,
 };
@@ -36,7 +35,6 @@ impl LocalClient {
 
 #[async_trait]
 impl LlmClient for LocalClient {
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

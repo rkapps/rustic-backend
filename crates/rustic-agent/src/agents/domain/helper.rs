@@ -15,7 +15,6 @@ pub fn clean_content(s: &str) -> String {
     }
 }
 
-
 pub fn truncate(s: &str, max: usize) -> String {
     let s = clean_content(s);
     if s.len() <= max {

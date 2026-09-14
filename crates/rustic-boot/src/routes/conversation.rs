@@ -10,7 +10,7 @@ use axum::{
 use futures::StreamExt;
 use reqwest::StatusCode;
 use rustic_agent::agents::domain::TurnChunkResponse;
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 
 use crate::{
     auth::firebase::{FirebaseClaims, firebase_auth_middleware},

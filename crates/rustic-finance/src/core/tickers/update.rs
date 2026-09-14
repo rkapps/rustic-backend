@@ -14,19 +14,22 @@ use crate::{
     core::tickers::{
         BASE_CURRENCY,
         indicators::IndicatorCalculator,
-        sync::{
-            should_sync_embeddings, should_sync_indicators,
-            should_sync_sentiments,
-        },
-    }, domain::{
+        sync::{should_sync_embeddings, should_sync_indicators, should_sync_sentiments},
+    },
+    domain::{
         Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerSentiment,
         tickers::{AssetType, TICKER_PERFORMANCE_PERIODS},
-    }, storage::{
-        FinanceMongoStorageReader, mongo::writer::FinanceMongoStorageWriter, reader::{TickerHistoryStorageReader, TickerSentimentStorageReader}, writer::{
+    },
+    storage::{
+        FinanceMongoStorageReader,
+        mongo::writer::FinanceMongoStorageWriter,
+        reader::{TickerHistoryStorageReader, TickerSentimentStorageReader},
+        writer::{
             TickerControlStorageWriter, TickerEmbeddingStorageWriter, TickerHistoryStorageWriter,
             TickerIndicatorStorageWriter, TickerSentimentStorageWriter, TickerStorageWriter,
         },
-    }, util::data_utils::{
+    },
+    util::data_utils::{
         assets_cap_label, calculate_performance, get_period_close, get_period_start,
     },
 };
@@ -77,8 +80,15 @@ pub async fn update_all_tickers(
                     info!("Updating Ticker: {} {}/{}", ticker.symbol, i + 1, total);
                 }
 
-                let result =
-                    update_ticker(reader, writer, provider_service, &mut tc, &mut ticker, update).await;
+                let result = update_ticker(
+                    reader,
+                    writer,
+                    provider_service,
+                    &mut tc,
+                    &mut ticker,
+                    update,
+                )
+                .await;
 
                 sleep(delay).await;
 
@@ -244,7 +254,7 @@ pub(crate) async fn update_ticker_history(
     // let ome(hist_start_date) = Utc.with_ymd_and_hms(2010, 11, 23, 14, 30, 0) else {
     //     return Err(anyhow::anyhow!("Error calcuating start date"));
     // };
-    let old_histories = match reader.get_ticker_history(&ticker.symbol).await{
+    let old_histories = match reader.get_ticker_history(&ticker.symbol).await {
         Ok(c) => c,
         Err(_) => Vec::new(),
     };
@@ -284,7 +294,7 @@ pub(crate) async fn update_ticker_history(
     };
 
     // remove duplicates
-    histories.dedup_by_key(|h|h.date);
+    histories.dedup_by_key(|h| h.date);
 
     // Build the set of dates we ALREADY have, rather than trusting last_sync_at.
     // This is what actually finds gaps — a bookmark only tells you when the job
@@ -300,7 +310,6 @@ pub(crate) async fn update_ticker_history(
         .cloned()
         .collect();
 
-
     debug!(
         "Ticker {} New History updates: {} (existing: {}, fetched: {})",
         ticker.symbol,
@@ -309,11 +318,8 @@ pub(crate) async fn update_ticker_history(
         histories.len(),
     );
 
-
     Ok((histories, new_histories))
 }
-
-
 
 pub(crate) async fn update_ticker_price_history(
     _tc: &mut TickerControl,

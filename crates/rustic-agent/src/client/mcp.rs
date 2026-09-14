@@ -44,5 +44,3 @@ pub trait MCPServerAdapter: Send + Sync + Debug {
     /// response header; this method abstracts over the specific header name.
     fn extract_session_id(&self, headers: &HeaderMap) -> Option<String>;
 }
-
-

@@ -29,13 +29,13 @@ async fn main() -> Result<()> {
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
 
-
     // define tools array
     let mut tools: Vec<Arc<dyn Tool>> = vec![];
 
     // RUSTIC_CORE_MONGO_URI
     // Used for rustic_fiance and rustic_economic
-    let rustic_core_mongo_uri = env::var("RUSTIC_CORE_MONGO_URI").expect("RUSTIC_CORE_MONGO_URI envrionment variable not set");
+    let rustic_core_mongo_uri = env::var("RUSTIC_CORE_MONGO_URI")
+        .expect("RUSTIC_CORE_MONGO_URI envrionment variable not set");
     info!("Rustic Core Mongo uri: {:?}", rustic_core_mongo_uri);
 
     // finance reader service
@@ -45,7 +45,8 @@ async fn main() -> Result<()> {
     match env::var("RUSTIC_AI_ECONOMIC_CONFIG_USAGE_FILE") {
         Ok(c) => {
             // economic reader service
-            let economic_service = get_economic_reader_service(&rustic_core_mongo_uri, &config_dir, &c).await?;
+            let economic_service =
+                get_economic_reader_service(&rustic_core_mongo_uri, &config_dir, &c).await?;
             tools.extend(economic_service.tools());
         }
         Err(_) => {
@@ -55,7 +56,8 @@ async fn main() -> Result<()> {
 
     // RUSTIC_CLIENT_MONGO_URI
     // Used for rustic_platform and client specific data
-    let rustic_client_mongo_uri = env::var("RUSTIC_CLIENT_MONGO_URI").expect("RUSTIC_CLIENT_MONGO_URI envrionment variable not set");
+    let rustic_client_mongo_uri = env::var("RUSTIC_CLIENT_MONGO_URI")
+        .expect("RUSTIC_CLIENT_MONGO_URI envrionment variable not set");
     info!("Rustic Client Mongo uri: {:?}", rustic_client_mongo_uri);
 
     let rustic_platform_mongo_db = env::var("RUSTIC_PLATFORM_DB_NAME")

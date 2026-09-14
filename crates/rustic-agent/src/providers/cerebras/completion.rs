@@ -2,8 +2,8 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
-    }, providers::{cerebras::CEREBRAS_BASE_URL, openai::completion::OpenAIClient},
+    },
+    providers::{cerebras::CEREBRAS_BASE_URL, openai::completion::OpenAIClient},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -33,13 +33,11 @@ impl CerebrasClient {
                 api_key,
             )?),
         })
-
     }
 }
 
 #[async_trait]
 impl LlmClient for CerebrasClient {
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

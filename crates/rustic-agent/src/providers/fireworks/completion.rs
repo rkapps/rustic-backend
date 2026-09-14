@@ -2,7 +2,6 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
     },
     providers::{fireworks::FIREWORKS_BASE_URL, openai::completion::OpenAIClient},
 };
@@ -39,7 +38,6 @@ impl FireworksClient {
 
 #[async_trait]
 impl LlmClient for FireworksClient {
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

@@ -13,7 +13,7 @@ use crate::{
 pub async fn get_ticker_charts_from(
     reader: Arc<dyn StorageReader>,
     symbol: &str,
-    date: DateTime<Utc>
+    date: DateTime<Utc>,
 ) -> Result<Vec<TickerChartEntity>> {
     let indicators = reader
         .get_ticker_indicators_by_symbol(symbol, date)

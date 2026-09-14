@@ -2,7 +2,6 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-        response::CompletionResponse,
     },
     providers::{openai::completion::OpenAIClient, together::TOGETHER_BASE_URL},
 };
@@ -39,7 +38,6 @@ impl TogetherClient {
 
 #[async_trait]
 impl LlmClient for TogetherClient {
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

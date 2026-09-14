@@ -902,7 +902,7 @@ impl PipeLineAgent {
                     let _ = tx
                         .send(Ok(TurnChunkResponse::status(agent_id.clone(), status)))
                         .await;
-                    
+
                     let _ = tx
                         .send(Ok(TurnChunkResponse::final_response(turn_response.clone())))
                         .await;
@@ -911,9 +911,6 @@ impl PipeLineAgent {
                 let _ = tx.send(Ok(chunk)).await;
             }
         }
-
-     
-
     }
 
     /// Resolve a list of [`AgentGoal`]s to `(Arc<dyn Runnable>, goal_string)` pairs.

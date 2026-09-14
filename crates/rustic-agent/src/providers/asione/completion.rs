@@ -2,7 +2,8 @@ use crate::{
     client::{
         llm::{CompletionStreamResponse, LlmClient},
         request::CompletionRequest,
-    }, providers::{asione::ASIONE_BASE_URL, openai::completion::OpenAIClient},
+    },
+    providers::{asione::ASIONE_BASE_URL, openai::completion::OpenAIClient},
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -62,7 +63,7 @@ pub fn asione_request(request: CompletionRequest) -> CompletionRequest {
         stream: request.stream,
         store: request.store,
         definitions: request.definitions.clone(),
-        last_response_id: request.last_response_id.clone(),  // was: None — needed for Responses continuity
+        last_response_id: request.last_response_id.clone(), // was: None — needed for Responses continuity
         response_format_schema: request.response_format_schema,
     }
 }

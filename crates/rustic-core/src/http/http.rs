@@ -164,7 +164,7 @@ impl HttpClient {
         if let Some(h) = headers {
             request = request.headers(h);
         }
-        
+
         trace!("Body: {:#?}", body);
         let response = request.json(&body).send().await.map_err(|e| {
             error!("Error {:?}", e);

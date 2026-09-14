@@ -386,7 +386,7 @@ impl OpenAICompletionsRequest {
 
         let mut msg_type_assistant = None;
         let mut msg_type_tool_call = None;
-        let mut msg_type_tool_output = None;
+        let msg_type_tool_output = None;
         let mut function_type = None;
         let mut text = None;
 
@@ -431,8 +431,7 @@ impl OpenAICompletionsRequest {
                     })
                 } else {
                     None
-                };                
-
+                };
             }
             "AkashML" => {
                 msg_type_tool_call = Some("function".to_string());
@@ -446,8 +445,7 @@ impl OpenAICompletionsRequest {
                     })
                 } else {
                     None
-                };                
-
+                };
             }
             "AsiOne" => {
                 msg_type_tool_call = Some("function".to_string());
@@ -461,8 +459,7 @@ impl OpenAICompletionsRequest {
                     })
                 } else {
                     None
-                };                
-
+                };
             }
 
             _ => {}

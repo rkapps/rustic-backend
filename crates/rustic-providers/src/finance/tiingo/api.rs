@@ -109,7 +109,6 @@ pub async fn get_crypto_history(
     Ok(all_history)
 }
 
-
 pub async fn get_stock_etf_realtime(
     http_client: &HttpClient,
     symbol: &str,

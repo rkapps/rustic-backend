@@ -258,7 +258,7 @@ impl OpenAIClient {
                         _pending_tools = ?pending_tool_calls.len(),
                         "Choice: {:?}", choice
                     );
-                
+
                     // Accumulate any tool_calls present in THIS chunk first — some
                     // providers (ASI:One) deliver id/name/arguments and finish_reason
                     // together in a single chunk, with no prior partial deltas.
@@ -268,10 +268,10 @@ impl OpenAIClient {
                             let entry = pending_tool_calls
                                 .entry(index)
                                 .or_insert((String::new(), String::new(), String::new()));
-                
+
                             if let Some(id) = &tool_call.id { entry.0 = id.clone(); }
                             if let Some(name) = &tool_call.function.name { entry.1 = name.clone(); }
-                
+
                             if let Some(args) = &tool_call.function.arguments {
                                 if !args.is_empty() {
                                     entry.2.push_str(args);
@@ -279,10 +279,10 @@ impl OpenAIClient {
                             }
                         }
                     }
-                
+
                     if let Some(reason) = &choice.finish_reason {
                         finish_reason = true;
-                
+
                         if reason == "tool_calls" {
                             for (_, (id, name, arguments)) in &pending_tool_calls {
                                 if id.is_empty() || name.is_empty() {
@@ -313,7 +313,7 @@ impl OpenAIClient {
                         }
                         continue;
                     }
-                
+
                     let content = delta.content.unwrap_or_default();
                     if !content.is_empty() {
                         yield Ok(CompletionChunkResponse::content(agent_id.clone(), content, String::new()))
