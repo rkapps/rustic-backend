@@ -22,8 +22,6 @@ pub struct TogetherClient {
 
 impl TogetherClient {
     /// Create a `TogetherClient` that speaks the OpenAI HTTP API against `base_url`.
-    ///
-    /// The API key is set to `"ollama"` as Ollama does not require authentication.
     pub fn new(api_key: String) -> Result<TogetherClient> {
         info!(
             target: "agent-together",
@@ -41,13 +39,6 @@ impl TogetherClient {
 
 #[async_trait]
 impl LlmClient for TogetherClient {
-    async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-        info!(
-            target: "agent-openai",
-            "Together request"
-        );
-        self.inner.complete(together_request(request)).await
-    }
 
     async fn complete_with_stream(
         &self,

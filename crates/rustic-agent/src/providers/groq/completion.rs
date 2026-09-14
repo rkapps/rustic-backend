@@ -23,8 +23,6 @@ pub struct GroqClient {
 
 impl GroqClient {
     /// Create a `GroqClient` that speaks the OpenAI HTTP API against `base_url`.
-    ///
-    /// The API key is set to `"ollama"` as Ollama does not require authentication.
     pub fn new(api_key: String) -> Result<GroqClient> {
         Ok(Self {
             inner: Box::new(OpenAIClient::new_with_base_url(
@@ -37,10 +35,6 @@ impl GroqClient {
 
 #[async_trait]
 impl LlmClient for GroqClient {
-    async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-        self.inner.complete(groq_request(request)).await
-    }
-
     async fn complete_with_stream(
         &self,
         request: CompletionRequest,

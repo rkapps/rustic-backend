@@ -36,9 +36,6 @@ impl LocalClient {
 
 #[async_trait]
 impl LlmClient for LocalClient {
-    async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-        self.inner.complete(request).await
-    }
 
     async fn complete_with_stream(
         &self,

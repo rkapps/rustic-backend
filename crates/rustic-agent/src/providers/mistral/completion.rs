@@ -21,12 +21,10 @@ pub struct MistralClient {
 }
 
 impl MistralClient {
-    /// Create a `TogetherClient` that speaks the OpenAI HTTP API against `base_url`.
-    ///
-    /// The API key is set to `"ollama"` as Ollama does not require authentication.
+    /// Create a `MistralClient` that speaks the OpenAI HTTP API against `base_url`.
     pub fn new(api_key: String) -> Result<MistralClient> {
         info!(
-            target: "agent-openai",
+            target: "agent-mistral",
             "Mistral request"
         );
 
@@ -41,13 +39,6 @@ impl MistralClient {
 
 #[async_trait]
 impl LlmClient for MistralClient {
-    async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-        info!(
-            target: "agent-openai",
-            "Mistral request"
-        );
-        self.inner.complete(mistral_request(request)).await
-    }
 
     async fn complete_with_stream(
         &self,

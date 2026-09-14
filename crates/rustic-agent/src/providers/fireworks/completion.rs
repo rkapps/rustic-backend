@@ -21,9 +21,7 @@ pub struct FireworksClient {
 }
 
 impl FireworksClient {
-    /// Create a `TogetherClient` that speaks the OpenAI HTTP API against `base_url`.
-    ///
-    /// The API key is set to `"ollama"` as Ollama does not require authentication.
+    /// Create a `FireworksClient` that speaks the OpenAI HTTP API against `base_url`.
     pub fn new(api_key: String) -> Result<FireworksClient> {
         info!(
             target: "agent-fireworks",
@@ -41,13 +39,6 @@ impl FireworksClient {
 
 #[async_trait]
 impl LlmClient for FireworksClient {
-    async fn complete(&self, request: CompletionRequest) -> HttpResult<CompletionResponse> {
-        info!(
-            target: "agent-openai",
-            "Fireworks request"
-        );
-        self.inner.complete(fireworks_request(request)).await
-    }
 
     async fn complete_with_stream(
         &self,
