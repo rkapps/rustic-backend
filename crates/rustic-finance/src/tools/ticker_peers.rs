@@ -87,7 +87,7 @@ impl Tool for TickerPeersTool {
             .into_iter()
             .collect();
         let elapsed = start.elapsed();
-        info!("Peers: {:?}  {:.1}s", peers.len(), elapsed.as_secs_f32());
+        info!("Peers: {:?}  {:.1}s", peers, elapsed.as_secs_f32());
 
         Ok(json!({ "symbols": if peers.is_empty() {Value::Null} else { json!(peers)} }))
     }

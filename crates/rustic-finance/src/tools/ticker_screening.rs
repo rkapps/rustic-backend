@@ -55,6 +55,8 @@ impl Tool for TickerScreeningTool {
             'compare spider ETFs' → query: 'SPDR ETFs', asset_type: 'etf' \
             'find golden cross stocks' or 'stocks in a golden cross' → signals: ['Golden Cross Active'] \
             'stocks that just crossed golden cross' → signals: ['Golden Cross'] \
+            'find low P/E semiconductor stocks' → industries: ['Semiconductors'], metric_filters: [{field: 'pe_ratio', op: 'lt', value: 15}] \
+                'stocks with a large dividend' → metric_filters: [{field: 'yield', op: 'gt', value: 4}] \
             \
             Signal rules: \
                 Pass ONE signal per category. Results must match ALL signals provided. \
@@ -129,9 +131,13 @@ impl Tool for TickerScreeningTool {
                     },
                     "description": "Filter by active technical or analyst signals."
                 },                
-                "industry": {
-                    "type": "string",
-                    "description": "Filter by industry, partial match. Example: 'semiconductors', 'medical devices'."
+                "industries": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "One or more industries to filter by. Must be exact industry names as
+                        returned by ticker_taxonomy — do not paraphrase or guess industry names. For a
+                        specific sub-category, pass one industry. For a broad sector-level request, pass
+                        every industry under that sector from the taxonomy result, all in one call."
                 },
                 "assets_cap_range": {
                     "type": "string",
@@ -144,10 +150,54 @@ impl Tool for TickerScreeningTool {
                     "enum": ["stock", "etf"],
                     "description": "Filter by asset type. Defaults to 'stock'."
                 },
+                "metric_filters": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "field": {
+                                "type": "string",
+                                "enum": [
+                                    "pe_ratio", "forward_pe", "peg_ratio", "pb_ratio", "ps_ratio",
+                                    "eps", "beta", "ev_to_ebitda", "profit_margin",
+                                    "return_on_equity_ttm", "yield"
+                                ],
+                                "description": "The metric to filter on."
+                            },
+                            "op": {
+                                "type": "string",
+                                "enum": ["gt", "gte", "lt", "lte"],
+                                "description": "Comparison operator."
+                            },
+                            "value": {
+                                "type": "number",
+                                "description": "Threshold value. For 'yield', use human-scale percentage (e.g. 4 for 4%, not 0.04)."
+                            }
+                        },
+                        "required": ["field", "op", "value"]
+                    },
+                    "description": "Filter by a numeric threshold on a fundamental or valuation metric. Use this for any 'high/low X' or 'X above/below N' language on a metric not otherwise covered by a dedicated field. Examples: 'low P/E' → {field: 'pe_ratio', op: 'lt', value: 15}, 'high EPS' → {field: 'eps', op: 'gt', value: 5}, 'beta above 2' → {field: 'beta', op: 'gt', value: 2}, 'large dividend' → {field: 'yield', op: 'gt', value: 4}. Infer a reasonable threshold when the user doesn't give an exact number; use their number exactly when they do."
+                },               
                 "limit": {
                     "type": "integer",
                     "description": "Max number of results to return. Defaults to 10."
-                }
+                },
+                "sort_by": {
+                    "type": "string",
+                    "enum": [
+                        "performance_1w", "performance_1m", "performance_3m", "performance_6m",
+                        "performance_ytd", "pe_ratio", "eps", "beta", "total_assets", "yield", "change_perc"
+                    ],
+                    "description": "Sort results by this field. Use for ranking/superlative language like \
+                        'best performing', 'outperformed', 'biggest gainers', 'highest yield' — not for \
+                        threshold filtering (use metric_filters for that)."
+                },
+                "sort_dir": {
+                    "type": "string",
+                    "enum": ["asc", "desc"],
+                    "description": "Sort direction. 'desc' for 'best/highest/outperformed', 'asc' for \
+                        'worst/lowest/underperformed'. Defaults to 'desc' if omitted."
+                },                
             }
         })
     }
@@ -184,7 +234,7 @@ impl Tool for TickerScreeningTool {
         let elapsed = start.elapsed();
         info!(
             "Symbols: {:?}  {:.1}s",
-            symbols.len(),
+            symbols,
             elapsed.as_secs_f32()
         );
         Ok(if symbols.is_empty() {

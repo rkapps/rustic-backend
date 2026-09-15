@@ -160,45 +160,72 @@ impl TickerStorageReader for FinanceMongoStorageReader {
 
     async fn search_tickers(&self, filter: TickerFilter) -> Result<Vec<Ticker>> {
         let mut criteria = SearchCriteria::new();
-        if let Some(industry) = filter.industry {
-            criteria = criteria.contains("industry", industry);
+        if let Some(industries) = filter.industries {
+            criteria = criteria.in_values("industry", industries);
         }
-
+    
         let new_asset_type = filter
             .asset_type
             .unwrap_or_else(|| "stock".to_string())
             .to_uppercase();
-
+    
         criteria = criteria.eq("asset_type", new_asset_type);
         if let Some(range) = filter.assets_cap_range {
             let (min_cap, max_cap) = assets_cap_label_range(Some(range));
-
             criteria = criteria.gte("total_assets", min_cap);
             criteria = criteria.lte("total_assets", max_cap);
         }
         if let Some(signals) = filter.signals {
             criteria = criteria.all_of("signals", signals);
         }
-
-        if let Some(cyield) = filter.r#yield
-            && cyield > 0.0
-        {
-            let dec_yield: Decimal = Decimal::from_f32_retain(cyield).unwrap();
-            let dec_yield = dec_yield / Decimal::from(100);
-
-            criteria = criteria.gte("yield", dec_yield);
+    
+    
+        // --- new: generic metric filters ---
+        if let Some(metric_filters) = filter.metric_filters {
+            for mf in metric_filters {
+                let field = map_metric_field(&mf.field)?;
+        
+                let dec_value = if field == "yield" {
+                    let dec: Decimal = Decimal::from_f64_retain(mf.value)
+                        .ok_or_else(|| anyhow::anyhow!("Invalid metric_filter value: {}", mf.value))?;
+                    dec / Decimal::from(100)
+                } else {
+                    Decimal::from_f64_retain(mf.value)
+                        .ok_or_else(|| anyhow::anyhow!("Invalid metric_filter value: {}", mf.value))?
+                };
+        
+                match mf.op.as_str() {
+                    "gt" | "gte" => criteria = criteria.gte(&field, dec_value),
+                    "lt" | "lte" => criteria = criteria.lte(&field, dec_value),
+                    _ => return Err(anyhow::anyhow!("Unsupported metric_filter op: {}", mf.op)),
+                }
+            }
         }
-
+    
         if let Some(limit) = filter.limit {
             criteria = criteria.limit(limit);
         }
-
-        criteria = criteria.sort_desc("total_assets");
-
+    
+        // --- new: real sort, falling back to existing default ---
+        match (filter.sort_by.as_deref(), filter.sort_dir.as_deref()) {
+            (Some(field), dir) => {
+                let mapped = map_sort_field(field)?; // validate against allow-list
+                if dir == Some("asc") {
+                    criteria = criteria.sort_asc(&mapped);
+                } else {
+                    criteria = criteria.sort_desc(&mapped);
+                }
+            }
+            (None, _) => {
+                criteria = criteria.sort_desc("total_assets");
+            }
+        }
+    
         debug!("search_tickers criteria: {:#?}", criteria);
-
+    
         self.manager.get_ticker_by_criteria(&criteria).await
     }
+    
 }
 
 #[async_trait]
@@ -213,5 +240,27 @@ impl TickerStorageWriter for FinanceMongoStorageWriter {
                 return Err(anyhow::anyhow!(format!("Error saving Ticker: {}", e)));
             }
         }
+    }
+}
+
+
+fn map_metric_field(field: &str) -> Result<String> {
+    match field {
+        "pe_ratio" | "forward_pe" | "peg_ratio" | "pb_ratio" | "ps_ratio"
+        | "eps" | "beta" | "ev_to_ebitda" | "profit_margin" | "return_on_equity_ttm"
+        | "yield" => {
+            Ok(field.to_string())
+        }
+        _ => Err(anyhow::anyhow!("Unsupported metric_filter field: {}", field)),
+    }
+}
+
+fn map_sort_field(field: &str) -> Result<String> {
+    match field {
+        "performance_1w" | "performance_1m" | "performance_6m" | "performance_ytd"
+        | "pe_ratio" | "eps" | "beta" | "total_assets" | "yield" | "change_perc" => {
+            Ok(field.to_string())
+        }
+        _ => Err(anyhow::anyhow!("Unsupported sort_by field: {}", field)),
     }
 }

@@ -11,7 +11,7 @@ pub struct TickerSearchParam {
     pub query: Option<String>,      // semantic: "cloud security", "payments infrastructure"
     pub score: Option<f32>,
     pub signals: Option<Vec<String>>, // ["RSI Oversold", "MACD Bullish Crossover"]
-    pub industry: Option<String>,     // regex match
+    pub industries: Option<Vec<String>>,         
     pub assets_cap_range: Option<String>, // "mega", "large", "mid", "small"
     pub r#yield: Option<f32>,
 
