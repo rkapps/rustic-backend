@@ -18,11 +18,3 @@ pub(crate) fn should_sync_embeddings(tc: &TickerControl) -> bool {
     }
     true
 }
-
-// sync_indicators return true if not updated in 24 hours
-pub(crate) fn should_sync_indicators(tc: &TickerControl) -> bool {
-    if let Some(last_sync) = tc.last_indicator_sync_at {
-        return Utc::now() - last_sync > Duration::hours(24);
-    }
-    true
-}

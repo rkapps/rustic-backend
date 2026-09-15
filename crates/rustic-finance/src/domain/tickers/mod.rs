@@ -8,6 +8,7 @@ pub mod history;
 pub mod indicator;
 pub mod news;
 pub mod sentiment;
+pub mod signals;
 pub mod ticker;
 pub mod ticker_peer;
 

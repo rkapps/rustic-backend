@@ -78,15 +78,6 @@ pub struct Ticker {
     #[serde(default)]
     pub signals: Vec<String>,
 
-    #[serde(default)]
-    pub lr_returns: HashMap<String, f64>, // LinearRegression returns
-
-    #[serde(default)]
-    pub rf_returns: HashMap<String, f64>, // RandomForst returns
-
-    #[serde(default)]
-    pub mlp_returns: HashMap<String, f64>, // MLP returns
-
     // pub market_cap: Option<i64>,
     pub expense_ratio: Option<f64>, // etfs
     pub eps: Option<f64>,

@@ -7,7 +7,11 @@ use tracing::{debug, warn};
 use anyhow::Result;
 
 use crate::{
-    domain::{TickerIndicator, dto::ticker_indicator_entity::TickerIndicatorEntity},
+    domain::{
+        TickerIndicator,
+        dto::ticker_indicator_entity::TickerIndicatorEntity,
+        tickers::indicator::{IndicatorSnapshot, IndicatorWindow},
+    },
     storage::{
         mongo::{reader::FinanceMongoStorageReader, writer::FinanceMongoStorageWriter},
         reader::TickerIndicatorStorageReader,
@@ -118,6 +122,35 @@ impl TickerIndicatorStorageReader for FinanceMongoStorageReader {
             }
             Err(e) => Err(anyhow::anyhow!("Error getting TickerIndicator: {}", e)),
         }
+    }
+
+    async fn get_ticker_indicators_last_n(
+        &self,
+        symbol: &str,
+        n: usize,
+    ) -> Result<Vec<TickerIndicator>> {
+        let criteria = SearchCriteria::new()
+            .eq("symbol", symbol)
+            .sort_desc("date")
+            .limit(n);
+        self.manager
+            .get_ticker_indicators_by_criteria(&criteria)
+            .await
+    }
+
+    async fn get_ticker_indicators_latest(&self, symbol: &str) -> Result<Option<TickerIndicator>> {
+        let indicators = self.get_ticker_indicators_last_n(symbol, 1).await?;
+        Ok(indicators.into_iter().next())
+    }
+
+    async fn get_ticker_indicators_window(&self, symbol: &str) -> Result<Option<IndicatorWindow>> {
+        let indicators = self.get_ticker_indicators_last_n(symbol, 2).await?;
+        if indicators.len() < 2 {
+            return Ok(None);
+        }
+        let curr = IndicatorSnapshot::from(indicators.first().unwrap());
+        let prev = IndicatorSnapshot::from(indicators.get(1).unwrap());
+        Ok(Some(IndicatorWindow::new(curr, prev)))
     }
 }
 

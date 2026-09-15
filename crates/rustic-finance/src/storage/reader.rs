@@ -9,6 +9,7 @@ use crate::domain::{
     Ticker, TickerControl, TickerEmbedding, TickerGroup, TickerHistory, TickerIndicator,
     TickerNews, TickerPeer, TickerSentiment,
     dto::{ticker_filter::TickerFilter, ticker_indicator_entity::TickerIndicatorEntity},
+    tickers::indicator::IndicatorWindow,
 };
 
 #[async_trait]
@@ -77,11 +78,21 @@ pub trait TickerIndicatorStorageReader: Send + Sync + Debug {
         from_date: DateTime<Utc>,
     ) -> Result<Vec<TickerIndicator>>;
 
+    async fn get_ticker_indicators_latest(&self, symbol: &str) -> Result<Option<TickerIndicator>>;
+
+    async fn get_ticker_indicators_last_n(
+        &self,
+        symbol: &str,
+        n: usize,
+    ) -> Result<Vec<TickerIndicator>>;
+
     async fn get_ticker_indicators_by_symbols(
         &self,
         symbols: Vec<String>,
         n: Option<usize>,
     ) -> Result<Vec<TickerIndicatorEntity>>;
+
+    async fn get_ticker_indicators_window(&self, symbol: &str) -> Result<Option<IndicatorWindow>>;
 }
 
 #[async_trait]

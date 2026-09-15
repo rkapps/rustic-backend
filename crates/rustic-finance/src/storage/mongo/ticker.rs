@@ -177,7 +177,7 @@ impl TickerStorageReader for FinanceMongoStorageReader {
             criteria = criteria.lte("total_assets", max_cap);
         }
         if let Some(signals) = filter.signals {
-            criteria = criteria.gte("signals", signals);
+            criteria = criteria.all_of("signals", signals);
         }
 
         if let Some(cyield) = filter.r#yield

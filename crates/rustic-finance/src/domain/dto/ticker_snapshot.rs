@@ -1,6 +1,5 @@
 use crate::domain::Ticker;
 use rust_decimal::prelude::ToPrimitive;
-use rustic_core::serialize_vec_or_null;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -29,30 +28,20 @@ pub struct TickerSnapshot {
     pub analyst_target_price: Option<f64>,
     pub analyst_consensus: Option<String>,
 
-    #[serde(serialize_with = "serialize_vec_or_null")]
-    pub technical_signals: Vec<String>,
-    #[serde(serialize_with = "serialize_vec_or_null")]
-    pub mlp_signals: Vec<String>,
-    #[serde(serialize_with = "serialize_vec_or_null")]
-    pub ml_signals: Vec<String>,
+    // new fields
+    pub dividend_amt: Option<f64>,
+    pub dividend_yield: Option<f64>,
+    pub profit_margin: Option<f64>,
+    pub operating_margin_ttm: Option<f64>,
+    pub return_on_equity_ttm: Option<f64>,
+    pub ev_to_ebitda: Option<f64>,
+    pub quarterly_revenue_growth_yoy: Option<f64>,
+    pub quarterly_earnings_growth_yoy: Option<f64>,
+    pub expense_ratio: Option<f64>, // etfs only
 }
 
 impl From<Ticker> for TickerSnapshot {
     fn from(ticker: Ticker) -> Self {
-        let mut technical_signals = Vec::new();
-        let mut mlp_signals = Vec::new();
-        let mut ml_signals = Vec::new();
-
-        for signal in ticker.signals {
-            if signal.starts_with("MLP") {
-                mlp_signals.push(signal);
-            } else if signal.starts_with("ML") {
-                ml_signals.push(signal);
-            } else {
-                technical_signals.push(signal);
-            }
-        }
-
         TickerSnapshot {
             symbol: ticker.symbol,
             name: ticker.name,
@@ -77,9 +66,16 @@ impl From<Ticker> for TickerSnapshot {
             peg_ratio: ticker.peg_ratio,
             ps_ratio: ticker.ps_ratio,
             total_assets: ticker.total_assets,
-            technical_signals,
-            mlp_signals,
-            ml_signals,
+
+            dividend_amt: (ticker.dividend_amt != 0.0).then_some(ticker.dividend_amt),
+            dividend_yield: (ticker.r#yield != 0.0).then_some(ticker.r#yield),
+            profit_margin: ticker.profit_margin,
+            operating_margin_ttm: ticker.operating_margin_ttm,
+            return_on_equity_ttm: ticker.return_on_equity_ttm,
+            ev_to_ebitda: ticker.ev_to_ebitda,
+            quarterly_revenue_growth_yoy: ticker.quarterly_revenue_growth_yoy,
+            quarterly_earnings_growth_yoy: ticker.quarterly_earnings_growth_yoy,
+            expense_ratio: ticker.expense_ratio,
         }
     }
 }

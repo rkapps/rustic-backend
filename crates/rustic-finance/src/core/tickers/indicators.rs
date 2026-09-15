@@ -11,11 +11,14 @@ use ta::{
 };
 use tracing::trace;
 
-use crate::domain::{
-    TickerHistory, TickerIndicator,
-    tickers::indicator::indicator_type::{
-        ATR, BB_LOWER, BB_MIDDLE, BB_UPPER, EMA, MACD, MACD_HISTOGRAM, MACD_SIGNAL, RSI, SMA,
-        STOCHASTIC_D, STOCHASTIC_K, VOLUME_RATIO,
+use crate::{
+    core::tickers::signals::SignalsCalculator,
+    domain::{
+        TickerHistory, TickerIndicator,
+        tickers::indicator::indicator_type::{
+            ATR, BB_LOWER, BB_MIDDLE, BB_UPPER, EMA, MACD, MACD_HISTOGRAM, MACD_SIGNAL, RSI, SMA,
+            STOCHASTIC_D, STOCHASTIC_K, VOLUME_RATIO,
+        },
     },
 };
 
@@ -66,6 +69,7 @@ impl IndicatorCalculator {
 
         let mut indicators = Vec::new();
         let mut k_window: Vec<f64> = Vec::new();
+        let signals_calculator = SignalsCalculator {};
 
         // ✅ SINGLE LOOP through history
         for (idx, h) in sorted_history.iter().enumerate() {
@@ -219,14 +223,12 @@ impl IndicatorCalculator {
                 values.insert(VOLUME_RATIO.to_string(), total_volume);
             }
 
+            let prev_values = indicators.last().map(|i: &TickerIndicator| &i.values);
+            let (signals, overall) = signals_calculator.calculate(&values, prev_values);
+
             if !values.is_empty() {
-                let indicator = TickerIndicator::new(
-                    h.date,
-                    &h.metadata.symbol,
-                    // &h.metadata.exchange,
-                    // &h.metadata.granularity,
-                    values,
-                );
+                let indicator =
+                    TickerIndicator::new(h.date, &h.metadata.symbol, values, signals, overall);
                 indicators.push(indicator);
             }
         }

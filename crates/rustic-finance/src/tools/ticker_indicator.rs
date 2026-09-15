@@ -5,9 +5,11 @@ use async_trait::async_trait;
 use rustic_core::Tool;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use tracing::info;
+use tracing::{info, warn};
 
-use crate::storage::reader::StorageReader;
+use crate::{
+    domain::dto::ticker_indicator_entity::TickerIndicatorEntity, storage::reader::StorageReader,
+};
 
 #[derive(Debug)]
 pub struct TickerIndicatorTool {
@@ -64,10 +66,25 @@ impl Tool for TickerIndicatorTool {
             .map_err(|e| anyhow::anyhow!("Failed to deserialize params: {:?} — {:?}", value, e))?;
 
         info!("Ticker indicators symbols {:?}", params.symbols);
-        let indicators = self
-            .storage_service
-            .get_ticker_indicators_by_symbols(params.symbols, Some(1))
-            .await?;
+        let futures: Vec<_> = params
+            .symbols
+            .iter()
+            .map(|t| self.storage_service.get_ticker_indicators_latest(t))
+            .collect();
+
+        let indicators: Vec<TickerIndicatorEntity> = futures::future::join_all(futures)
+            .await
+            .into_iter()
+            .filter_map(|r| match r {
+                Ok(Some(indicator)) => Some(TickerIndicatorEntity::from(&indicator)),
+                Ok(None) => None,
+                Err(e) => {
+                    warn!("Failed to get indicator: {}", e);
+                    None
+                }
+            })
+            .collect();
+
         let elapsed = start.elapsed();
         info!(
             "Indicators: {:?}  {:.1}s",

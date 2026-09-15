@@ -13,8 +13,9 @@ use rustic_providers::finance::service::ProviderService;
 use crate::{
     core::tickers::{
         BASE_CURRENCY,
+        classifier::TickerClassifier,
         indicators::IndicatorCalculator,
-        sync::{should_sync_embeddings, should_sync_indicators, should_sync_sentiments},
+        sync::{should_sync_embeddings, should_sync_sentiments},
     },
     domain::{
         Ticker, TickerControl, TickerEmbedding, TickerHistory, TickerIndicator, TickerSentiment,
@@ -23,7 +24,9 @@ use crate::{
     storage::{
         FinanceMongoStorageReader,
         mongo::writer::FinanceMongoStorageWriter,
-        reader::{TickerHistoryStorageReader, TickerSentimentStorageReader},
+        reader::{
+            TickerHistoryStorageReader, TickerIndicatorStorageReader, TickerSentimentStorageReader,
+        },
         writer::{
             TickerControlStorageWriter, TickerEmbeddingStorageWriter, TickerHistoryStorageWriter,
             TickerIndicatorStorageWriter, TickerSentimentStorageWriter, TickerStorageWriter,
@@ -156,7 +159,6 @@ pub async fn update_ticker(
     let mut histories = Vec::new();
 
     // update history
-    // if !update ||  {
     match update_ticker_history(reader.clone(), provider_service.clone(), ticker).await {
         Ok((all_histories, new_histories)) => {
             if !new_histories.is_empty() {
@@ -180,27 +182,26 @@ pub async fn update_ticker(
     }
 
     // update technical indicators
-    if !update || should_sync_indicators(tc) {
-        match update_stock_indicators(tc, ticker, &histories).await {
-            Ok(new_indicators) => {
-                if !new_indicators.is_empty() {
-                    debug!(
-                        "Ticker {} New Indicators: {}",
-                        ticker.symbol,
-                        new_indicators.len()
-                    );
-                    tc.last_indicator_sync_at = Some(Utc::now());
-                    if update {
-                        writer.save_ticker_control(tc.clone()).await?;
-                        writer
-                            .save_ticker_indicators(&ticker.symbol, new_indicators)
-                            .await?;
-                    }
+    match update_ticker_indicators(reader.clone(), ticker, &histories).await {
+        Ok(new_indicators) => {
+            if !new_indicators.is_empty() {
+                debug!(
+                    "Ticker {} New Indicators: {}",
+                    ticker.symbol,
+                    new_indicators.len()
+                );
+                tc.last_indicator_sync_at = Some(Utc::now());
+                if update {
+                    writer.save_ticker_control(tc.clone()).await?;
+                    writer
+                        .save_ticker_indicators(&ticker.symbol, new_indicators)
+                        .await?;
                 }
             }
-            Err(e) => error!("Indicators update failed for {}: {}", ticker.symbol, e),
         }
+        Err(e) => error!("Indicators update failed for {}: {}", ticker.symbol, e),
     }
+
 
     // sort by descending for updating price history
     histories.sort_by(|a, b| b.date.cmp(&a.date));
@@ -211,7 +212,7 @@ pub async fn update_ticker(
     update_ticker_performance(tc, ticker, &histories).await?;
 
     //update signals
-    // update_ticker_signals(storage_service.clone(), ticker).await?;
+    update_ticker_signals(reader.clone(), ticker).await?;
 
     tc.last_sync_at = Some(Utc::now());
 
@@ -254,7 +255,10 @@ pub(crate) async fn update_ticker_history(
     // let ome(hist_start_date) = Utc.with_ymd_and_hms(2010, 11, 23, 14, 30, 0) else {
     //     return Err(anyhow::anyhow!("Error calcuating start date"));
     // };
-    let old_histories = reader.get_ticker_history(&ticker.symbol).await.unwrap_or_default();
+    let old_histories = reader
+        .get_ticker_history(&ticker.symbol)
+        .await
+        .unwrap_or_default();
     let hist_start_date = Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap();
 
     let mut histories = match ticker.asset_type {
@@ -380,6 +384,83 @@ pub(crate) async fn update_ticker_performance(
         }
     }
     Ok(())
+}
+
+pub(crate) async fn update_ticker_indicators(
+    reader: Arc<FinanceMongoStorageReader>,
+    ticker: &mut Ticker,
+    histories: &[TickerHistory],
+) -> Result<Vec<TickerIndicator>> {
+    let mut new_indicators = Vec::new();
+    if histories.is_empty() {
+        return Ok(new_indicators);
+    }
+
+    let old_indicators = reader
+        .get_ticker_indicators(&ticker.symbol)
+        .await
+        .unwrap_or_default();
+
+    let sma_periods = &[20, 50, 100, 200];
+    let ema_periods = &[12, 26, 50];
+    let rsi_periods = &[10, 14, 26];
+    let k_period = 14;
+    let d_period = 3;
+    let bb_period = 20;
+    let bb_std_dev = 2.0;
+    let atr_period = 14;
+    let volume_ratio_period = 20;
+
+    let indicators = IndicatorCalculator::calculate_all_in_one_pass(
+        histories,
+        sma_periods.to_vec(),
+        ema_periods.to_vec(),
+        rsi_periods.to_vec(),
+        k_period,
+        d_period,
+        bb_period,
+        bb_std_dev,
+        atr_period,
+        volume_ratio_period,
+    )?;
+
+    if let Some(last_indicator) = indicators.clone().last() {
+        ticker.indicators_search = HashMap::new();
+        debug!("Last indicator: {:?}", last_indicator.date);
+        for value in &last_indicator.values {
+            ticker
+                .indicators_search
+                .insert(value.0.clone(), value.1.to_f64().unwrap_or_default());
+        }
+
+        // Build the set of dates we ALREADY have, rather than trusting last_sync_at.
+        // This is what actually finds gaps — a bookmark only tells you when the job
+        // last ran, not which specific days succeeded.
+        let existing_dates: std::collections::HashSet<chrono::NaiveDate> = old_indicators
+            .iter()
+            .map(|h| h.date.with_timezone(&Eastern).date_naive())
+            .collect();
+
+        new_indicators = indicators
+            .iter()
+            .filter(|h| !existing_dates.contains(&h.date.with_timezone(&Eastern).date_naive()))
+            .cloned()
+            .collect();
+
+        // always udpate the last indicator
+        if new_indicators.is_empty() {
+            new_indicators.push(last_indicator.clone())
+        }
+
+        debug!(
+            "Ticker {} Indicators updates: {:?} new indicators: {}",
+            ticker.symbol,
+            ticker.indicators_search,
+            new_indicators.len()
+        );
+    }
+
+    Ok(new_indicators)
 }
 
 pub async fn update_all_ticker_sentiments_embeddings(
@@ -755,69 +836,6 @@ pub async fn update_ticker_overview_embedding(
     Ok(())
 }
 
-pub(crate) async fn update_stock_indicators(
-    tc: &mut TickerControl,
-    ticker: &mut Ticker,
-    histories: &[TickerHistory],
-) -> Result<Vec<TickerIndicator>> {
-    let mut new_indicators = Vec::new();
-
-    if !histories.is_empty() {
-        let sma_periods = &[20, 50, 100, 200];
-        let ema_periods = &[12, 26, 50];
-        let rsi_periods = &[10, 14, 26];
-        let k_period = 14;
-        let d_period = 3;
-        let bb_period = 20;
-        let bb_std_dev = 2.0;
-        let atr_period = 14;
-        let volume_ratio_period = 20;
-
-        let indicators = IndicatorCalculator::calculate_all_in_one_pass(
-            histories,
-            sma_periods.to_vec(),
-            ema_periods.to_vec(),
-            rsi_periods.to_vec(),
-            k_period,
-            d_period,
-            bb_period,
-            bb_std_dev,
-            atr_period,
-            volume_ratio_period,
-        )?;
-
-        if let Some(last_indicator) = indicators.clone().last() {
-            ticker.indicators_search = HashMap::new();
-            debug!("Last indicator: {:?}", last_indicator.date);
-            for value in &last_indicator.values {
-                ticker
-                    .indicators_search
-                    .insert(value.0.clone(), value.1.to_f64().unwrap_or_default());
-            }
-
-            new_indicators = match tc.last_indicator_sync_at {
-                Some(last_sync) => indicators
-                    .into_iter()
-                    .filter(|h| h.date > last_sync)
-                    .collect(),
-                None => {
-                    // First sync - insert all
-                    indicators
-                }
-            };
-        }
-
-        debug!(
-            "Ticker {} Indicators updates: {:?} new indicators: {}",
-            ticker.symbol,
-            ticker.indicators_search,
-            new_indicators.len()
-        );
-    }
-
-    Ok(new_indicators)
-}
-
 pub async fn update_stocks_etfs_realtime(
     writer: Arc<FinanceMongoStorageWriter>,
     provider_service: Arc<ProviderService>,
@@ -911,5 +929,27 @@ pub async fn update_cryptos_realtime(
         writer.save_tickers(updated_tickers).await?;
     }
 
+    Ok(())
+}
+
+pub(crate) async fn update_ticker_signals(
+    reader: Arc<FinanceMongoStorageReader>,
+    ticker: &mut Ticker,
+) -> Result<()> {
+    let mut latest_signals: Vec<String> =
+        match reader.get_ticker_indicators_latest(&ticker.symbol).await? {
+            Some(indicator) => indicator.signals.iter().map(|s| s.name.clone()).collect(),
+            None => {
+                warn!("No indicators found for {}", ticker.symbol);
+                Vec::new()
+            }
+        };
+
+    let classifier = TickerClassifier {};
+    latest_signals.extend(classifier.beta_bucket(ticker.beta));
+    latest_signals.extend(classifier.analyst_bucket(ticker.analyst_consensus.as_deref()));
+
+    info!("Ticker {} signals: {}", ticker.symbol, latest_signals.len());
+    ticker.signals = latest_signals;
     Ok(())
 }
