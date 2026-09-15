@@ -530,7 +530,7 @@ impl PipeLineAgent {
                         };
                         turn_response.add_stage(stage_response);
 
-                        info!(
+                        debug!(
                             _merged= ?format_args!("{:#?}", merged),
                             "Agent: {:?}", self_clone.get_agent_id()
                         );
@@ -890,7 +890,7 @@ impl PipeLineAgent {
                     let final_response = synthesizer_response.clone();
                     turn_response.set_synthesizer(final_response);
 
-                    info!(
+                    debug!(
                         _turn_response = format_args!(
                             "{:?} {:#?}",
                             turn_response.agent_id, turn_response.content
