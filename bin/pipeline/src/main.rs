@@ -40,16 +40,19 @@ async fn main() -> Result<()> {
     set_logger(filter);
     let cli = Cli::parse();
 
-    // uri is the same for all
-    let mongo_uri = env::var("MONGO_URI").expect("MONGO_URI envrionment variable not set");
-    info!("Mongo uri: {}", mongo_uri);
+    
+    // RUSTIC_CORE_MONGO_URI
+    // Used for rustic_fiance and rustic_economic
+    let rustic_core_mongo_uri = env::var("RUSTIC_CORE_MONGO_URI")
+        .expect("RUSTIC_CORE_MONGO_URI envrionment variable not set");
+    info!("Rustic Core Mongo uri: {:?}", rustic_core_mongo_uri);
 
     let config_dir = env::var("RUSTIC_AI_CONFIG_PATH")
         .expect("RUSTIC_AI_CONFIG_PATH envrionment variable not set");
 
     match cli.command {
         PipelineCommands::BuildTickersPredictionModels { symbols } => {
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             let symbols_str = symbols.as_deref().unwrap_or("");
             match service.build_ticker_prediction_models(symbols_str).await {
                 Ok(_) => info!("Tickers Build Prediction Models completed successfully."),
@@ -61,7 +64,7 @@ async fn main() -> Result<()> {
             match env::var("RUSTIC_AI_ECONOMIC_CONFIG_LOAD_FILE") {
                 Ok(c) => {
                     let economic_service =
-                        get_economic_writer_service(&mongo_uri, &config_dir, &c).await?;
+                        get_economic_writer_service(&rustic_core_mongo_uri, &config_dir, &c).await?;
                     let config = economic_service.config.clone();
                     let pipeline = EconomicDataPipeline::new(Arc::new(economic_service));
                     let pipeline_config = EconomicDataPipelineConfig::new_bea(config, true);
@@ -75,7 +78,7 @@ async fn main() -> Result<()> {
         PipelineCommands::UpdateTickersEod => {
             info!("Tickers EOD PipeLine started...");
 
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             match service.update_eod_tickers("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
@@ -84,7 +87,7 @@ async fn main() -> Result<()> {
         PipelineCommands::UpdateTickersSentimentsEmbeddings => {
             info!("Tickers EOD PipeLine started...");
 
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             match service
                 .update_eod_tickers_sentiments_embeddings("", true)
                 .await
@@ -94,14 +97,14 @@ async fn main() -> Result<()> {
             }
         }
         PipelineCommands::UpdateStocksEtfsRealtime => {
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             match service.update_realtime_stocks_etfs("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
             }
         }
         PipelineCommands::UpdateCryptosRealtime => {
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             match service.update_realtime_cryptos("", true).await {
                 Ok(_) => info!("Tickers EOD update completed successfully."),
                 Err(e) => error!("Tickers EOD update failed: {:?}", e),
@@ -109,7 +112,7 @@ async fn main() -> Result<()> {
         }
         PipelineCommands::UpdateTickersNews => {
             info!("Tickers News PipeLine started...");
-            let service = get_finance_writer_service(&mongo_uri).await?;
+            let service = get_finance_writer_service(&rustic_core_mongo_uri).await?;
             match service.update_tickers_news().await {
                 Ok(_) => info!("Tickers News update completed successfully."),
                 Err(e) => error!("Tickers News update failed: {:?}", e),
