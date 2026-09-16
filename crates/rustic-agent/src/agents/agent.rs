@@ -195,7 +195,11 @@ x        )
                     if iteration > MAX_ITERATIONS {
                         break;
                     }
-                    info!("Agent: {} Iteration: {:?}", agent.id, iteration);
+                    info!(
+                        _iteration=?iteration,
+                        _messages= ?iterations.get(&iteration),
+                        "Agent: {}", agent.id
+                    );
 
                     let iter_span = tracing::span!(
                         tracing::Level::INFO,
