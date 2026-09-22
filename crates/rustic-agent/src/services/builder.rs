@@ -295,14 +295,14 @@ impl<'a> AgentBuilder<'a> {
         self.with_temperature(0.5).with_max_tokens(4096)
     }
 
-    /// `Precise` — cache enabled, high reasoning, 0.2 temperature, 16384 max tokens.
+       /// `Precise` — cache enabled, medium reasoning, 0.2 temperature, 65536 max tokens.
     pub fn with_preset_precise(mut self) -> Self {
         self.enable_cache = true;
-        self.reasoning_effort = ReasoningEffort::High;
-        self.with_temperature(0.2).with_max_tokens(32768)
+        self.reasoning_effort = ReasoningEffort::Medium;
+        self.with_temperature(0.2).with_max_tokens(65536)
     }
 
-    /// `data` — cache enabled, low reasoning, 0.1 temperature, 65536 max tokens.
+    /// `data` — cache enabled, low reasoning, 0.1 temperature, 32768 max tokens.
     pub fn with_preset_data(mut self) -> Self {
         self.enable_cache = true;
         self.reasoning_effort = ReasoningEffort::Low;
