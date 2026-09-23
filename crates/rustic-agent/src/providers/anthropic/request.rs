@@ -114,53 +114,65 @@ pub struct AnthropicToolDefinition {
     input_schema: serde_json::Value,
 }
 
-/// Extended-thinking configuration sent with every request.
-///
-/// `budget_tokens` is capped below `max_tokens` to ensure there is always
-/// room for visible output.
 #[derive(Debug, Serialize)]
 pub struct AnthropicThinking {
     r#type: String,
-    budget_tokens: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    budget_tokens: Option<i32>,
 }
-
 impl AnthropicThinking {
-    /// Build the thinking config from a [`ReasoningEffort`] level.
-    ///
-    /// `None` → `disabled`; `Low`/`Medium`/`High` → `enabled` with increasing token budgets.
-    pub fn new(reasoning_effort: ReasoningEffort) -> Self {
+    /// Legacy (Sonnet 4.6 and earlier): fixed-budget thinking.
+    pub fn legacy(reasoning_effort: &ReasoningEffort) -> Self {
         match reasoning_effort {
             ReasoningEffort::None => AnthropicThinking {
                 r#type: "disabled".to_string(),
-                budget_tokens: 0,
+                budget_tokens: None,
             },
             ReasoningEffort::Low => AnthropicThinking {
                 r#type: "enabled".to_string(),
-                budget_tokens: 2048,
+                budget_tokens: Some(2048),
             },
             ReasoningEffort::Medium => AnthropicThinking {
                 r#type: "enabled".to_string(),
-                budget_tokens: 4096,
+                budget_tokens: Some(4096),
             },
             ReasoningEffort::High => AnthropicThinking {
                 r#type: "enabled".to_string(),
-                budget_tokens: 8000,
+                budget_tokens: Some(8000),
+            },
+        }
+    }
+
+    /// Adaptive (Sonnet 5 / Opus 4.7+): no budget, on/off only.
+    pub fn adaptive(reasoning_effort: &ReasoningEffort) -> Self {
+        match reasoning_effort {
+            ReasoningEffort::None => AnthropicThinking {
+                r#type: "disabled".to_string(),
+                budget_tokens: None,
+            },
+            _ => AnthropicThinking {
+                r#type: "adaptive".to_string(),
+                budget_tokens: None,
             },
         }
     }
 }
-
-/// Tool schema in Anthropic's format (`input_schema` instead of `parameters`).
 #[derive(Debug, Serialize)]
 pub struct AnthropicOutputConfig {
-    format: Value,
+    effort: String,
 }
 
-// #[derive(Debug, Serialize)]
-// pub struct AnthropicOutputConfigFormat {
-//     r#type: String,
-//     schema: Value
-// }
+impl AnthropicOutputConfig {
+    pub fn new(reasoning_effort: &ReasoningEffort) -> Option<Self> {
+        match reasoning_effort {
+            ReasoningEffort::None => None,  // no effort needed if thinking is off
+            ReasoningEffort::Low => Some(AnthropicOutputConfig { effort: "low".to_string() }),
+            ReasoningEffort::Medium => Some(AnthropicOutputConfig { effort: "medium".to_string() }),
+            ReasoningEffort::High => Some(AnthropicOutputConfig { effort: "high".to_string() }),
+        }
+    }
+}
+
 
 impl AnthropicCompletionRequest {
     /// Convert a provider-agnostic [`CompletionRequest`] into Anthropic's wire format.
@@ -271,17 +283,29 @@ impl AnthropicCompletionRequest {
         let cache_control = AnthropicCompletionRequestCache {
             r#type: "ephemeral".to_string(),
         };
-        let mut thinking = AnthropicThinking::new(request.reasoning_effort);
+        // let mut thinking = AnthropicThinking::new(request.reasoning_effort);
         let temperature = match arequest.reasoning_effort {
             ReasoningEffort::None => 0.7,
             _ => 1.0,
         };
-        let budget_tokens = if thinking.budget_tokens >= request.max_tokens {
-            request.max_tokens - 1 // cap thinking, preserve max_tokens
+        // let budget_tokens = if thinking.budget_tokens >= request.max_tokens {
+        //     request.max_tokens - 1 // cap thinking, preserve max_tokens
+        // } else {
+        //     thinking.budget_tokens
+        // };
+        // thinking.budget_tokens = budget_tokens;
+
+        let thinking = if supports_adaptive_thinking(&request.model) {
+            AnthropicThinking::adaptive(&request.reasoning_effort)
         } else {
-            thinking.budget_tokens
+            AnthropicThinking::legacy(&request.reasoning_effort)
         };
-        thinking.budget_tokens = budget_tokens;
+
+        let output_config = if supports_adaptive_thinking(&request.model) {
+            AnthropicOutputConfig::new(&request.reasoning_effort) // effort field, only meaningful here
+        } else {
+            None // 4.6 doesn't take output_config.effort at all
+        };
 
         debug!("thikning: {:?}", thinking);
 
@@ -295,7 +319,7 @@ impl AnthropicCompletionRequest {
         // } else {
         //     None
         // };
-        let output_config = None;
+        // let output_config = None;
 
         let arequest = AnthropicCompletionRequest {
             max_tokens: request.max_tokens,
@@ -312,4 +336,12 @@ impl AnthropicCompletionRequest {
 
         Ok(arequest)
     }
+}
+
+fn supports_adaptive_thinking(model: &str) -> bool {
+    model.starts_with("claude-sonnet-5")
+        || model.starts_with("claude-opus-5")
+        || model.starts_with("claude-opus-4-7")
+        || model.starts_with("claude-opus-4-8")
+    // add fable/mythos if/when they route through this same client
 }
