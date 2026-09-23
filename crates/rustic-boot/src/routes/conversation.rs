@@ -10,7 +10,7 @@ use axum::{
 use futures::StreamExt;
 use reqwest::StatusCode;
 use rustic_agent::agents::domain::TurnChunkResponse;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::{
     auth::firebase::{FirebaseClaims, firebase_auth_middleware},
@@ -217,8 +217,10 @@ pub async fn send_turn_streaming_handler(
                     if let TurnChunkResponse::Final { response } = &chunk {
                         // already handled above — send done event
                         let turn_response = response.clone();
-                        debug!("Turn Response: {}", turn_response);
                         let elapsed = start.elapsed();
+                        info!("Total Time: {} ms", elapsed.as_millis());
+                        debug!("Turn Response: {}", turn_response);
+
                         match conversation_service
                             .save_turn(
                                 &uid,
